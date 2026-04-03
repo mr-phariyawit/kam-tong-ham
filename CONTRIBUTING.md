@@ -179,3 +179,25 @@ npm run dev
 - Test with at least 2 real players before opening a PR.
 - Describe new word packs or rule changes in the PR description.
 - Run `npm run typecheck` before pushing.
+
+---
+
+## QA Gate Rules (AEG-67)
+
+These rules exist because a critical regression (cannot create rooms) reached production undetected due to missing API-layer test coverage.
+
+### Rule 1 — REST API changes require API tests
+
+Any PR that modifies `server/src/app.ts` or adds/changes HTTP endpoints **must** include or update tests in `server/src/__tests__/api.test.ts`. The test must exercise the endpoint with `supertest` and assert the response shape.
+
+### Rule 2 — Client create/join flow changes require regression tests
+
+Any PR that modifies the `createRoom()` or `joinRoom()` functions in `client/js/app.js` must include a note in the PR description confirming the flow was manually verified end-to-end (REST call + Colyseus join).
+
+### Rule 3 — Regressions require test-first fixes
+
+If a bug is filed against the room creation or join flow, the fix PR must include a failing test that reproduces the bug, then the fix that makes it pass. Commit the test in the same PR as the fix.
+
+### Rule 4 — CI must pass before merge
+
+The CI pipeline runs `typecheck → build → test`. All three must pass. Do not merge PRs with a failing CI run.

@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   setupMatchMaker, teardownMatchMaker, createRoom, joinRoom,
-  sendMessage, makeMockClient, startPlaying, resolveVote, advanceClock,
+  sendMessage, makeMockClient, startPlaying, endRound, resolveVote, advanceClock,
 } from "./helpers";
 
 beforeAll(setupMatchMaker);
@@ -257,5 +257,109 @@ describe("Blind Voting — edge cases", () => {
 
     expect(room.state.players.get("p2_bv09").isAlive).toBe(true);
     expect(room.state.players.get("p1_bv09").score).toBe(-1);
+  });
+});
+
+// ─── Score Integrity: multiple challenge rounds ──────────────────────────────
+
+describe("Blind Voting — score integrity across multiple challenge rounds", () => {
+  /**
+   * BV-10: Scenario
+   *   4 players: P1, P2, P3, P4
+   *   Challenge 1: P1 accuses P2 → P3 and P4 both vote guilty
+   *     → P2 eliminated (-3 pts), P1 gains +2 pts
+   *   Challenge 2: P3 accuses P4 → P1 (only eligible voter) votes not_yet
+   *     → false challenge, P3 penalized -1 pt, P4 safe
+   *   Round ends by timer → P1, P3, P4 (alive) each gain +5 survival bonus
+   *
+   *   Expected final scores:
+   *     P1 = +2 + 5 = 7
+   *     P2 = -3       (dead, no bonus)
+   *     P3 = -1 + 5 = 4
+   *     P4 =  0 + 5 = 5
+   */
+  it("BV-10: scores accumulate correctly across two challenge rounds and a survival bonus", async () => {
+    const room = await createRoom("BV10");
+    const p1 = makeMockClient("p1_bv10");
+    const p2 = makeMockClient("p2_bv10");
+    const p3 = makeMockClient("p3_bv10");
+    const p4 = makeMockClient("p4_bv10");
+    await joinRoom(room, p1, { nickname: "Alice", avatar: "😀" });
+    await joinRoom(room, p2, { nickname: "Bob", avatar: "😎" });
+    await joinRoom(room, p3, { nickname: "Carol", avatar: "🎉" });
+    await joinRoom(room, p4, { nickname: "Dave", avatar: "🤖" });
+    sendMessage(room, p1, "START_GAME");
+    startPlaying(room);
+
+    // ── Challenge 1: P1 accuses P2; P3 and P4 vote guilty ──
+    sendMessage(room, p1, "ACCUSE", { targetPlayerId: "p2_bv10" });
+    expect(room.state.currentAccusation.totalVoters).toBe(2); // P3 and P4 eligible
+
+    sendMessage(room, p3, "VOTE", { vote: "guilty" });
+    sendMessage(room, p4, "VOTE", { vote: "guilty" });
+
+    // Immediate reveal (all voters voted)
+    expect(room.state.phase).toBe("PLAYING");
+    expect(room.state.players.get("p2_bv10").isAlive).toBe(false);
+    expect(room.state.players.get("p1_bv10").score).toBe(2);
+    expect(room.state.players.get("p2_bv10").score).toBe(-3);
+
+    // ── Challenge 2: P3 accuses P4; only P1 is eligible voter ──
+    sendMessage(room, p3, "ACCUSE", { targetPlayerId: "p4_bv10" });
+    // P2 is dead → eligible voters = P1 only (P3=accuser, P4=accused excluded)
+    expect(room.state.currentAccusation.totalVoters).toBe(1);
+
+    sendMessage(room, p1, "VOTE", { vote: "not_yet" });
+
+    // Immediate reveal — false challenge, P3 penalized
+    expect(room.state.phase).toBe("PLAYING");
+    expect(room.state.players.get("p4_bv10").isAlive).toBe(true);
+    expect(room.state.players.get("p3_bv10").score).toBe(-1);
+
+    // ── Round ends by timer; alive players get +5 survival bonus ──
+    endRound(room, "timer");
+
+    // Score integrity assertions
+    expect(room.state.players.get("p1_bv10").score).toBe(7);  // 2 + 5
+    expect(room.state.players.get("p2_bv10").score).toBe(-3); // eliminated, no bonus
+    expect(room.state.players.get("p3_bv10").score).toBe(4);  // -1 + 5
+    expect(room.state.players.get("p4_bv10").score).toBe(5);  // 0 + 5
+  });
+
+  /**
+   * BV-11: VOTE_REVEAL carries guilty=false on failed challenges.
+   * NOTE — AEG-32 spec requires a separate CHALLENGE_PENALTY event to be emitted.
+   * The current server implementation does NOT emit CHALLENGE_PENALTY; it only sends
+   * VOTE_REVEAL (with guilty=false). The client listens for CHALLENGE_PENALTY to show
+   * the penalty toast — that toast will never fire. This test documents the current
+   * (incomplete) server behaviour and should be updated when CHALLENGE_PENALTY is added.
+   *
+   * Expected after fix: server broadcasts CHALLENGE_PENALTY with accuserId, accuserName, penalty=1.
+   */
+  it("BV-11: VOTE_REVEAL.guilty=false signals failed challenge (CHALLENGE_PENALTY event not yet emitted — known gap)", async () => {
+    const room = await createRoom("BV11");
+    const p1 = makeMockClient("p1_bv11");
+    const p2 = makeMockClient("p2_bv11");
+    const p3 = makeMockClient("p3_bv11");
+    await joinRoom(room, p1, { nickname: "Alice", avatar: "😀" });
+    await joinRoom(room, p2, { nickname: "Bob", avatar: "😎" });
+    await joinRoom(room, p3, { nickname: "Carol", avatar: "🎉" });
+    sendMessage(room, p1, "START_GAME");
+    startPlaying(room);
+
+    p3.sends = [];
+    sendMessage(room, p1, "ACCUSE", { targetPlayerId: "p2_bv11" });
+    sendMessage(room, p3, "VOTE", { vote: "not_yet" });
+
+    // VOTE_REVEAL is emitted with guilty=false
+    const reveal = p3.sends.find((s) => s.type === "VOTE_REVEAL");
+    expect(reveal).toBeDefined();
+    expect(reveal?.msg?.guilty).toBe(false);
+
+    // CHALLENGE_PENALTY is NOT currently emitted by the server.
+    // When AEG-32 is fully satisfied, the server must emit CHALLENGE_PENALTY
+    // so the UI penalty toast triggers. Remove the negation below after the fix.
+    const penalty = p3.sends.find((s) => s.type === "CHALLENGE_PENALTY");
+    expect(penalty).toBeUndefined(); // ← flip to toBeDefined() once server emits CHALLENGE_PENALTY
   });
 });

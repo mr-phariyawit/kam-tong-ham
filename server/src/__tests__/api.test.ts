@@ -150,6 +150,51 @@ describe("GET /api/categories", () => {
   });
 });
 
+// ─── Regression: AEG-66 — room code isolation (filterBy fix) ─────────────────
+//
+// Root cause: gameServer.define() was missing .filterBy(["roomCode"]), so
+// client.join() could match ANY available room regardless of the requested code.
+// Players joining with code "ABCD" might land in a room with code "XYZA".
+//
+// Fix: added .filterBy(["roomCode"]) to the room definition in index.ts.
+// These tests confirm the HTTP lookup layer correctly isolates rooms by code,
+// which is the REST-layer equivalent of the matchmaker isolation guarantee.
+
+describe("Regression AEG-66: room code isolation", () => {
+  afterEach(() => {
+    vi.mocked(matchMaker.query).mockResolvedValue([]);
+  });
+
+  it("API-15: requesting code AAAA does not return a room registered under BBBB", async () => {
+    vi.mocked(matchMaker.query).mockResolvedValue([
+      { metadata: { roomCode: "BBBB" }, locked: false, clients: 1 } as any,
+    ]);
+
+    const res = await request(app).get("/api/rooms/AAAA");
+
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe("ROOM_NOT_FOUND");
+  });
+
+  it("API-16: two rooms with different codes are returned independently", async () => {
+    vi.mocked(matchMaker.query).mockResolvedValue([
+      { metadata: { roomCode: "AAAA" }, locked: false, clients: 2 } as any,
+      { metadata: { roomCode: "BBBB" }, locked: false, clients: 3 } as any,
+    ]);
+
+    const resA = await request(app).get("/api/rooms/AAAA");
+    const resB = await request(app).get("/api/rooms/BBBB");
+
+    expect(resA.status).toBe(200);
+    expect(resA.body.roomCode).toBe("AAAA");
+    expect(resA.body.playerCount).toBe(2);
+
+    expect(resB.status).toBe(200);
+    expect(resB.body.roomCode).toBe("BBBB");
+    expect(resB.body.playerCount).toBe(3);
+  });
+});
+
 // ─── GET /api/health ──────────────────────────────────────────────────────────
 
 describe("GET /api/health", () => {

@@ -54,6 +54,8 @@ export class KhamTongHamRoom extends Room<GameState> {
   private playerTokens: Map<string, string> = new Map(); // sessionId -> token
   /** Nicknames of permanently kicked players (lower-cased). */
   private kickedNicknames: Set<string> = new Set();
+  /** AEG-51: Registered onDispose callbacks (for test observability). */
+  private _disposeListeners: Array<() => void> = [];
 
   onCreate(options: { roomCode: string }) {
     this.setState(new GameState());
@@ -85,6 +87,9 @@ export class KhamTongHamRoom extends Room<GameState> {
     );
     this.onMessage("KICK_PLAYER", (client, data: { targetPlayerId: string }) =>
       this.handleKickPlayer(client, data.targetPlayerId)
+    );
+    this.onMessage("TRANSFER_HOST", (client, data: { targetPlayerId: string }) =>
+      this.handleTransferHost(client, data.targetPlayerId)
     );
 
     this.resetInactivityTimer();
@@ -185,7 +190,7 @@ export class KhamTongHamRoom extends Room<GameState> {
         if (this.allDisconnected()) {
           this.disconnect();
         }
-      }, 30000);
+      }, 5 * 60 * 1000); // 5 minutes — allows host to rejoin via token (AEG-36/AEG-51)
     }
   }
 
@@ -503,6 +508,27 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.state.players.delete(targetPlayerId);
     this.state.playerCount = this.state.players.size;
     this.playerTokens.delete(targetPlayerId);
+  }
+
+  private handleTransferHost(client: Client, targetPlayerId: string) {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !player.isHost) {
+      this.sendError(client, "NOT_HOST", "เฉพาะเจ้าของห้องเท่านั้น");
+      return;
+    }
+
+    const target = this.state.players.get(targetPlayerId);
+    if (!target || !target.isConnected) {
+      this.sendError(client, "PLAYER_NOT_FOUND", "ไม่พบผู้เล่น");
+      return;
+    }
+
+    player.isHost = false;
+    target.isHost = true;
+    this.broadcast("HOST_TRANSFERRED", {
+      newHostId: target.id,
+      newHostNickname: target.nickname,
+    });
   }
 
   // ─── GAME FLOW ──────────────────────────────────────────────
@@ -859,7 +885,12 @@ export class KhamTongHamRoom extends Room<GameState> {
     }, INACTIVITY_TIMEOUT_MS);
   }
 
-  onDispose() {
+  // @ts-ignore — overloaded: called by framework with no args (cleanup) or by tests with a callback (listener registration)
+  onDispose(cb?: () => void) {
+    if (cb) {
+      this._disposeListeners.push(cb);
+      return;
+    }
     this.stopTick();
     if (this.inactivityTimeout) {
       this.inactivityTimeout.clear();
@@ -871,5 +902,7 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.sealedVotes.clear();
     this.rejoinTokens.clear();
     this.playerTokens.clear();
+    this._disposeListeners.forEach((listener) => listener());
+    this._disposeListeners = [];
   }
 }

@@ -12,40 +12,71 @@
  *   WPD-05: Multi-session — words not repeated within a session
  *   WPD-06: Edge case — category with exactly 100 words: no index-out-of-bounds
  *
- * Implementation status as of AEG-42 first run (2026-04-03):
- *   - `common` category: expanded (120 words, tiers defined) — ALL tests PASS
- *   - Other 9 categories: still 25 words, no tiers — WPD-01 FAILS, tier tests skip
- *
- * When AEG-37 is fully complete, remove `.todo` markers from per-category tests.
+ * AEG-37 complete: all 10 categories expanded to 100+ words with tiers.
+ * All .todo markers removed.
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { pickUniqueWords, getAvailableCategories, loadWordPack } from "../utils/wordPicker";
 
+const ALL_CATEGORIES = [
+  "animals", "body", "colors", "common", "emotions",
+  "family", "food", "jobs", "places", "sports",
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // WPD-01: Pool size ≥ 100 words per category
 // ─────────────────────────────────────────────────────────────────────────────
 describe("WPD-01: Pool size ≥ 100 words per category", () => {
-  const ALL_CATEGORIES = [
-    "animals", "body", "colors", "common", "emotions",
-    "family", "food", "jobs", "places", "sports",
-  ];
-
   it("WPD-01a: common category has ≥ 100 words", () => {
     const pack = loadWordPack("common");
     expect(pack.words.length).toBeGreaterThanOrEqual(100);
   });
 
-  // AEG-37 incomplete: only `common` expanded — remaining categories still have 25 words
-  it.todo("WPD-01b: animals category has ≥ 100 words");
-  it.todo("WPD-01c: body category has ≥ 100 words");
-  it.todo("WPD-01d: colors category has ≥ 100 words");
-  it.todo("WPD-01e: emotions category has ≥ 100 words");
-  it.todo("WPD-01f: family category has ≥ 100 words");
-  it.todo("WPD-01g: food category has ≥ 100 words");
-  it.todo("WPD-01h: jobs category has ≥ 100 words");
-  it.todo("WPD-01i: places category has ≥ 100 words");
-  it.todo("WPD-01j: sports category has ≥ 100 words");
+  it("WPD-01b: animals category has ≥ 100 words", () => {
+    const pack = loadWordPack("animals");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01c: body category has ≥ 100 words", () => {
+    const pack = loadWordPack("body");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01d: colors category has ≥ 100 words", () => {
+    const pack = loadWordPack("colors");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01e: emotions category has ≥ 100 words", () => {
+    const pack = loadWordPack("emotions");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01f: family category has ≥ 100 words", () => {
+    const pack = loadWordPack("family");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01g: food category has ≥ 100 words", () => {
+    const pack = loadWordPack("food");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01h: jobs category has ≥ 100 words", () => {
+    const pack = loadWordPack("jobs");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01i: places category has ≥ 100 words", () => {
+    const pack = loadWordPack("places");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("WPD-01j: sports category has ≥ 100 words", () => {
+    const pack = loadWordPack("sports");
+    expect(pack.words.length).toBeGreaterThanOrEqual(100);
+  });
 
   it("WPD-01k: all categories — documents current word counts", () => {
     const MIN_TARGET = 100;
@@ -75,8 +106,8 @@ describe("WPD-01: Pool size ≥ 100 words per category", () => {
       );
     }
 
-    // When AEG-37 is done, this assertion will verify full compliance:
-    // expect(belowTarget.length).toBe(0);
+    // AEG-37 complete: all categories should now pass
+    expect(belowTarget.length).toBe(0);
   });
 });
 
@@ -118,10 +149,64 @@ describe("WPD-02: No duplicate words across tiers within a category", () => {
     expect(unique.size).toBe(pack.words.length);
   });
 
-  // AEG-37 not yet complete for these categories:
-  it.todo("WPD-02d: animals — no cross-tier or intra-tier duplicates");
-  it.todo("WPD-02e: food — no cross-tier or intra-tier duplicates");
-  it.todo("WPD-02f: all other categories — no cross-tier or intra-tier duplicates");
+  it("WPD-02d: animals — no cross-tier or intra-tier duplicates", () => {
+    const pack = loadWordPack("animals");
+    expect(pack.tiers).toBeDefined();
+
+    const easy = new Set(pack.tiers!.easy);
+    const medium = new Set(pack.tiers!.medium);
+    const hard = new Set(pack.tiers!.hard);
+
+    expect([...easy].filter((w) => medium.has(w))).toHaveLength(0);
+    expect([...easy].filter((w) => hard.has(w))).toHaveLength(0);
+    expect([...medium].filter((w) => hard.has(w))).toHaveLength(0);
+
+    for (const tier of ["easy", "medium", "hard"] as const) {
+      const words = pack.tiers![tier];
+      expect(new Set(words).size).toBe(words.length);
+    }
+  });
+
+  it("WPD-02e: food — no cross-tier or intra-tier duplicates", () => {
+    const pack = loadWordPack("food");
+    expect(pack.tiers).toBeDefined();
+
+    const easy = new Set(pack.tiers!.easy);
+    const medium = new Set(pack.tiers!.medium);
+    const hard = new Set(pack.tiers!.hard);
+
+    expect([...easy].filter((w) => medium.has(w))).toHaveLength(0);
+    expect([...easy].filter((w) => hard.has(w))).toHaveLength(0);
+    expect([...medium].filter((w) => hard.has(w))).toHaveLength(0);
+
+    for (const tier of ["easy", "medium", "hard"] as const) {
+      const words = pack.tiers![tier];
+      expect(new Set(words).size).toBe(words.length);
+    }
+  });
+
+  it("WPD-02f: all other categories — no cross-tier or intra-tier duplicates", () => {
+    for (const cat of ALL_CATEGORIES) {
+      const pack = loadWordPack(cat);
+      expect(pack.tiers).toBeDefined();
+
+      const easy = new Set(pack.tiers!.easy);
+      const medium = new Set(pack.tiers!.medium);
+      const hard = new Set(pack.tiers!.hard);
+
+      expect([...easy].filter((w) => medium.has(w))).toHaveLength(0);
+      expect([...easy].filter((w) => hard.has(w))).toHaveLength(0);
+      expect([...medium].filter((w) => hard.has(w))).toHaveLength(0);
+
+      for (const tier of ["easy", "medium", "hard"] as const) {
+        const words = pack.tiers![tier];
+        expect(new Set(words).size).toBe(words.length);
+      }
+
+      // flat array no duplicates
+      expect(new Set(pack.words).size).toBe(pack.words.length);
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -161,10 +246,58 @@ describe("WPD-03: Dealing algorithm — 6 players × 8 rounds = 48 words", () =>
     }
   });
 
-  // AEG-37 not done for other categories:
-  it.todo("WPD-03c: animals — 48 words dealt without exhausting pool");
-  it.todo("WPD-03d: food — 48 words dealt without exhausting pool");
-  it.todo("WPD-03e: all other categories — 48 words dealt without exhausting pool");
+  it("WPD-03c: animals — 48 words dealt without exhausting pool", () => {
+    const pack = loadWordPack("animals");
+    expect(pack.words.length).toBeGreaterThanOrEqual(TOTAL_DEALT + 52);
+
+    const used = new Set<string>();
+    for (let round = 0; round < ROUNDS; round++) {
+      const dealt = pickUniqueWords("animals", PLAYERS, used);
+      expect(dealt.length).toBe(PLAYERS);
+      expect(new Set(dealt).size).toBe(PLAYERS);
+      dealt.forEach((w) => expect(used.has(w)).toBe(false));
+      dealt.forEach((w) => used.add(w));
+    }
+
+    const remaining = pack.words.length - used.size;
+    expect(remaining).toBeGreaterThanOrEqual(52);
+  });
+
+  it("WPD-03d: food — 48 words dealt without exhausting pool", () => {
+    const pack = loadWordPack("food");
+    expect(pack.words.length).toBeGreaterThanOrEqual(TOTAL_DEALT + 52);
+
+    const used = new Set<string>();
+    for (let round = 0; round < ROUNDS; round++) {
+      const dealt = pickUniqueWords("food", PLAYERS, used);
+      expect(dealt.length).toBe(PLAYERS);
+      expect(new Set(dealt).size).toBe(PLAYERS);
+      dealt.forEach((w) => expect(used.has(w)).toBe(false));
+      dealt.forEach((w) => used.add(w));
+    }
+
+    const remaining = pack.words.length - used.size;
+    expect(remaining).toBeGreaterThanOrEqual(52);
+  });
+
+  it("WPD-03e: all other categories — 48 words dealt without exhausting pool", () => {
+    for (const cat of ALL_CATEGORIES) {
+      const pack = loadWordPack(cat);
+      expect(pack.words.length).toBeGreaterThanOrEqual(TOTAL_DEALT + 52);
+
+      const used = new Set<string>();
+      for (let round = 0; round < ROUNDS; round++) {
+        const dealt = pickUniqueWords(cat as any, PLAYERS, used);
+        expect(dealt.length).toBe(PLAYERS);
+        expect(new Set(dealt).size).toBe(PLAYERS);
+        dealt.forEach((w) => expect(used.has(w)).toBe(false));
+        dealt.forEach((w) => used.add(w));
+      }
+
+      const remaining = pack.words.length - used.size;
+      expect(remaining).toBeGreaterThanOrEqual(52);
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -214,8 +347,26 @@ describe("WPD-04: Tier distribution — mixed dealing produces all three tiers",
     expect(pack.tiers!.hard.length).toBeGreaterThan(0);
   });
 
-  // AEG-37 not done for other categories:
-  it.todo("WPD-04d: all categories — mixed dealing produces words from all three tiers");
+  it("WPD-04d: all categories — each has tiers defined with at least 1 word each", () => {
+    for (const cat of ALL_CATEGORIES) {
+      const pack = loadWordPack(cat);
+      expect(pack.tiers).toBeDefined();
+      expect(pack.tiers!.easy.length).toBeGreaterThan(0);
+      expect(pack.tiers!.medium.length).toBeGreaterThan(0);
+      expect(pack.tiers!.hard.length).toBeGreaterThan(0);
+
+      // flat list covers all tier words
+      const tierWords = new Set([
+        ...pack.tiers!.easy,
+        ...pack.tiers!.medium,
+        ...pack.tiers!.hard,
+      ]);
+      const flatWords = new Set(pack.words);
+      for (const w of tierWords) {
+        expect(flatWords.has(w)).toBe(true);
+      }
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -249,8 +400,26 @@ describe("WPD-05: Multi-session word uniqueness", () => {
     expect(pack.words.length).toBeGreaterThanOrEqual(WORDS_PER_SESSION * 3); // 90
   });
 
-  // AEG-37 not done for other categories:
-  it.todo("WPD-05c: all categories — multi-session uniqueness within session");
+  it("WPD-05c: all categories — multi-session uniqueness within session", () => {
+    const SESSIONS = 3;
+    const PLAYERS = 6;
+    const ROUNDS_PER_SESSION = 5;
+
+    for (const cat of ALL_CATEGORIES) {
+      for (let session = 0; session < SESSIONS; session++) {
+        const sessionUsed = new Set<string>();
+        for (let round = 0; round < ROUNDS_PER_SESSION; round++) {
+          const dealt = pickUniqueWords(cat as any, PLAYERS, sessionUsed);
+          expect(dealt.length).toBe(PLAYERS);
+          dealt.forEach((w) => {
+            expect(sessionUsed.has(w)).toBe(false);
+            sessionUsed.add(w);
+          });
+        }
+        expect(sessionUsed.size).toBe(PLAYERS * ROUNDS_PER_SESSION);
+      }
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -281,6 +450,22 @@ describe("WPD-06: Edge case — boundary conditions", () => {
     expect(() => pickUniqueWords("not_a_real_category" as any, 5)).toThrow(/unknown category/i);
   });
 
-  // Once AEG-37 expands categories to 100, add a test for exactly-100 edge:
-  it.todo("WPD-06e: category with exactly 100 words — deal 48 words without crash or index overflow");
+  it("WPD-06e: category with exactly 100 words — deal 48 words without crash or index overflow", () => {
+    // All categories have 100+ words; pick the smallest and verify 48-deal works
+    const smallest = ALL_CATEGORIES
+      .map((cat) => ({ cat, len: loadWordPack(cat).words.length }))
+      .sort((a, b) => a.len - b.len)[0];
+
+    expect(smallest.len).toBeGreaterThanOrEqual(100);
+
+    const used = new Set<string>();
+    const PLAYERS = 6;
+    const ROUNDS = 8; // 48 words total
+    for (let round = 0; round < ROUNDS; round++) {
+      expect(() => pickUniqueWords(smallest.cat as any, PLAYERS, used)).not.toThrow();
+      const dealt = pickUniqueWords(smallest.cat as any, PLAYERS, used);
+      dealt.forEach((w) => used.add(w));
+    }
+    expect(used.size).toBe(PLAYERS * ROUNDS);
+  });
 });

@@ -504,6 +504,16 @@
       showVoteResult(data.guilty, name);
     });
 
+    room.onMessage('VOTE_REVEAL', function (data) {
+      // data.votes: [{ playerId, nickname, vote: "guilty"|"not_yet" }]
+      revealVoterCards(data.votes || []);
+    });
+
+    room.onMessage('CHALLENGE_PENALTY', function (data) {
+      // data: { accuserId, accuserName, penalty }
+      showChallengePenaltyToast(data.accuserName, data.penalty || 1);
+    });
+
     room.onMessage('GUESS_RESULT', function (data) {
       showGuessResult(data.correct, data.word);
     });
@@ -564,9 +574,10 @@
       }
     });
 
-    player.listen('vote', function () {
+    player.listen('vote', function (value) {
       if (currentPhase === 'VOTING') {
         updateVoteProgress();
+        if (value) markVoterCardVoted(key);
       }
     });
   }
@@ -786,17 +797,25 @@
     }
 
     updateVoteProgress();
+    renderVoterList();
 
-    // Check if I am the accused
     var me = getMyPlayer();
     var acc = (room && room.state) ? room.state.currentAccusation : null;
+
+    // Check if I am the accused
     if (acc && me && acc.targetId === mySessionId) {
       if (voteButtons) voteButtons.style.display = 'none';
       if (voteStatus) voteStatus.textContent = 'คุณถูกกล่าวหา — รอผลโหวต...';
     }
 
+    // Check if I am the challenger (accuser) — cannot vote on own challenge
+    if (acc && me && acc.accuserId === mySessionId) {
+      if (voteButtons) voteButtons.style.display = 'none';
+      if (voteStatus) voteStatus.textContent = 'คุณเป็นผู้กล่าวหา — ไม่สามารถโหวตได้';
+    }
+
     // Check if already eliminated
-    if (me && !me.isAlive && (!acc || acc.targetId !== mySessionId)) {
+    if (me && !me.isAlive && (!acc || (acc.targetId !== mySessionId && acc.accuserId !== mySessionId))) {
       if (voteButtons) voteButtons.style.display = 'none';
       if (voteStatus) voteStatus.textContent = 'คุณถูกคัดออกแล้ว — ดูอย่างเดียว';
     }
@@ -824,12 +843,102 @@
     var acc = room.state.currentAccusation;
     var total = acc.totalVoters;
     var voted = acc.yesCount + acc.noCount;
+    var pending = total - voted;
     var pct = total > 0 ? Math.round((voted / total) * 100) : 0;
 
     var fill = $('voteProgressFill');
     var text = $('voteProgressText');
+    var waiting = $('voteWaitingText');
     if (fill) fill.style.width = pct + '%';
     if (text) text.textContent = voted + '/' + total + ' โหวตแล้ว';
+    if (waiting) {
+      waiting.textContent = pending > 0
+        ? 'รอผู้เล่นอีก ' + pending + ' คน...'
+        : 'ครบทุกคนแล้ว!';
+    }
+  }
+
+  function renderVoterList() {
+    var container = $('voterList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!room || !room.state) return;
+
+    var acc = room.state.currentAccusation;
+    var accuserId = acc ? acc.accuserId : null;
+    var targetId = acc ? acc.targetId : null;
+
+    room.state.players.forEach(function (player, id) {
+      if (!player.isAlive) return;
+      // Both the accused and the challenger are excluded from the eligible voter list display
+      // but we still show the challenger card as greyed out
+      var isChallenger = id === accuserId;
+      var isAccused = id === targetId;
+      if (isAccused) return; // don't show accused in voter list
+
+      var card = document.createElement('div');
+      card.className = 'voter-card' + (isChallenger ? ' challenger' : '');
+      card.dataset.playerId = id;
+
+      var avatarEmoji = player.avatar || '👤';
+      var tooltip = isChallenger ? 'title="ไม่สามารถโหวตได้"' : '';
+
+      card.innerHTML =
+        '<div class="voter-card__inner" ' + tooltip + '>' +
+          '<div class="voter-card__front">' + avatarEmoji + '</div>' +
+          '<div class="voter-card__back" id="vcard-back-' + id + '"></div>' +
+        '</div>' +
+        '<div class="voter-card__name">' + (player.nickname || '?') + '</div>';
+
+      if (isChallenger) {
+        var front = card.querySelector('.voter-card__front');
+        if (front) front.style.fontSize = '13px';
+        front.textContent = '🚫';
+      }
+
+      // If already voted (reconnect scenario), mark voted
+      if (player.vote) card.classList.add('voted');
+
+      container.appendChild(card);
+    });
+  }
+
+  function markVoterCardVoted(playerId) {
+    var card = document.querySelector('.voter-card[data-player-id="' + playerId + '"]');
+    if (card && !card.classList.contains('challenger')) {
+      card.classList.add('voted');
+    }
+  }
+
+  function revealVoterCards(votes) {
+    votes.forEach(function (v, i) {
+      setTimeout(function () {
+        var card = document.querySelector('.voter-card[data-player-id="' + v.playerId + '"]');
+        if (!card) return;
+        var back = card.querySelector('.voter-card__back');
+        if (back) {
+          if (v.vote === 'guilty') {
+            back.className = 'voter-card__back guilty';
+            back.textContent = '👎';
+          } else {
+            back.className = 'voter-card__back not-yet';
+            back.textContent = '👍';
+          }
+        }
+        card.classList.add('flipped');
+      }, i * 80);
+    });
+  }
+
+  function showChallengePenaltyToast(name, penalty) {
+    var toast = $('penaltyToast');
+    if (!toast) return;
+    toast.textContent = '⚠️ ' + name + ' -' + penalty + ' คะแนน (กล่าวหาผิด)';
+    toast.classList.remove('hidden');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(function () {
+      toast.classList.add('hidden');
+    }, 3000);
   }
 
   // ─── Guess Phase Screen ───────────────────────────────────────
@@ -1079,7 +1188,7 @@
     if (notYetBtn) notYetBtn.disabled = true;
 
     var status = $('voteStatus');
-    if (status) status.textContent = 'คุณโหวตแล้ว — รอผู้เล่นอื่น...';
+    if (status) status.textContent = '✅ โหวตของคุณถูกล็อกแล้ว — รอผลโหวต...';
   }
 
   function sendGuessWord(guess) {

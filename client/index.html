@@ -145,11 +145,14 @@
       <div class="accused-word" id="accusedWord">---</div>
     </div>
 
+    <div class="voter-list" id="voterList"></div>
+
     <div class="vote-progress">
       <div class="vote-progress-bar">
         <div class="vote-progress-fill" id="voteProgressFill" style="width: 0%"></div>
       </div>
       <div class="vote-progress-text" id="voteProgressText">0/0 โหวตแล้ว</div>
+      <div class="vote-waiting-text" id="voteWaitingText"></div>
     </div>
 
     <div class="vote-status" id="voteStatus"></div>
@@ -262,6 +265,9 @@
   <div class="countdown-overlay hidden" id="countdownOverlay">
     <div id="countdownContent"></div>
   </div>
+
+  <!-- ========== CHALLENGE PENALTY TOAST ========== -->
+  <div class="penalty-toast hidden" id="penaltyToast"></div>
 
   <!-- ========== VOTE RESULT OVERLAY ========== -->
   <div class="vote-result-overlay hidden" id="voteResultOverlay">

@@ -42,20 +42,22 @@ describe("AEG-35: Nickname Filter", () => {
     expect(room.state.players.has("p1_nf01")).toBe(true);
   });
 
-  it("NF-02: offensive Thai nickname triggers BLOCKED_NICKNAME error", async () => {
+  it("NF-02: offensive Thai nickname triggers NICKNAME_REJECTED error", async () => {
     const room = await createRoom("NF02");
     const p1 = makeMockClient("p1_nf02");
     await tryJoinExpectingRejection(room, p1, { nickname: "ไอ้สัตว์", avatar: "😀" });
     const err = p1.sends.find((s) => s.type === "ERROR");
-    expect(err?.msg?.code).toBe("BLOCKED_NICKNAME");
+    expect(err?.msg?.code).toBe("NICKNAME_REJECTED");
+    expect(err?.msg?.reason).toBe("OFFENSIVE");
   });
 
-  it("NF-03: offensive English nickname triggers BLOCKED_NICKNAME error", async () => {
+  it("NF-03: offensive English nickname triggers NICKNAME_REJECTED error", async () => {
     const room = await createRoom("NF03");
     const p1 = makeMockClient("p1_nf03");
     await tryJoinExpectingRejection(room, p1, { nickname: "fuckme", avatar: "😀" });
     const err = p1.sends.find((s) => s.type === "ERROR");
-    expect(err?.msg?.code).toBe("BLOCKED_NICKNAME");
+    expect(err?.msg?.code).toBe("NICKNAME_REJECTED");
+    expect(err?.msg?.reason).toBe("OFFENSIVE");
   });
 
   it("NF-04: case-insensitive — FUCK also blocked", async () => {
@@ -63,7 +65,8 @@ describe("AEG-35: Nickname Filter", () => {
     const p1 = makeMockClient("p1_nf04");
     await tryJoinExpectingRejection(room, p1, { nickname: "FUCK", avatar: "😀" });
     const err = p1.sends.find((s) => s.type === "ERROR");
-    expect(err?.msg?.code).toBe("BLOCKED_NICKNAME");
+    expect(err?.msg?.code).toBe("NICKNAME_REJECTED");
+    expect(err?.msg?.reason).toBe("OFFENSIVE");
   });
 });
 

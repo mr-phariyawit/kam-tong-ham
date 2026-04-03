@@ -95,11 +95,19 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.resetInactivityTimer();
   }
 
+  /** Reserved system names that may not be used as player nicknames (AEG-35). */
+  private static readonly RESERVED_NAMES = new Set(["admin", "host", "system", "ผู้ดูแล"]);
+
   onJoin(client: Client, options: JoinOptions) {
     // ─── AEG-35: Nickname filter ───────────────────────────────
     const rawNickname = (options.nickname || "ผู้เล่น").slice(0, 15);
     if (isBlockedNickname(rawNickname)) {
-      client.send("ERROR", { code: "BLOCKED_NICKNAME", message: "ชื่อผู้เล่นไม่เหมาะสม กรุณาใช้ชื่ออื่น" });
+      client.send("ERROR", { code: "NICKNAME_REJECTED", reason: "OFFENSIVE", message: "ชื่อผู้เล่นไม่เหมาะสม กรุณาใช้ชื่ออื่น" });
+      client.leave();
+      return;
+    }
+    if (KhamTongHamRoom.RESERVED_NAMES.has(rawNickname.toLowerCase())) {
+      client.send("ERROR", { code: "NICKNAME_REJECTED", reason: "RESERVED", message: "ชื่อนี้ถูกสงวนไว้ กรุณาใช้ชื่ออื่น" });
       client.leave();
       return;
     }
@@ -107,7 +115,7 @@ export class KhamTongHamRoom extends Room<GameState> {
     // ─── AEG-34: Rejoin token validation ──────────────────────
     if (options.roomToken) {
       const record = this.rejoinTokens.get(options.roomToken);
-      if (!record || record.revoked) {
+      if (!record || record.revoked || rawNickname.toLowerCase() !== record.nickname.toLowerCase()) {
         client.send("ERROR", { code: "KICKED", message: "คุณถูกเตะออกจากห้องนี้แล้ว" });
         client.leave();
         return;

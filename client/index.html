@@ -99,6 +99,10 @@
       </div>
     </div>
 
+    <div class="lobby-host-actions hidden" id="lobbyHostActions">
+      <button class="btn btn-ghost btn-small" id="btnTransferHost">🔑 โอนตำแหน่งโฮสต์</button>
+    </div>
+
     <div class="lobby-bottom">
       <button class="btn btn-primary" id="btnStartGame" disabled>เริ่มเกม</button>
     </div>
@@ -227,6 +231,7 @@
     <div class="modal-content nickname-modal">
       <div class="modal-title">ตั้งชื่อของคุณ</div>
       <input type="text" class="input-field" id="nicknameInput" placeholder="ชื่อเล่น (1-15 ตัวอักษร)" maxlength="15" autocomplete="off">
+      <div class="nickname-error hidden" id="nicknameError"></div>
       <div class="label mb-8" style="margin-top:12px">เลือกอวาตาร์</div>
       <div class="emoji-grid" id="emojiGrid"></div>
       <button class="btn btn-primary" id="btnConfirmNickname" style="margin-top:12px">ยืนยัน</button>

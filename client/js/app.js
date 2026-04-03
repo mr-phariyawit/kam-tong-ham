@@ -198,6 +198,63 @@
 
   function hideNicknameModal() {
     $('nicknameModal').classList.add('hidden');
+    var errEl = $('nicknameError');
+    if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+    var input = $('nicknameInput');
+    if (input) input.classList.remove('input-error');
+  }
+
+  function showNicknameRejectionError(message) {
+    // Re-open the nickname modal and show inline error so player can retry
+    var modal = $('nicknameModal');
+    if (modal) modal.classList.remove('hidden');
+    var errEl = $('nicknameError');
+    if (errEl) { errEl.textContent = message; errEl.classList.remove('hidden'); }
+    var input = $('nicknameInput');
+    if (input) { input.classList.add('input-error'); input.focus(); input.select(); }
+  }
+
+  function showTransferHostPicker() {
+    var players = getPlayersArray().filter(function (p) {
+      return p.isConnected && p.isAlive && p.id !== mySessionId;
+    });
+    if (players.length === 0) {
+      showToast('ไม่มีผู้เล่นที่สามารถโอนตำแหน่งได้');
+      return;
+    }
+    // Build a simple inline picker using a toast-style dropdown modal
+    var existing = $('transferHostModal');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'transferHostModal';
+    var content = document.createElement('div');
+    content.className = 'modal-content';
+    content.innerHTML = '<div class="modal-title">🔑 โอนตำแหน่งโฮสต์</div>';
+
+    players.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-ghost';
+      btn.style.cssText = 'width:100%;margin-top:8px;display:flex;align-items:center;gap:8px;';
+      btn.innerHTML = '<span>' + p.avatar + '</span><span>' + escapeHtml(p.nickname) + '</span>';
+      btn.addEventListener('click', function () {
+        if (room) room.send('TRANSFER_HOST', { targetId: p.id });
+        overlay.remove();
+        vibrate(20);
+      });
+      content.appendChild(btn);
+    });
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn-ghost';
+    cancelBtn.style.cssText = 'width:100%;margin-top:12px;';
+    cancelBtn.textContent = 'ยกเลิก';
+    cancelBtn.addEventListener('click', function () { overlay.remove(); });
+    content.appendChild(cancelBtn);
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
   }
 
   // ─── Join Modal ───────────────────────────────────────────────
@@ -535,6 +592,23 @@
       leaveRoom();
     });
 
+    room.onMessage('HOST_TRANSFERRED', function (data) {
+      // data: { newHostId, newHostName }
+      var msg = (data.newHostName || 'ผู้เล่น') + ' เป็นเจ้าของห้องแล้ว 👑';
+      showToast(msg);
+      // isHost state is updated via player.listen('isHost') which calls updateHostUI()
+    });
+
+    room.onMessage('NICKNAME_REJECTED', function (data) {
+      // data: { reason: 'OFFENSIVE' | 'RESERVED' }
+      var messages = {
+        OFFENSIVE: 'ชื่อนี้ไม่ได้รับอนุญาต กรุณาเลือกชื่ออื่น',
+        RESERVED: 'ชื่อนี้ถูกสงวนไว้ กรุณาเลือกชื่ออื่น',
+      };
+      var errorText = messages[data.reason] || 'ชื่อนี้ไม่สามารถใช้ได้ กรุณาเลือกชื่ออื่น';
+      showNicknameRejectionError(errorText);
+    });
+
     room.onMessage('ROOM_EXPIRED', function (data) {
       showToast(data.message || 'ห้องหมดเวลา');
       leaveRoom();
@@ -695,15 +769,18 @@
     var config = $('lobbyConfig');
     var startBtn = $('btnStartGame');
     var hostLabel = $('lobbyHostLabel');
+    var hostActions = $('lobbyHostActions');
 
     if (isHost) {
       if (config) config.style.display = '';
       if (startBtn) startBtn.style.display = '';
       if (hostLabel) hostLabel.textContent = '👑 คุณเป็นเจ้าของห้อง';
+      if (hostActions && currentPhase === 'LOBBY') hostActions.classList.remove('hidden');
     } else {
       if (config) config.style.display = 'none';
       if (startBtn) startBtn.style.display = 'none';
       if (hostLabel) hostLabel.textContent = '';
+      if (hostActions) hostActions.classList.add('hidden');
     }
   }
 
@@ -1298,6 +1375,12 @@
       if (e.key === 'Enter') $('btnConfirmNickname').click();
     });
 
+    $('nicknameInput').addEventListener('input', function () {
+      var errEl = $('nicknameError');
+      if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+      this.classList.remove('input-error');
+    });
+
     // ── Join modal ──────────────────────────────────────────────
 
     $('btnConfirmJoin').addEventListener('click', function () {
@@ -1393,6 +1476,15 @@
       configCategory.addEventListener('change', function () {
         sendUpdateConfig({ category: configCategory.value });
         vibrate(15);
+      });
+    }
+
+    // Transfer Host
+    var btnTransferHost = $('btnTransferHost');
+    if (btnTransferHost) {
+      btnTransferHost.addEventListener('click', function () {
+        vibrate(15);
+        showTransferHostPicker();
       });
     }
 

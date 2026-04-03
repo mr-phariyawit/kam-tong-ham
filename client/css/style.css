@@ -1319,6 +1319,35 @@ h3 {
   cursor: pointer;
 }
 
+/* Nickname inline error */
+.nickname-error {
+  color: var(--accent-red);
+  font-size: 13px;
+  margin-top: 6px;
+  text-align: center;
+  min-height: 18px;
+}
+
+.nickname-error.hidden {
+  display: none;
+}
+
+.input-field.input-error {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.25);
+}
+
+/* Lobby host actions (Transfer Host) */
+.lobby-host-actions {
+  padding: 4px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.lobby-host-actions.hidden {
+  display: none;
+}
+
 /* Nickname entry modal */
 .nickname-modal .emoji-grid {
   display: grid;

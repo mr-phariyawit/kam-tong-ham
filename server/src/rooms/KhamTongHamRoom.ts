@@ -680,6 +680,12 @@ export class KhamTongHamRoom extends Room<GameState> {
         accuser.roundPoints -= 1;
         accuser.score -= 1;
       }
+      // AEG-53: Emit CHALLENGE_PENALTY so the UI penalty toast fires
+      this.broadcast("CHALLENGE_PENALTY", {
+        accuserId: accusation.accuserId,
+        accuserName: accuser?.nickname ?? "",
+        penalty: 1,
+      });
     }
 
     // AEG-31: Reveal all individual votes simultaneously via VOTE_REVEAL event

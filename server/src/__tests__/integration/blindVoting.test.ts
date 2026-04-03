@@ -327,16 +327,10 @@ describe("Blind Voting — score integrity across multiple challenge rounds", ()
   });
 
   /**
-   * BV-11: VOTE_REVEAL carries guilty=false on failed challenges.
-   * NOTE — AEG-32 spec requires a separate CHALLENGE_PENALTY event to be emitted.
-   * The current server implementation does NOT emit CHALLENGE_PENALTY; it only sends
-   * VOTE_REVEAL (with guilty=false). The client listens for CHALLENGE_PENALTY to show
-   * the penalty toast — that toast will never fire. This test documents the current
-   * (incomplete) server behaviour and should be updated when CHALLENGE_PENALTY is added.
-   *
-   * Expected after fix: server broadcasts CHALLENGE_PENALTY with accuserId, accuserName, penalty=1.
+   * BV-11: Server emits both VOTE_REVEAL (guilty=false) and CHALLENGE_PENALTY on failed challenges.
+   * AEG-53 fix: server now broadcasts CHALLENGE_PENALTY with accuserId, accuserName, penalty=1.
    */
-  it("BV-11: VOTE_REVEAL.guilty=false signals failed challenge (CHALLENGE_PENALTY event not yet emitted — known gap)", async () => {
+  it("BV-11: VOTE_REVEAL.guilty=false signals failed challenge; CHALLENGE_PENALTY event is emitted", async () => {
     const room = await createRoom("BV11");
     const p1 = makeMockClient("p1_bv11");
     const p2 = makeMockClient("p2_bv11");
@@ -356,10 +350,11 @@ describe("Blind Voting — score integrity across multiple challenge rounds", ()
     expect(reveal).toBeDefined();
     expect(reveal?.msg?.guilty).toBe(false);
 
-    // CHALLENGE_PENALTY is NOT currently emitted by the server.
-    // When AEG-32 is fully satisfied, the server must emit CHALLENGE_PENALTY
-    // so the UI penalty toast triggers. Remove the negation below after the fix.
+    // CHALLENGE_PENALTY is now emitted — UI penalty toast can fire
     const penalty = p3.sends.find((s) => s.type === "CHALLENGE_PENALTY");
-    expect(penalty).toBeUndefined(); // ← flip to toBeDefined() once server emits CHALLENGE_PENALTY
+    expect(penalty).toBeDefined();
+    expect(penalty?.msg?.accuserId).toBe("p1_bv11");
+    expect(penalty?.msg?.accuserName).toBe("Alice");
+    expect(penalty?.msg?.penalty).toBe(1);
   });
 });

@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   setupMatchMaker, teardownMatchMaker, createRoom, joinRoom,
-  sendMessage, makeMockClient, advanceClock, startPlaying, endRound,
+  sendMessage, makeMockClient, advanceClock, startPlaying, endRound, resolveVote,
 } from "./helpers";
 
 beforeAll(setupMatchMaker);
@@ -74,7 +74,10 @@ describe("Scenario 4.1: 2-Player game flow", () => {
     expect(room.state.currentAccusation.targetId).toBe("p2_sc41d");
   });
 
-  it("P1 votes guilty (only voter) → P2 eliminated, P1 gets +2 accuse bonus (+5 survival after last-survivor)", async () => {
+  // NOTE: In a 2-player game, both players are excluded from voting (accuser + accused = all players).
+  // totalVoters=0, so any accusation resolves immediately as not-guilty on timer expiry.
+  // Accuser loses 1 point (false-challenge penalty). This prevents trivial 2-player abuse.
+  it("2-player: P1 accuses P2 → P1 gets ACCUSER_CANNOT_VOTE when trying to vote", async () => {
     const room = await createRoom();
     const p1 = makeMockClient("p1_sc41e");
     const p2 = makeMockClient("p2_sc41e");
@@ -84,17 +87,19 @@ describe("Scenario 4.1: 2-Player game flow", () => {
     startPlaying(room);
     sendMessage(room, p1, "ACCUSE", { targetPlayerId: "p2_sc41e" });
 
+    // AEG-31/32: Accuser cannot vote
     sendMessage(room, p1, "VOTE", { vote: "guilty" });
-    // 1 eligible voter (P1, accuser), 1 guilty → guilty=true
-    // P2 eliminated: -3; P1 gets +2 (accuse bonus)
-    // P1 is last survivor → endRound fires → P1 gets +5 survival bonus
-    // Final P1 score: +2 + +5 = 7
-    expect(room.state.players.get("p2_sc41e").isAlive).toBe(false);
-    expect(room.state.players.get("p2_sc41e").score).toBe(-3);
-    expect(room.state.players.get("p1_sc41e").score).toBe(7); // 2 (accuse) + 5 (last survivor)
+    const err = p1.sends.find((s) => s.type === "ERROR");
+    expect(err?.msg?.code).toBe("ACCUSER_CANNOT_VOTE");
+
+    // P2 (accused) also cannot vote
+    p2.sends = [];
+    sendMessage(room, p2, "VOTE", { vote: "guilty" });
+    const err2 = p2.sends.find((s) => s.type === "ERROR");
+    expect(err2?.msg?.code).toBe("ACCUSED_CANNOT_VOTE");
   });
 
-  it("2-player scoreboard: P1=7 (survive+accuse), P2=0 (eliminated+guess correct)", async () => {
+  it("2-player: accusation with 0 eligible voters resolves not-guilty on timer, P1 loses 1 pt (AEG-32)", async () => {
     const room = await createRoom();
     const p1 = makeMockClient("p1_sc41f");
     const p2 = makeMockClient("p2_sc41f");
@@ -103,32 +108,22 @@ describe("Scenario 4.1: 2-Player game flow", () => {
     sendMessage(room, p1, "START_GAME");
     startPlaying(room);
 
-    // Get P2's actual word
-    const p2Word = p2.sends.find((s) => s.type === "YOUR_WORD")?.msg?.word;
-    expect(p2Word).toBeDefined();
-
-    // P1 accuses P2 and wins
     sendMessage(room, p1, "ACCUSE", { targetPlayerId: "p2_sc41f" });
-    sendMessage(room, p1, "VOTE", { vote: "guilty" });
-    // P1: +2 (accuse), P2: -3 (eliminated)
+    expect(room.state.currentAccusation.totalVoters).toBe(0);
 
-    // Now end round (P1 is last survivor)
-    // P1 gets +5 survival bonus since endRound was called by checkLastSurvivor
-    // After elimination, checkLastSurvivor fires endRound('last_survivor')
-    // which gives alive players +5
+    // Resolve vote (simulates timer expiry): 0 votes → effectiveNoCount=0 → guilty=false
+    resolveVote(room);
 
     const p1State = room.state.players.get("p1_sc41f");
     const p2State = room.state.players.get("p2_sc41f");
-    // P1 got +5 (last survivor) + +2 (accuse) = 7
-    expect(p1State.score).toBe(7);
 
-    // P2 guesses their word correctly in GUESS_PHASE
-    if (["GUESS_PHASE", "PLAYING"].includes(room.state.phase)) {
-      sendMessage(room, p2, "GUESS_WORD", { guess: p2Word });
-      expect(p2State.guessCorrect).toBe(true);
-      // P2: -3 (eliminated) + 3 (guess correct) = 0
-      expect(p2State.score).toBe(0);
-    }
+    // P1 (accuser) loses 1 pt for false challenge
+    expect(p1State.score).toBe(-1);
+    // P2 (target) unaffected
+    expect(p2State.isAlive).toBe(true);
+    expect(p2State.score).toBe(0);
+    // Phase returns to PLAYING
+    expect(room.state.phase).toBe("PLAYING");
   });
 });
 

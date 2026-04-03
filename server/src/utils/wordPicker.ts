@@ -1,13 +1,24 @@
 import * as fs from "fs";
 import * as path from "path";
 
+export interface WordPackTiers {
+  easy: string[];
+  medium: string[];
+  hard: string[];
+}
+
 export interface WordPack {
   id: string;
   category: string;
   icon: string;
   difficulty: string;
+  /** Flat word list — all tiers combined. Used for backward-compatible random picking. */
   words: string[];
+  /** Optional tiered word lists for difficulty-aware dealing (AEG-37). */
+  tiers?: WordPackTiers;
 }
+
+export type Difficulty = "easy" | "medium" | "hard" | "mixed";
 
 const wordPackCache: Map<string, WordPack> = new Map();
 let allowedCategoriesCache: Set<string> | null = null;
@@ -44,19 +55,28 @@ export function loadWordPack(categoryId: string): WordPack {
 /**
  * Pick `count` unique random words from a category.
  * Optionally exclude words already used in previous rounds.
+ * Optionally filter by difficulty tier (defaults to "mixed" = all tiers).
  */
 export function pickUniqueWords(
   categoryId: string,
   count: number,
-  exclude: Set<string> = new Set()
+  exclude: Set<string> = new Set(),
+  difficulty: Difficulty = "mixed"
 ): string[] {
   const pack = loadWordPack(categoryId);
-  const available = pack.words.filter((w) => !exclude.has(w));
+
+  let pool: string[];
+  if (difficulty !== "mixed" && pack.tiers && pack.tiers[difficulty]) {
+    pool = pack.tiers[difficulty];
+  } else {
+    pool = pack.words;
+  }
+
+  const available = pool.filter((w) => !exclude.has(w));
 
   if (available.length < count) {
     // If not enough words after exclusion, allow repeats from full pool
-    const pool = [...pack.words];
-    return shuffleAndPick(pool, count);
+    return shuffleAndPick([...pool], count);
   }
 
   return shuffleAndPick(available, count);

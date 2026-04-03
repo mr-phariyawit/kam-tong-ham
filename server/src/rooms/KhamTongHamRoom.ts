@@ -1,4 +1,5 @@
 import { Room, Client, Delayed } from "colyseus";
+import * as crypto from "crypto";
 import {
   GameState,
   Player,
@@ -9,11 +10,12 @@ import {
 } from "../schemas/GameState";
 import { pickUniqueWords } from "../utils/wordPicker";
 import { activeRoomCodes } from "../utils/roomRegistry";
+import { isBlockedNickname } from "../utils/nicknameFilter";
 
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 8;
 const COUNTDOWN_SECS = 3;
-const VOTE_TIMER_SECS = 15;
+const VOTE_TIMER_SECS = 30; // blind voting: 30s for all eligible voters to cast
 const GUESS_TIMER_SECS = 10;
 const INACTIVITY_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -21,6 +23,16 @@ interface JoinOptions {
   nickname: string;
   avatar: string;
   roomCode?: string;
+  /** Rejoin token issued on first join; prevents kicked players from re-entering. */
+  roomToken?: string;
+}
+
+/** Server-side rejoin token record. */
+interface RejoinTokenRecord {
+  playerId: string;
+  nickname: string;
+  avatar: string;
+  revoked: boolean;
 }
 
 export class KhamTongHamRoom extends Room<GameState> {
@@ -30,6 +42,18 @@ export class KhamTongHamRoom extends Room<GameState> {
   /** Server-side only: maps playerId -> assigned word for current round */
   private roundWords: Map<string, string> = new Map();
   private colorIndex: number = 0;
+
+  // ─── AEG-31: Blind voting ────────────────────────────────────
+  /** Sealed votes — not visible to clients until VOTE_REVEAL fires. */
+  private sealedVotes: Map<string, string> = new Map(); // playerId -> "guilty" | "not_yet"
+
+  // ─── AEG-34: Rejoin tokens ───────────────────────────────────
+  /** Per-token records for reconnection and kick-revocation. */
+  private rejoinTokens: Map<string, RejoinTokenRecord> = new Map();
+  /** Per-player mapping to their issued token (for revocation on kick). */
+  private playerTokens: Map<string, string> = new Map(); // sessionId -> token
+  /** Nicknames of permanently kicked players (lower-cased). */
+  private kickedNicknames: Set<string> = new Set();
 
   onCreate(options: { roomCode: string }) {
     this.setState(new GameState());
@@ -67,9 +91,32 @@ export class KhamTongHamRoom extends Room<GameState> {
   }
 
   onJoin(client: Client, options: JoinOptions) {
+    // ─── AEG-35: Nickname filter ───────────────────────────────
+    const rawNickname = (options.nickname || "ผู้เล่น").slice(0, 15);
+    if (isBlockedNickname(rawNickname)) {
+      client.send("ERROR", { code: "BLOCKED_NICKNAME", message: "ชื่อผู้เล่นไม่เหมาะสม กรุณาใช้ชื่ออื่น" });
+      client.leave();
+      return;
+    }
+
+    // ─── AEG-34: Rejoin token validation ──────────────────────
+    if (options.roomToken) {
+      const record = this.rejoinTokens.get(options.roomToken);
+      if (!record || record.revoked) {
+        client.send("ERROR", { code: "KICKED", message: "คุณถูกเตะออกจากห้องนี้แล้ว" });
+        client.leave();
+        return;
+      }
+    } else if (this.kickedNicknames.has(rawNickname.toLowerCase())) {
+      // Catch fresh rejoin attempts by kicked players (e.g. after clearing sessionStorage)
+      client.send("ERROR", { code: "KICKED", message: "คุณถูกเตะออกจากห้องนี้แล้ว" });
+      client.leave();
+      return;
+    }
+
     const player = new Player();
     player.id = client.sessionId;
-    player.nickname = (options.nickname || "ผู้เล่น").slice(0, 15);
+    player.nickname = rawNickname;
     player.avatar = options.avatar || "😀";
     player.isHost = this.state.players.size === 0;
     player.isAlive = true;
@@ -80,6 +127,18 @@ export class KhamTongHamRoom extends Room<GameState> {
 
     this.state.players.set(client.sessionId, player);
     this.state.playerCount = this.state.players.size;
+
+    // Issue rejoin token and send to client
+    const token = crypto.randomBytes(16).toString("hex");
+    this.rejoinTokens.set(token, {
+      playerId: client.sessionId,
+      nickname: player.nickname,
+      avatar: player.avatar,
+      revoked: false,
+    });
+    this.playerTokens.set(client.sessionId, token);
+    client.send("ROOM_TOKEN", { token });
+
     this.resetInactivityTimer();
   }
 
@@ -108,12 +167,15 @@ export class KhamTongHamRoom extends Room<GameState> {
         this.checkLastSurvivor();
       }
 
-      // Transfer host if needed
+      // ─── AEG-36: Automatic host transfer on disconnect ───────
       if (player.isHost) {
         player.isHost = false;
         this.transferHost();
       }
     }
+
+    // Clean up player token mapping (but keep rejoinTokens record for reconnect validation)
+    this.playerTokens.delete(client.sessionId);
 
     this.resetInactivityTimer();
 
@@ -195,8 +257,10 @@ export class KhamTongHamRoom extends Room<GameState> {
     accusation.voteDeadline = Date.now() + VOTE_TIMER_SECS * 1000;
     accusation.yesCount = 0;
     accusation.noCount = 0;
+    accusation.votedCount = 0;
 
-    // Count eligible voters: alive players excluding the accused and the accuser
+    // AEG-31: Eligible voters exclude BOTH the accused AND the accuser (self-exclusion).
+    // AEG-32: Challenger self-exclusion is enforced here and in handleVote.
     const eligibleVoters = this.getAlivePlayers().filter(
       (p) => p.id !== targetPlayerId && p.id !== client.sessionId
     );
@@ -211,12 +275,16 @@ export class KhamTongHamRoom extends Room<GameState> {
       p.vote = "";
     });
 
+    // Clear sealed votes for this challenge round
+    this.sealedVotes.clear();
+
     // Broadcast accusation details (targetWord intentionally omitted — secret stays server-side)
     this.broadcast("ACCUSATION", {
       accuserId: accusation.accuserId,
       accuserName: accusation.accuserName,
       targetId: accusation.targetId,
       targetName: accusation.targetName,
+      totalVoters: accusation.totalVoters,
     });
   }
 
@@ -238,25 +306,31 @@ export class KhamTongHamRoom extends Room<GameState> {
       return;
     }
 
-    // Already voted
-    if (voter.vote === "guilty" || voter.vote === "not_yet") {
+    // AEG-31/32: Accuser (challenger) cannot vote on their own challenge
+    if (client.sessionId === this.state.currentAccusation.accuserId) {
+      this.sendError(client, "ACCUSER_CANNOT_VOTE", "ผู้กล่าวหาไม่สามารถโหวตได้");
+      return;
+    }
+
+    // Already voted (use sealedVotes for the check — player.vote is set to "voted" sentinel)
+    if (this.sealedVotes.has(client.sessionId)) {
       this.sendError(client, "ALREADY_VOTED", "คุณโหวตแล้ว");
       return;
     }
 
     const validVote = vote === "guilty" ? "guilty" : "not_yet";
-    voter.vote = validVote;
 
-    if (validVote === "guilty") {
-      this.state.currentAccusation.yesCount++;
-    } else {
-      this.state.currentAccusation.noCount++;
-    }
+    // AEG-31: Store vote in sealed map (invisible to clients until VOTE_REVEAL)
+    this.sealedVotes.set(client.sessionId, validVote);
 
-    // Check if all eligible voters have voted
-    const totalVoted =
-      this.state.currentAccusation.yesCount + this.state.currentAccusation.noCount;
-    if (totalVoted >= this.state.currentAccusation.totalVoters) {
+    // Mark player as "voted" without revealing the choice
+    voter.vote = "voted";
+
+    // Update progress counter (how many have voted, NOT what they voted)
+    this.state.currentAccusation.votedCount = this.sealedVotes.size;
+
+    // If all eligible voters have cast their votes, reveal immediately
+    if (this.sealedVotes.size >= this.state.currentAccusation.totalVoters) {
       this.resolveVote();
     }
   }
@@ -410,6 +484,15 @@ export class KhamTongHamRoom extends Room<GameState> {
     const target = this.state.players.get(targetPlayerId);
     if (!target) return;
 
+    // AEG-34: Revoke the kicked player's rejoin token
+    const token = this.playerTokens.get(targetPlayerId);
+    if (token) {
+      const record = this.rejoinTokens.get(token);
+      if (record) record.revoked = true;
+    }
+    // Also track by nickname so fresh-join rejoin attempts are blocked
+    this.kickedNicknames.add(target.nickname.toLowerCase());
+
     // Notify kicked player
     const targetClient = this.clients.find((c) => c.sessionId === targetPlayerId);
     if (targetClient) {
@@ -419,6 +502,7 @@ export class KhamTongHamRoom extends Room<GameState> {
 
     this.state.players.delete(targetPlayerId);
     this.state.playerCount = this.state.players.size;
+    this.playerTokens.delete(targetPlayerId);
   }
 
   // ─── GAME FLOW ──────────────────────────────────────────────
@@ -441,6 +525,7 @@ export class KhamTongHamRoom extends Room<GameState> {
       p.roundPoints = 0;
     });
     this.state.currentAccusation = null;
+    this.sealedVotes.clear();
 
     // Assign words
     this.assignWords();
@@ -491,7 +576,7 @@ export class KhamTongHamRoom extends Room<GameState> {
     } else if (this.state.phase === "VOTING") {
       this.state.voteTimer--;
       if (this.state.voteTimer <= 0) {
-        // Absent votes default to "not_yet"
+        // Timer expired: absent votes default to "not_yet" — resolve with sealed votes as-is
         this.resolveVote();
       }
     } else if (this.state.phase === "GUESS_PHASE") {
@@ -533,10 +618,15 @@ export class KhamTongHamRoom extends Room<GameState> {
     if (!this.state.currentAccusation) return;
 
     const accusation = this.state.currentAccusation;
-    const yesCount = accusation.yesCount;
-    const noCount = accusation.noCount;
 
-    // Absent votes count as "not_yet"
+    // AEG-31: Count votes from the sealed map (absent votes count as "not_yet")
+    let yesCount = 0;
+    let noCount = 0;
+    this.sealedVotes.forEach((vote) => {
+      if (vote === "guilty") yesCount++;
+      else noCount++;
+    });
+
     const totalEligible = accusation.totalVoters;
     const absentVotes = totalEligible - (yesCount + noCount);
     const effectiveNoCount = noCount + absentVotes;
@@ -559,26 +649,39 @@ export class KhamTongHamRoom extends Room<GameState> {
         accuser.score += 2;
       }
     } else {
-      // False accusation
+      // AEG-32: False challenge — deduct 1 point from challenger
       if (accuser) {
         accuser.roundPoints -= 1;
         accuser.score -= 1;
       }
     }
 
-    // Broadcast vote result
-    this.broadcast("VOTE_RESULT", {
+    // AEG-31: Reveal all individual votes simultaneously via VOTE_REVEAL event
+    const voteList: Array<{ playerId: string; vote: string }> = [];
+    this.sealedVotes.forEach((vote, playerId) => {
+      voteList.push({ playerId, vote });
+    });
+
+    this.broadcast("VOTE_REVEAL", {
       guilty,
       yesCount,
       noCount: effectiveNoCount,
       targetId: accusation.targetId,
       accuserId: accusation.accuserId,
+      votes: voteList,
     });
 
-    // Clear accusation and votes
+    // Update player.vote fields to actual votes (post-reveal)
+    this.sealedVotes.forEach((vote, playerId) => {
+      const p = this.state.players.get(playerId);
+      if (p) p.vote = vote;
+    });
+
+    // Clear accusation and sealed votes
+    this.sealedVotes.clear();
     this.state.currentAccusation = null;
     this.state.players.forEach((p) => {
-      p.vote = "";
+      if (p.vote === "voted") p.vote = ""; // clear any remaining "voted" sentinels
     });
 
     // Return to playing
@@ -600,12 +703,6 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.clock.setTimeout(() => {
       if (this.state.phase === "ROUND_END") {
         this.state.phase = "SCOREBOARD";
-
-        // Auto-advance to game over if all rounds done
-        if (this.state.currentRound >= this.state.config.totalRounds) {
-          // Host can still choose to end or continue
-          // Don't auto-advance; let host decide
-        }
       }
     }, 5000);
   }
@@ -652,6 +749,7 @@ export class KhamTongHamRoom extends Room<GameState> {
     if (alivePlayers.length <= 1) {
       // If we're in voting, resolve it first conceptually, but end round
       if (this.state.phase === "VOTING") {
+        this.sealedVotes.clear();
         this.state.currentAccusation = null;
         this.state.players.forEach((p) => {
           p.vote = "";
@@ -686,6 +784,9 @@ export class KhamTongHamRoom extends Room<GameState> {
     return allDisc;
   }
 
+  /**
+   * AEG-36: Transfer host to the next connected player and broadcast HOST_TRANSFERRED.
+   */
   private transferHost() {
     let newHost: Player | null = null;
     this.state.players.forEach((p) => {
@@ -695,6 +796,10 @@ export class KhamTongHamRoom extends Room<GameState> {
     });
     if (newHost) {
       (newHost as Player).isHost = true;
+      this.broadcast("HOST_TRANSFERRED", {
+        newHostId: (newHost as Player).id,
+        newHostNickname: (newHost as Player).nickname,
+      });
     }
   }
 
@@ -763,5 +868,8 @@ export class KhamTongHamRoom extends Room<GameState> {
       activeRoomCodes.delete(this.state.roomCode);
     }
     this.roundWords.clear();
+    this.sealedVotes.clear();
+    this.rejoinTokens.clear();
+    this.playerTokens.clear();
   }
 }

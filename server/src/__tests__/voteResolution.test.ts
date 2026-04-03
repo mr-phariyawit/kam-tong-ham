@@ -75,23 +75,29 @@ function resolveVote(
 /** Mirrors handleVote() guards */
 type VoteError =
   | "ACCUSED_CANNOT_VOTE"
+  | "ACCUSER_CANNOT_VOTE"
   | "ALREADY_VOTED"
   | "CANNOT_VOTE"
   | "INVALID_PHASE"
   | null;
 
+/** sealedVotes mirrors the server-side Map used for blind voting. */
 function tryVote(
   voterId: string,
   vote: string,
   accusation: Accusation,
   players: Map<string, Player>,
-  phase: string
+  phase: string,
+  sealedVotes: Map<string, string> = new Map()
 ): VoteError {
   if (phase !== "VOTING" || !accusation) return "INVALID_PHASE";
   const voter = players.get(voterId);
   if (!voter || !voter.isAlive) return "CANNOT_VOTE";
   if (voterId === accusation.targetId) return "ACCUSED_CANNOT_VOTE";
-  if (voter.vote === "guilty" || voter.vote === "not_yet") return "ALREADY_VOTED";
+  // AEG-31/32: Accuser (challenger) is excluded from voting on their own challenge
+  if (voterId === accusation.accuserId) return "ACCUSER_CANNOT_VOTE";
+  // Use sealedVotes to detect double-voting (player.vote is now a "voted" sentinel)
+  if (sealedVotes.has(voterId)) return "ALREADY_VOTED";
   return null;
 }
 
@@ -263,13 +269,56 @@ describe("Vote Resolution", () => {
     expect(err).toBe("CANNOT_VOTE");
   });
 
-  // VR-13: Double vote rejected
+  // VR-13: Double vote rejected (via sealedVotes)
   it("VR-13: player who already voted receives ALREADY_VOTED error on second attempt", () => {
-    const voter = makePlayer({ id: "p4", vote: "guilty" });
+    const voter = makePlayer({ id: "p4", vote: "voted" }); // "voted" sentinel
     const players = new Map([["p4", voter]]);
     const accusation = makeAccusation("p1", "p2", 2);
+    const sealedVotes = new Map([["p4", "guilty"]]); // already voted
 
-    const err = tryVote("p4", "guilty", accusation, players, "VOTING");
+    const err = tryVote("p4", "guilty", accusation, players, "VOTING", sealedVotes);
     expect(err).toBe("ALREADY_VOTED");
+  });
+
+  // VR-14: Accuser (challenger) cannot vote on their own challenge (AEG-31/32)
+  it("VR-14: accuser receives ACCUSER_CANNOT_VOTE when trying to vote on own challenge", () => {
+    const accuser = makePlayer({ id: "p1" });
+    const players = new Map([["p1", accuser]]);
+    const accusation = makeAccusation("p1", "p2", 1);
+
+    const err = tryVote("p1", "guilty", accusation, players, "VOTING");
+    expect(err).toBe("ACCUSER_CANNOT_VOTE");
+  });
+
+  // VR-15: 3-player game — P3 (only eligible voter) votes guilty → guilty=true
+  it("VR-15: 3-player: P1 accuses P2, only P3 eligible → P3 guilty vote → guilty=true", () => {
+    const accuser = makePlayer({ id: "p1" });
+    const target = makePlayer({ id: "p2" });
+    const players = new Map([["p1", accuser], ["p2", target]]);
+
+    const accusation = makeAccusation("p1", "p2", 1); // 1 eligible voter (P3)
+    accusation.yesCount = 1;
+    accusation.noCount = 0;
+
+    const { guilty } = resolveVote(accusation, players);
+    expect(guilty).toBe(true);
+    expect(target.isAlive).toBe(false);
+    expect(accuser.score).toBe(2);
+  });
+
+  // VR-16: False challenge penalty — accuser loses 1 point (AEG-32)
+  it("VR-16: failed challenge in 3-player game → accuser loses 1 point", () => {
+    const accuser = makePlayer({ id: "p1" });
+    const target = makePlayer({ id: "p2" });
+    const players = new Map([["p1", accuser], ["p2", target]]);
+
+    const accusation = makeAccusation("p1", "p2", 1); // P3 eligible
+    accusation.yesCount = 0;
+    accusation.noCount = 0; // P3 absent → counts as not_yet
+
+    const { guilty } = resolveVote(accusation, players);
+    expect(guilty).toBe(false);
+    expect(target.isAlive).toBe(true);
+    expect(accuser.score).toBe(-1); // AEG-32 penalty
   });
 });

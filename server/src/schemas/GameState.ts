@@ -47,9 +47,13 @@ export class Accusation extends Schema {
   @type("string") targetName: string = "";
   // targetWord is intentionally NOT in the shared schema — it must stay server-side only
   @type("number") voteDeadline: number = 0;
-  @type("number") yesCount: number = 0;
-  @type("number") noCount: number = 0;
+  // yesCount and noCount are NOT @type-decorated — they must NOT sync to clients before reveal
+  // (blind voting: no vote counts exposed until VOTE_REVEAL event fires)
+  yesCount: number = 0;
+  noCount: number = 0;
   @type("number") totalVoters: number = 0;
+  // votedCount shows progress (how many have voted) without revealing choices
+  @type("number") votedCount: number = 0;
 }
 
 export class GameConfig extends Schema {

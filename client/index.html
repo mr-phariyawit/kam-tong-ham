@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FF4757">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="คำต้องห้าม">
+  <meta name="description" content="คำต้องห้าม — เกมปาร์ตี้สุดฮา เล่นกับเพื่อนได้ทุกที่">
+  <title>คำต้องห้าม</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sound Toggle (global) -->
+  <button class="sound-toggle" id="soundToggle" aria-label="เปิด/ปิดเสียง">🔊</button>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Confetti Container -->
+  <div class="confetti-container" id="confettiContainer"></div>
+
+  <!-- ========== SCREEN: HOME ========== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-logo">🎭</div>
+    <h1 class="home-title">คำต้องห้าม</h1>
+    <p class="home-subtitle">เกมปาร์ตี้สุดฮา เล่นกับเพื่อน!</p>
+
+    <div class="home-buttons">
+      <button class="btn btn-primary" id="btnCreateRoom">สร้างห้อง</button>
+      <button class="btn btn-secondary" id="btnJoinRoom">เข้าร่วมห้อง</button>
+    </div>
+
+    <div class="home-categories" id="btnBrowseCategories">
+      📚 หมวดคำ ►
+    </div>
+
+    <div class="home-footer">
+      v1.0 — เทพลีลา x คำต้องห้าม
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: LOBBY ========== -->
+  <div class="screen" id="screen-lobby">
+    <div class="lobby-header">
+      <button class="lobby-back" id="btnLobbyBack">← ออก</button>
+      <span class="label" id="lobbyHostLabel"></span>
+    </div>
+
+    <div class="room-code-section">
+      <div class="room-code-label">รหัสห้อง</div>
+      <div class="room-code-display" id="roomCodeDisplay" title="แตะเพื่อคัดลอก">----</div>
+      <div class="room-code-copied" id="roomCodeCopied">คัดลอกแล้ว!</div>
+      <div class="qr-container" id="qrContainer">
+        <canvas id="qrCanvas" width="120" height="120"></canvas>
+      </div>
+    </div>
+
+    <div class="player-list-header" id="playerCountLabel">ผู้เล่น 0/8</div>
+    <div class="player-list" id="lobbyPlayerList"></div>
+
+    <div class="lobby-config" id="lobbyConfig">
+      <div class="config-row">
+        <span class="config-label">หมวดคำ</span>
+        <select class="config-select" id="configCategory">
+          <option value="common">💬 คำทั่วไป</option>
+          <option value="food">🍜 อาหาร</option>
+          <option value="animals">🐘 สัตว์</option>
+          <option value="jobs">👨‍⚕️ อาชีพ</option>
+          <option value="places">🏛️ สถานที่</option>
+          <option value="emotions">😊 อารมณ์</option>
+          <option value="sports">⚽ กีฬา</option>
+          <option value="colors">🎨 สี</option>
+          <option value="body">🦷 ร่างกาย</option>
+          <option value="family">👨‍👩‍👧 ครอบครัว</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <span class="config-label">จำนวนรอบ</span>
+        <div class="config-options" id="configRounds">
+          <button class="config-option" data-value="1">1</button>
+          <button class="config-option active" data-value="3">3</button>
+          <button class="config-option" data-value="5">5</button>
+        </div>
+      </div>
+      <div class="config-row">
+        <span class="config-label">เวลา/รอบ</span>
+        <div class="config-options" id="configTimer">
+          <button class="config-option" data-value="120">2 นาที</button>
+          <button class="config-option active" data-value="180">3 นาที</button>
+          <button class="config-option" data-value="300">5 นาที</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lobby-bottom">
+      <button class="btn btn-primary" id="btnStartGame" disabled>เริ่มเกม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: PLAYING ========== -->
+  <div class="screen" id="screen-playing">
+    <div class="playing-topbar">
+      <div class="timer-display" id="playingTimer">3:00</div>
+      <div class="alive-count" id="aliveCount">👁️ 4 คน</div>
+    </div>
+
+    <div class="playing-word-area" id="playingWordArea">
+      <div class="word-display" id="wordDisplay">---</div>
+    </div>
+
+    <div class="playing-secondary-actions">
+      <button class="btn btn-ghost btn-small" id="btnGuessWord">🧠 เดาคำ</button>
+      <button class="btn btn-ghost btn-small" id="btnSurrender">🏳️ ยอมแพ้</button>
+    </div>
+
+    <div class="playing-bottom">
+      <button class="btn btn-kill" id="btnKill">ฆ่า!</button>
+    </div>
+
+    <!-- Spectator overlay (shown when eliminated) -->
+    <div class="spectator-overlay hidden" id="spectatorOverlay">
+      <div class="spectator-icon">👻</div>
+      <div class="spectator-text">คุณถูกกำจัดแล้ว</div>
+      <div class="label">รอจนจบรอบ...</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: VOTING ========== -->
+  <div class="screen" id="screen-voting">
+    <div class="voting-header">
+      <div class="voting-title">🗳️ โหวต</div>
+      <div class="vote-timer" id="voteTimerDisplay">0:15</div>
+    </div>
+
+    <div class="accused-section">
+      <div class="accused-name" id="accusedName">---</div>
+      <div class="accused-label">พูดคำว่า...</div>
+      <div class="accused-word" id="accusedWord">---</div>
+    </div>
+
+    <div class="vote-progress">
+      <div class="vote-progress-bar">
+        <div class="vote-progress-fill" id="voteProgressFill" style="width: 0%"></div>
+      </div>
+      <div class="vote-progress-text" id="voteProgressText">0/0 โหวตแล้ว</div>
+    </div>
+
+    <div class="vote-status" id="voteStatus"></div>
+
+    <div class="vote-buttons" id="voteButtonsContainer">
+      <button class="btn btn-vote btn-vote-guilty" id="btnVoteGuilty">โดนแล้ว</button>
+      <button class="btn btn-vote btn-vote-not-yet" id="btnVoteNotYet">ยังนะ</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GUESS PHASE ========== -->
+  <div class="screen" id="screen-guess">
+    <div class="guess-title">🧠 เดาคำของคุณ!</div>
+    <div class="guess-timer" id="guessTimerDisplay">0:10</div>
+    <div class="guess-prompt">คุณคิดว่าคำของคุณคืออะไร?</div>
+
+    <div class="guess-input-area">
+      <input type="text" class="input-field" id="guessInput" placeholder="พิมพ์คำที่นี่..." maxlength="30" autocomplete="off">
+      <button class="btn btn-primary" id="btnSubmitGuess">ส่งคำตอบ</button>
+      <button class="btn btn-ghost" id="btnSkipGuess">ข้าม</button>
+    </div>
+
+    <div class="guess-result-display hidden" id="guessResultDisplay">
+      <div class="guess-result-icon" id="guessResultIcon"></div>
+      <div class="guess-result-text" id="guessResultText"></div>
+      <div class="guess-result-word" id="guessResultWord"></div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: ROUND END ========== -->
+  <div class="screen" id="screen-roundend">
+    <div class="roundend-title" id="roundendTitle">จบรอบ 1/3</div>
+    <div class="roundend-table" id="roundendTable"></div>
+    <div class="roundend-bottom">
+      <button class="btn btn-primary" id="btnNextFromRoundend">ต่อไป →</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: SCOREBOARD ========== -->
+  <div class="screen" id="screen-scoreboard">
+    <div class="scoreboard-title">🏆 คะแนน</div>
+    <div class="scoreboard-round" id="scoreboardRound">รอบ 1/3</div>
+    <div class="scoreboard-list" id="scoreboardList"></div>
+    <div class="scoreboard-bottom" id="scoreboardBottom">
+      <button class="btn btn-primary" id="btnNextRound">เล่นรอบถัดไป</button>
+      <button class="btn btn-secondary" id="btnEndGame">จบเกม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME OVER ========== -->
+  <div class="screen" id="screen-gameover">
+    <div class="gameover-title">🎉 จบเกม!</div>
+
+    <div class="gameover-winner" id="gameoverWinner">
+      <div class="gameover-winner-label">👑 ผู้ชนะ</div>
+      <div class="gameover-winner-avatar" id="gameoverWinnerAvatar">🎭</div>
+      <div class="gameover-winner-name" id="gameoverWinnerName">---</div>
+      <div class="gameover-winner-score" id="gameoverWinnerScore">0 คะแนน</div>
+    </div>
+
+    <div class="gameover-rankings" id="gameoverRankings"></div>
+
+    <div class="gameover-buttons">
+      <button class="btn btn-secondary" id="btnShareResults">📤 แชร์ผล</button>
+      <button class="btn btn-primary" id="btnPlayAgain">🔄 เล่นอีก</button>
+      <button class="btn btn-ghost" id="btnExit">🚪 ออก</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: NICKNAME ENTRY ========== -->
+  <div class="modal-overlay hidden" id="nicknameModal">
+    <div class="modal-content nickname-modal">
+      <div class="modal-title">ตั้งชื่อของคุณ</div>
+      <input type="text" class="input-field" id="nicknameInput" placeholder="ชื่อเล่น (1-15 ตัวอักษร)" maxlength="15" autocomplete="off">
+      <div class="label mb-8" style="margin-top:12px">เลือกอวาตาร์</div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+      <button class="btn btn-primary" id="btnConfirmNickname" style="margin-top:12px">ยืนยัน</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: JOIN ROOM ========== -->
+  <div class="modal-overlay hidden" id="joinModal">
+    <div class="modal-content">
+      <div class="modal-title">เข้าร่วมห้อง</div>
+      <input type="text" class="input-field input-code" id="joinCodeInput" placeholder="รหัส" maxlength="4" autocomplete="off">
+      <button class="btn btn-primary" id="btnConfirmJoin" style="margin-top:12px">เข้าร่วม</button>
+      <button class="btn btn-ghost" id="btnCancelJoin" style="margin-top:8px">ยกเลิก</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: TARGET SELECTION ========== -->
+  <div class="modal-overlay hidden" id="targetModal">
+    <div class="modal-content">
+      <div class="modal-title">เลือกเป้าหมาย</div>
+      <div class="target-list" id="targetList"></div>
+      <button class="btn btn-ghost" id="btnCancelTarget" style="margin-top:12px">ยกเลิก</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: CATEGORIES ========== -->
+  <div class="modal-overlay hidden" id="categoriesModal">
+    <div class="modal-content">
+      <div class="modal-title">📚 หมวดคำ</div>
+      <div class="category-list" id="categoryList"></div>
+      <button class="btn btn-ghost" id="btnCloseCategories" style="margin-top:12px">ปิด</button>
+    </div>
+  </div>
+
+  <!-- ========== COUNTDOWN OVERLAY ========== -->
+  <div class="countdown-overlay hidden" id="countdownOverlay">
+    <div id="countdownContent"></div>
+  </div>
+
+  <!-- ========== VOTE RESULT OVERLAY ========== -->
+  <div class="vote-result-overlay hidden" id="voteResultOverlay">
+    <div class="vote-result-icon" id="voteResultIcon"></div>
+    <div class="vote-result-text" id="voteResultText"></div>
+    <div class="vote-result-detail" id="voteResultDetail"></div>
+  </div>
+
+  <script src="https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "id": "KTH-T-002",
+  "type": "task",
+  "title": "Fix disconnect.test.ts playerCount off-by-1 assertions",
+  "description": "5 tests in disconnect.test.ts fail because playerCount assertions are off by 1. The onLeave logic or simulateLeave helper is not decrementing playerCount correctly. Investigate and fix.",
+  "status": "todo",
+  "priority": "high",
+  "points": 3,
+  "sprint": "sprint-1",
+  "block0_mode": "standard",
+  "tags": ["fix", "qa"],
+  "epic": "KTH-E-001",
+  "sub_tasks": [
+    "Read disconnect.test.ts to understand the test expectations",
+    "Read KhamTongHamRoom.ts onLeave handler",
+    "Determine if the bug is in test assumptions or room logic",
+    "Fix the off-by-1 discrepancy",
+    "Run tests to confirm all 5 disconnect tests pass"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-05T05:15:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "KTH-E-001",
+  "type": "epic",
+  "title": "Sprint 3: Word Pack Expansion + Test Stabilization",
+  "description": "Expand word categories from 10 to 19, fix resulting test failures, and stabilize disconnect logic.",
+  "status": "in_progress",
+  "priority": "high",
+  "points": 13,
+  "sprint": "sprint-1",
+  "block0_mode": "standard",
+  "tags": ["feature", "qa"],
+  "tasks": ["KTH-T-001", "KTH-T-002", "KTH-T-003"],
+  "created": "2026-05-05T05:15:00Z",
+  "source": "git-history-mining (AEG-* commits)"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-003",
+  "type": "task",
+  "title": "Validate all 9 new wordpack JSON files structure and content",
+  "description": "Ensure the 9 new wordpack files (daily-life, entertainment, office, relationships, school, shopping, slang, trap-words, travel) meet the WordPack interface (id, category, icon, difficulty, words[], tiers?) and have >= 100 words.",
+  "status": "todo",
+  "priority": "medium",
+  "points": 2,
+  "sprint": "sprint-1",
+  "block0_mode": "lite",
+  "tags": ["qa"],
+  "epic": "KTH-E-001",
+  "sub_tasks": [
+    "Check each JSON matches WordPack interface",
+    "Verify words count >= 100 per pack",
+    "Verify no duplicate words within each pack",
+    "Ensure existing wordPool.test.ts WPD-01 suite covers new categories"
+  ],
+  "assignee": "war-machine",
+  "created": "2026-05-05T05:15:00Z"
+}

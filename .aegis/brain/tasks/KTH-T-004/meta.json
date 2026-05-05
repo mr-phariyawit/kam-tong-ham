@@ -1,0 +1,14 @@
+{
+  "id": "KTH-T-004",
+  "type": "task",
+  "title": "Historical placeholder — all Sprint 1-2 work (DONE)",
+  "description": "Aggregate placeholder for AEG-31 through AEG-67 completed work. See KTH-E-002 for full list.",
+  "status": "done",
+  "priority": "n/a",
+  "points": 21,
+  "sprint": "sprint-0",
+  "tags": ["historical"],
+  "epic": "KTH-E-002",
+  "sub_tasks": ["All sub-tasks completed prior to AEGIS installation"],
+  "created": "2026-05-05T05:15:00Z"
+}

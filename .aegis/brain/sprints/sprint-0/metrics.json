@@ -1,0 +1,16 @@
+{
+  "sprint": "sprint-0",
+  "started": "2026-05-05",
+  "planned_end": "2026-05-05",
+  "actual_end": null,
+  "goal": "Set up the project and run the first /aegis-start session",
+  "capacity_pts": 5,
+  "committed_pts": 5,
+  "completed_pts": 0,
+  "daily_burndown": [
+    { "date": "2026-05-05", "day": 1, "remaining": 5, "completed": 0 }
+  ],
+  "velocity_history": [],
+  "tasks": { "TODO": 3, "IN_PROGRESS": 0, "IN_REVIEW": 0, "QA": 0, "DONE": 0, "BLOCKED": 0 },
+  "carry_over": { "count": 0, "points": 0, "task_ids": [] }
+}

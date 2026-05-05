@@ -1,0 +1,29 @@
+{
+  "id": "KTH-E-002",
+  "type": "epic",
+  "title": "Historical: Sprint 1-2 Completed Work (AEG-31 through AEG-67)",
+  "description": "Tracks all previously completed tickets from git history. These are DONE and logged for traceability.",
+  "status": "done",
+  "priority": "n/a",
+  "points": 21,
+  "sprint": "sprint-0",
+  "tags": ["historical"],
+  "tasks": ["KTH-T-004"],
+  "created": "2026-05-05T05:15:00Z",
+  "source": "git-history-mining",
+  "completed_tickets": [
+    "AEG-31: Host transfer bug fix",
+    "AEG-32: Nickname validation",
+    "AEG-34: Blind voting",
+    "AEG-35: Challenge penalty",
+    "AEG-36: Word tier system",
+    "AEG-37: Tiered word dealing",
+    "AEG-40: Score integrity tests",
+    "AEG-41: Anti-abuse activation",
+    "AEG-51: Room cleanup + TRANSFER_HOST",
+    "AEG-53: CHALLENGE_PENALTY event fix",
+    "AEG-59: Anti-abuse test fix (NICKNAME_REJECTED)",
+    "AEG-66: Room code isolation regression tests",
+    "AEG-67: REST API test suite"
+  ]
+}

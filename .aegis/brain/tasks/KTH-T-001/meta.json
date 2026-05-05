@@ -1,0 +1,20 @@
+{
+  "id": "KTH-T-001",
+  "type": "task",
+  "title": "Fix wordPicker.test.ts category count assertions (10 -> 19)",
+  "description": "Tests WP-07 and getAvailableCategories expect exactly 10 categories but the project now has 19 built-in wordpacks. Update assertions to reflect new reality.",
+  "status": "todo",
+  "priority": "high",
+  "points": 2,
+  "sprint": "sprint-1",
+  "block0_mode": "lite",
+  "tags": ["fix", "qa"],
+  "epic": "KTH-E-001",
+  "sub_tasks": [
+    "Update WP-07 assertion from 10 to 19",
+    "Update getAvailableCategories test assertion from 10 to 19",
+    "Verify all 19 categories load without error"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-05T05:15:00Z"
+}

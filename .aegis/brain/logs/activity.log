@@ -135,3 +135,9 @@ fix(wordpacks): remove duplicates from 5 packs, ens
   Decision Matrix: Sprint 1 complete. Next: P7.4 (Sprint just closed) -> plan Sprint 2.
   Context budget: ~35% used. Room for Sprint 2 planning.
 [2026-05-05T06:29:48Z] [HOOK:guard-bash] ALLOW — git add .aegis/ _aegis-output/iso-docs/PM-01-project-plan/current.md _aegis-output/iso-docs/SI-01-requirements-spec/curr
+[2026-05-05T06:29:59Z] [HOOK:guard-bash] ALLOW — git commit -m "$(cat <<'EOF' chore(aegis): bootstrap AEGIS for kam-tong-ham — BLOCK 0 pass  Replaces AEGIS-Team boiler
+[2026-05-05T06:30:00Z] [HOOK:post-tool] GIT_COMMIT — 4579678 | cmd: git commit -m "$(cat <<'EOF'
+chore(aegis): bootstrap AEGIS for kam-tong-ham — BL
+[2026-05-05T06:30:05Z] [HOOK:guard-bash] ALLOW — git log --oneline feat/sprint3-wip-preserve ^main 
+[2026-05-05T06:30:10Z] [HOOK:guard-bash] ALLOW — git status 
+[2026-05-05T06:30:20Z] [HOOK:guard-bash] ALLOW — git add .claude/ CLAUDE.md CLAUDE_agents.md CLAUDE_lessons.md CLAUDE_safety.md CLAUDE_skills.md PROJECT_INDEX.md Dockerf

@@ -1,0 +1,7 @@
+node_modules
+.git
+server/src/**/*.ts
+server/src/__tests__
+*.md
+tsconfig.json
+.claude

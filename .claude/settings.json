@@ -1,0 +1,161 @@
+{
+  "_README": "MBP-guard patch applied 2026-04-22. Identical to current .claude/settings.json plus a PreToolUse matcher on AskUserQuestion wired to guard-ask-user.sh. Apply BETWEEN sessions: cp tools/settings-mbp-guard.json .claude/settings.json. After apply, restart Claude Code. Backup first: cp .claude/settings.json .claude/settings.json.pre-mbp-backup",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_TASK_LIST_ID": "aegis-tasks-kam-tong-ham",
+    "AEGIS_HOOK_PROFILE": "standard"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" guard-bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" guard-write \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-write.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" guard-ask-user \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-ask-user.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" post-tool-use \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" post-edit-accumulate \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-accumulate.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/aegis-token-profile.sh\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/aegis-live-tail/emit.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/aegis-activity-logger/log.mjs\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" on-stop \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-stop.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "_comment_design": "AEGIS v9 hardened permission model (S1-04 + S1-05). defaultMode acceptEdits auto-approves Edit/Write only. Bash requires explicit allow. Removed wildcards on rm/curl/docker/kubectl/terraform that previously bypassed safety. Allow list = 20 safe commands (down from 60+). Deny list = 26 dangerous patterns (up from 8).",
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Agent",
+      "Bash(./tests/*)",
+      "Bash(./tools/*)",
+      "Bash(cat:*)",
+      "Bash(date:*)",
+      "Bash(diff:*)",
+      "Bash(echo:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(pwd:*)",
+      "Bash(rg:*)",
+      "Bash(tail:*)",
+      "Bash(test:*)",
+      "Bash(wc:*)",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Read",
+      "SendMessage",
+      "TeamCreate",
+      "TeamDelete",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf .:*)",
+      "Bash(rm -rf ./:*)",
+      "Bash(rm -rf ../:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git commit --amend:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(docker rm -f:*)",
+      "Bash(docker system prune:*)",
+      "Bash(terraform destroy:*)",
+      "Bash(curl * | bash:*)",
+      "Bash(curl * | sh:*)",
+      "Bash(wget * | bash:*)",
+      "Bash(wget * | sh:*)",
+      "Bash(eval *:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777*:*)",
+      "Bash(chmod -R 777*:*)"
+    ]
+  }
+}

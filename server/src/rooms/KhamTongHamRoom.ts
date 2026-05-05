@@ -184,8 +184,10 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.updateAliveCount();
     this.resetInactivityTimer();
 
-    // ─── Consented leave in LOBBY — remove immediately ─────────
-    if (consented && this.state.phase === "LOBBY") {
+    // ─── Leave in LOBBY (consented or not) — remove immediately ─────────
+    // In LOBBY there's no game state to preserve; players can always re-join
+    // with the room code. No need for reconnection window.
+    if (this.state.phase === "LOBBY") {
       const wasHost = player.isHost;
       this.state.players.delete(client.sessionId);
       this.state.playerCount = this.state.players.size;

@@ -54,10 +54,10 @@ describe("pickUniqueWords", () => {
     expect(results.size).toBeGreaterThan(1);
   });
 
-  // WP-07: All 10 categories supported
+  // WP-07: All 19 categories supported (10 original + 9 expansion packs)
   it("WP-07: all available categories return non-empty arrays without error", () => {
     const categories = getAvailableCategories();
-    expect(categories.length).toBe(10);
+    expect(categories.length).toBe(19);
     categories.forEach((cat) => {
       const words = pickUniqueWords(cat, 2);
       expect(words.length).toBeGreaterThan(0);
@@ -88,9 +88,9 @@ describe("pickUniqueWords", () => {
 });
 
 describe("getAvailableCategories", () => {
-  it("returns exactly 10 categories", () => {
+  it("returns exactly 19 categories", () => {
     const cats = getAvailableCategories();
-    expect(cats.length).toBe(10);
+    expect(cats.length).toBe(19);
   });
 
   it("returns known category IDs", () => {

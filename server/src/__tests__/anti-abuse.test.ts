@@ -22,8 +22,37 @@ import {
 beforeAll(setupMatchMaker);
 afterAll(teardownMatchMaker);
 
-function simulateLeave(room: any, client: any, consented = false) {
-  (room as any)["_onLeave"](client, consented);
+/**
+ * Simulate a player leaving. For LOBBY leaves, onLeave removes immediately (sync before await).
+ * For mid-game leaves, the reconnection deferred is rejected to simulate timeout.
+ */
+async function simulateLeave(room: any, client: any, consented = false) {
+  const leavePromise = (room as any)["_onLeave"](client, consented ? 4000 : 1001);
+
+  // For non-LOBBY, non-consented leaves, reject the reconnection deferred
+  if (!consented && room.state.phase !== "LOBBY") {
+    const sessionId = client.sessionId;
+    if (room.reservedSeatTimeouts && room.reservedSeatTimeouts[sessionId]) {
+      clearTimeout(room.reservedSeatTimeouts[sessionId]);
+      delete room.reservedSeatTimeouts[sessionId];
+    }
+    if (room._reconnections) {
+      const token = client._reconnectionToken;
+      if (token && room._reconnections[token]) {
+        const [, deferred] = room._reconnections[token];
+        deferred.reject(false);
+      }
+    }
+    const roomReconnectDeferreds = (room as any).reconnectDeferreds;
+    if (roomReconnectDeferreds && roomReconnectDeferreds.has(sessionId)) {
+      const deferred = roomReconnectDeferreds.get(sessionId);
+      if (deferred && deferred.reject) {
+        try { deferred.reject(false); } catch (_) {}
+      }
+    }
+  }
+
+  await leavePromise;
 }
 
 /**
@@ -59,7 +88,7 @@ describe("SC-RJ: Rejoin Tokens (AEG-34)", () => {
     expect(token).toBeDefined();
 
     // Bob "refreshes" — leaves and rejoins with token
-    simulateLeave(room, p2, false);
+    await simulateLeave(room, p2, false);
 
     const p2b = makeMockClient("p2b_rj01");
     await joinRoom(room, p2b, { nickname: "Bob", avatar: "😎", roomToken: token });
@@ -242,7 +271,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       await joinRoom(room, p2, { nickname: "Bob", avatar: "😎" });
       await joinRoom(room, p3, { nickname: "Carol", avatar: "🎉" });
 
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
       expect(room.state.players.get("p2_ht09a").isHost).toBe(true);
       expect(room.state.playerCount).toBe(2);
     });
@@ -258,7 +287,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
 
       p2.sends = [];
       p3.sends = [];
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
 
       const p2Transfer = p2.sends.find((s) => s.type === "HOST_TRANSFERRED");
       const p3Transfer = p3.sends.find((s) => s.type === "HOST_TRANSFERRED");
@@ -282,7 +311,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       sendMessage(room, p1, "START_GAME");
       (room as any)["startPlaying"]();
 
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
       expect(["PLAYING", "VOTING"]).toContain(room.state.phase);
     });
 
@@ -297,7 +326,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       sendMessage(room, p1, "START_GAME");
       (room as any)["startPlaying"]();
 
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
       const p2Host = room.state.players.get("p2_ht10b")?.isHost ?? false;
       const p3Host = room.state.players.get("p3_ht10b")?.isHost ?? false;
       expect(p2Host || p3Host).toBe(true);
@@ -314,7 +343,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       sendMessage(room, p1, "START_GAME");
       (room as any)["startPlaying"]();
 
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
       const newHostClient = room.state.players.get("p2_ht10c")?.isHost ? p2 : p3;
       expect(() => sendMessage(room, newHostClient, "END_GAME")).not.toThrow();
       expect(room.state.phase).toBe("GAME_OVER");
@@ -333,7 +362,7 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
 
       p2.sends = [];
       p3.sends = [];
-      simulateLeave(room, p1, false);
+      await simulateLeave(room, p1, false);
 
       const transfer =
         p2.sends.find((s) => s.type === "HOST_TRANSFERRED") ||
@@ -353,8 +382,8 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       await joinRoom(room, p1, { nickname: "Alice", avatar: "😀" });
       await joinRoom(room, p2, { nickname: "Bob", avatar: "😎" });
 
-      simulateLeave(room, p1, false);
-      simulateLeave(room, p2, false);
+      await simulateLeave(room, p1, false);
+      await simulateLeave(room, p2, false);
 
       advanceClock(room, 4 * 60 * 1000 + 59 * 1000);
       expect(room.state).toBeDefined();
@@ -370,8 +399,8 @@ describe("SC-HT: Host Transfer (AEG-36)", () => {
       let disposed = false;
       room.onDispose(() => { disposed = true; });
 
-      simulateLeave(room, p1, false);
-      simulateLeave(room, p2, false);
+      await simulateLeave(room, p1, false);
+      await simulateLeave(room, p2, false);
 
       advanceClock(room, 5 * 60 * 1000 + 1000);
       expect(disposed).toBe(true);

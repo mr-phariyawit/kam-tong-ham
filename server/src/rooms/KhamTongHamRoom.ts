@@ -18,6 +18,7 @@ const COUNTDOWN_SECS = 3;
 const VOTE_TIMER_SECS = 30; // blind voting: 30s for all eligible voters to cast
 const GUESS_TIMER_SECS = 10;
 const INACTIVITY_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+const RECONNECT_TIMEOUT_SECS = 300; // 5 minutes — generous for mobile party game
 
 interface JoinOptions {
   nickname: string;
@@ -57,6 +58,10 @@ export class KhamTongHamRoom extends Room<GameState> {
   /** AEG-51: Registered onDispose callbacks (for test observability). */
   private _disposeListeners: Array<() => void> = [];
 
+  // ─── Reconnection tracking ───────────────────────────────────
+  /** Maps sessionId -> reconnection deferred (has .reject()) for pending reconnections. */
+  private reconnectDeferreds: Map<string, { reject: Function }> = new Map();
+
   onCreate(options: { roomCode: string }) {
     this.setState(new GameState());
     this.state.roomCode = options.roomCode || "";
@@ -65,6 +70,9 @@ export class KhamTongHamRoom extends Room<GameState> {
 
     this.maxClients = MAX_PLAYERS;
     this.autoDispose = true;
+
+    // Set metadata for Colyseus matchmaking (filterBy roomCode)
+    this.setMetadata({ roomCode: this.state.roomCode });
 
     // Register message handlers
     this.onMessage("START_GAME", (client) => this.handleStartGame(client));
@@ -77,6 +85,7 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.onMessage("GUESS_WORD", (client, data: { guess: string }) =>
       this.handleGuessWord(client, data.guess)
     );
+    this.onMessage("PING", () => {}); // keepalive — no-op
     this.onMessage("NEXT_ROUND", (client) => this.handleNextRound(client));
     this.onMessage("END_GAME", (client) => this.handleEndGame(client));
     this.onMessage("SURRENDER", (client) => this.handleSurrender(client));
@@ -155,51 +164,117 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.resetInactivityTimer();
   }
 
-  onLeave(client: Client, consented: boolean) {
+  async onLeave(client: Client, consented: boolean) {
     const player = this.state.players.get(client.sessionId);
     if (!player) return;
 
-    if (this.state.phase === "LOBBY") {
-      // In lobby, remove the player entirely
+    // ─── Mark player as disconnected immediately ───────────────
+    player.isConnected = false;
+
+    // ─── AEG-36: Temporary host transfer while disconnected ────
+    if (player.isHost) {
+      const hasOtherConnected = this.getConnectedPlayers().some((p) => p.id !== client.sessionId);
+      if (hasOtherConnected) {
+        player.isHost = false;
+        this.transferHost();
+      }
+      // If no other connected players, keep host flag — they'll retain it on reconnect
+    }
+
+    this.updateAliveCount();
+    this.resetInactivityTimer();
+
+    // ─── Consented leave in LOBBY — remove immediately ─────────
+    if (consented && this.state.phase === "LOBBY") {
       const wasHost = player.isHost;
       this.state.players.delete(client.sessionId);
       this.state.playerCount = this.state.players.size;
-
-      // Transfer host if needed
+      this.playerTokens.delete(client.sessionId);
       if (wasHost && this.state.players.size > 0) {
         this.transferHost();
       }
-    } else {
-      // During game, mark as disconnected and treat as surrendered
-      player.isConnected = false;
-      if (player.isAlive) {
-        player.isAlive = false;
-        player.roundPoints -= 3;
-        player.score -= 3;
-        this.updateAliveCount();
-        this.checkLastSurvivor();
+      this.checkAllDisconnectedCleanup();
+      return;
+    }
+
+    // ─── Allow reconnection (5 minutes) ────────────────────────
+    try {
+      const reconnectDeferred = this.allowReconnection(client, RECONNECT_TIMEOUT_SECS);
+      this.reconnectDeferreds.set(client.sessionId, reconnectDeferred);
+
+      // Await reconnection — this resolves when the client reconnects
+      const reconnectedClient = await reconnectDeferred;
+
+      // ─── CLIENT RECONNECTED SUCCESSFULLY ─────────────────────
+      this.reconnectDeferreds.delete(client.sessionId);
+
+      // Restore connected state
+      player.isConnected = true;
+
+      // Restore host if no one else has it
+      const currentHost = this.getHostPlayer();
+      if (!currentHost) {
+        player.isHost = true;
+        this.broadcast("HOST_TRANSFERRED", {
+          newHostId: player.id,
+          newHostNickname: player.nickname,
+        });
       }
 
-      // ─── AEG-36: Automatic host transfer on disconnect ───────
+      this.state.playerCount = this.state.players.size;
+      this.updateAliveCount();
+
+      // Re-send the player's secret word if in an active round
+      if (this.state.phase === "PLAYING" || this.state.phase === "VOTING" || this.state.phase === "COUNTDOWN") {
+        const word = this.roundWords.get(client.sessionId);
+        if (word) {
+          reconnectedClient.send("YOUR_WORD", { word });
+        }
+      }
+
+      // Re-send ROOM_TOKEN so client can update localStorage
+      const token = this.playerTokens.get(client.sessionId);
+      if (token) {
+        reconnectedClient.send("ROOM_TOKEN", { token });
+      }
+
+      // Notify all clients about reconnection
+      this.broadcast("PLAYER_RECONNECTED", {
+        playerId: player.id,
+        nickname: player.nickname,
+      });
+
+    } catch (_) {
+      // ─── RECONNECTION TIMED OUT — truly remove player ────────
+      this.reconnectDeferreds.delete(client.sessionId);
+
+      if (this.state.phase !== "LOBBY") {
+        // During game: mark as surrendered if still alive
+        if (player.isAlive) {
+          player.isAlive = false;
+          player.roundPoints -= 3;
+          player.score -= 3;
+          this.updateAliveCount();
+          this.checkLastSurvivor();
+        }
+      }
+
+      // Transfer host if they held it
       if (player.isHost) {
         player.isHost = false;
         this.transferHost();
       }
+
+      // In LOBBY, remove player entirely; during game, keep for score display
+      if (this.state.phase === "LOBBY") {
+        this.state.players.delete(client.sessionId);
+      }
+
+      this.state.playerCount = this.state.players.size;
+      this.playerTokens.delete(client.sessionId);
     }
 
-    // Clean up player token mapping (but keep rejoinTokens record for reconnect validation)
-    this.playerTokens.delete(client.sessionId);
-
-    this.resetInactivityTimer();
-
-    // Clean up if all players left
-    if (this.state.players.size === 0 || this.allDisconnected()) {
-      this.clock.setTimeout(() => {
-        if (this.allDisconnected()) {
-          this.disconnect();
-        }
-      }, 5 * 60 * 1000); // 5 minutes — allows host to rejoin via token (AEG-36/AEG-51)
-    }
+    this.checkAllDisconnectedCleanup();
   }
 
   // ─── MESSAGE HANDLERS ───────────────────────────────────────
@@ -403,7 +478,7 @@ export class KhamTongHamRoom extends Room<GameState> {
       return;
     }
 
-    if (this.state.phase !== "SCOREBOARD") {
+    if (this.state.phase !== "SCOREBOARD" && this.state.phase !== "ROUND_END" && this.state.phase !== "GUESS_PHASE") {
       this.sendError(client, "INVALID_PHASE", "ไม่สามารถเริ่มรอบถัดไปได้ในขณะนี้");
       return;
     }
@@ -505,6 +580,13 @@ export class KhamTongHamRoom extends Room<GameState> {
     }
     // Also track by nickname so fresh-join rejoin attempts are blocked
     this.kickedNicknames.add(target.nickname.toLowerCase());
+
+    // Cancel any pending reconnection for the kicked player
+    const pendingReconnect = this.reconnectDeferreds.get(targetPlayerId);
+    if (pendingReconnect) {
+      try { pendingReconnect.reject(false); } catch (_) { /* already resolved */ }
+      this.reconnectDeferreds.delete(targetPlayerId);
+    }
 
     // Notify kicked player
     const targetClient = this.clients.find((c) => c.sessionId === targetPlayerId);
@@ -824,6 +906,26 @@ export class KhamTongHamRoom extends Room<GameState> {
     return allDisc;
   }
 
+  /** Returns the current host player, or null if none. */
+  private getHostPlayer(): Player | null {
+    let host: Player | null = null;
+    this.state.players.forEach((p) => {
+      if (p.isHost && p.isConnected) host = p;
+    });
+    return host;
+  }
+
+  /** Schedule room disposal if all players are disconnected. */
+  private checkAllDisconnectedCleanup() {
+    if (this.state.players.size === 0 || this.allDisconnected()) {
+      this.clock.setTimeout(() => {
+        if (this.allDisconnected()) {
+          this.disconnect();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+    }
+  }
+
   /**
    * AEG-36: Transfer host to the next connected player and broadcast HOST_TRANSFERRED.
    */
@@ -916,6 +1018,11 @@ export class KhamTongHamRoom extends Room<GameState> {
     this.sealedVotes.clear();
     this.rejoinTokens.clear();
     this.playerTokens.clear();
+    // Reject all pending reconnection deferreds
+    this.reconnectDeferreds.forEach((deferred) => {
+      try { deferred.reject(false); } catch (_) { /* already resolved/rejected */ }
+    });
+    this.reconnectDeferreds.clear();
     this._disposeListeners.forEach((listener) => listener());
     this._disposeListeners = [];
   }

@@ -15,16 +15,24 @@
     '🔥','⭐','💎','🌈',
   ];
   const CATEGORIES = [
-    { id: 'common',   label: '💬 คำทั่วไป',     desc: 'คำที่ใช้ในชีวิตประจำวัน' },
-    { id: 'food',     label: '🍜 อาหาร',        desc: 'อาหารไทยและต่างประเทศ' },
-    { id: 'animals',  label: '🐘 สัตว์',         desc: 'สัตว์ทุกชนิด' },
-    { id: 'jobs',     label: '👨‍⚕️ อาชีพ',       desc: 'อาชีพต่างๆ' },
-    { id: 'places',   label: '🏛️ สถานที่',       desc: 'สถานที่ในไทยและทั่วโลก' },
-    { id: 'emotions', label: '😊 อารมณ์',        desc: 'คำเกี่ยวกับอารมณ์ความรู้สึก' },
-    { id: 'sports',   label: '⚽ กีฬา',          desc: 'กีฬาทุกประเภท' },
-    { id: 'colors',   label: '🎨 สี',            desc: 'สีต่างๆ' },
-    { id: 'body',     label: '🦷 ร่างกาย',       desc: 'อวัยวะและส่วนต่างๆ ของร่างกาย' },
-    { id: 'family',   label: '👨‍👩‍👧 ครอบครัว',   desc: 'คำเกี่ยวกับครอบครัวและความสัมพันธ์' },
+    { id: 'trap-words',    label: '💣 คำกับดัก',          desc: 'คำที่พูดบ่อยสุดๆ ยากมาก!' },
+    { id: 'daily-life',    label: '🏠 ชีวิตประจำวัน',      desc: 'กิจวัตร ทำงาน กินข้าว' },
+    { id: 'slang',         label: '🔥 คำฮิตวัยรุ่น',      desc: 'คำสแลง คำฮิต พูดกันทุกวัน' },
+    { id: 'common',        label: '💬 คำทั่วไป',          desc: 'คำที่ใช้ในชีวิตประจำวัน' },
+    { id: 'food',          label: '🍜 อาหาร',             desc: 'อาหารไทยและต่างประเทศ' },
+    { id: 'shopping',      label: '🛒 ช้อปปิ้ง',          desc: 'ซื้อของ ตลาด ออนไลน์' },
+    { id: 'entertainment', label: '📱 บันเทิง/โซเชียล',   desc: 'หนัง เพลง เกม โซเชียล' },
+    { id: 'school',        label: '🎓 โรงเรียน/มหาลัย',   desc: 'เรียน สอบ เพื่อน ครู' },
+    { id: 'office',        label: '💼 ออฟฟิศ',            desc: 'ประชุม อีเมล เจ้านาย' },
+    { id: 'travel',        label: '✈️ เที่ยว',             desc: 'ทะเล ภูเขา ท่องเที่ยว' },
+    { id: 'relationships', label: '💕 ความสัมพันธ์',       desc: 'จีบ แฟน เลิก รัก' },
+    { id: 'animals',       label: '🐘 สัตว์',              desc: 'สัตว์ทุกชนิด' },
+    { id: 'emotions',      label: '😊 อารมณ์',             desc: 'คำเกี่ยวกับความรู้สึก' },
+    { id: 'sports',        label: '⚽ กีฬา',               desc: 'กีฬาทุกประเภท' },
+    { id: 'places',        label: '🏛️ สถานที่',            desc: 'สถานที่ในไทยและทั่วโลก' },
+    { id: 'body',          label: '🦷 ร่างกาย',            desc: 'อวัยวะและส่วนต่างๆ' },
+    { id: 'colors',        label: '🎨 สี',                 desc: 'สีต่างๆ' },
+    { id: 'family',        label: '👨‍👩‍👧 ครอบครัว',        desc: 'คำเกี่ยวกับครอบครัว' },
   ];
 
   // ─── State ────────────────────────────────────────────────────
@@ -43,10 +51,27 @@
   let avatar = '😀';
   let pendingAction = null; // 'create' | 'join'
   let joinCode = '';
+  let wordHidden = false;
   let reconnectToken = null;
 
+  // ─── Reconnection State ──────────────────────────────────────
+  let isReconnecting = false;
+  let reconnectAttempts = 0;
+  let reconnectTimer = null;
+  let wakeLockSentinel = null;
+  var RECONNECT_MAX_ATTEMPTS = 20;
+  var RECONNECT_MAX_DELAY_MS = 30000;
+  var RECONNECT_STORAGE_KEY = 'ktb_reconnect';
+
   // ─── DOM Cache ────────────────────────────────────────────────
-  const $ = (id) => document.getElementById(id);
+  const _$ = (id) => document.getElementById(id);
+  // Safe $: returns a proxy that silently ignores calls on null elements
+  const $ = (id) => {
+    var el = _$(id);
+    if (el) return el;
+    // Return a dummy that won't crash on .addEventListener, .classList, .textContent etc.
+    return new Proxy({}, { get: () => () => {} });
+  };
 
   const screens = {
     home:       $('screen-home'),
@@ -303,12 +328,49 @@
     $('targetModal').classList.add('hidden');
   }
 
+  // ─── Dynamic Categories (from server API) ──────────────────────
+  let serverCategories = CATEGORIES; // fallback to hardcoded
+
+  async function loadCategoriesFromServer() {
+    try {
+      // Use relative URL — works on any domain (localhost, production, preview)
+      var resp = await fetch('/api/categories');
+      var data = await resp.json();
+      console.log('[categories] loaded', data.categories ? data.categories.length : 0);
+      if (data.success && data.categories && data.categories.length > 0) {
+        serverCategories = data.categories.map(function (c) {
+          return {
+            id: c.id,
+            label: c.icon + ' ' + c.category,
+            desc: c.wordCount + ' คำ' + (c.difficulty === 'extreme' ? ' (โหดมาก!)' : c.difficulty === 'hard' ? ' (ยาก)' : ''),
+          };
+        });
+        populateCategorySelect();
+        console.log('[categories] select populated with', serverCategories.length);
+      }
+    } catch (e) {
+      console.warn('[categories] failed to load, using defaults', e);
+    }
+  }
+
+  function populateCategorySelect() {
+    var select = $('configCategory');
+    if (!select) return;
+    select.innerHTML = '';
+    serverCategories.forEach(function (cat) {
+      var opt = document.createElement('option');
+      opt.value = cat.id;
+      opt.textContent = cat.label;
+      select.appendChild(opt);
+    });
+  }
+
   // ─── Categories Modal ─────────────────────────────────────────
   function showCategoriesModal() {
     var list = $('categoryList');
     list.innerHTML = '';
 
-    CATEGORIES.forEach(function (cat) {
+    serverCategories.forEach(function (cat) {
       var item = document.createElement('div');
       item.className = 'category-item';
       item.innerHTML =
@@ -386,6 +448,272 @@
     }, 2500);
   }
 
+  // ─── Word Hide System ──────────────────────────────────────────
+  // Prevents player from seeing their own word when interacting with buttons.
+  // Method 1: Gyroscope — word blurs when phone tilts toward user
+  // Method 2: Touch Hold — long-press anywhere on word area to hide
+
+  function hideWord() {
+    if (wordHidden) return;
+    wordHidden = true;
+    var overlay = $('wordHiddenOverlay');
+    var wordEl = $('wordDisplay');
+    if (overlay) overlay.classList.add('active');
+    if (wordEl) wordEl.classList.add('tilted');
+  }
+
+  function showWord() {
+    if (!wordHidden) return;
+    wordHidden = false;
+    var overlay = $('wordHiddenOverlay');
+    var wordEl = $('wordDisplay');
+    if (overlay) overlay.classList.remove('active');
+    if (wordEl) wordEl.classList.remove('tilted');
+  }
+
+  function initWordHideSystem() {
+    var wordArea = $('playingWordArea');
+    if (!wordArea) return;
+
+    // Method 1: Gyroscope / DeviceOrientation
+    // When phone is tilted toward user (beta > 70°), hide the word
+    // When held upright or facing away (beta < 50°), show the word
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', function (e) {
+        if (currentPhase !== 'PLAYING') return;
+        // beta: front-back tilt. ~0° = flat, 90° = vertical facing user
+        // When user holds phone outward (others see): beta ~70-90°
+        // When user tilts to look at screen: beta ~20-60°
+        // We hide when beta drops below 50° (user is looking at screen)
+        if (e.beta !== null && e.beta < 50 && e.beta > -30) {
+          hideWord();
+        } else {
+          showWord();
+        }
+      });
+    }
+
+    // Method 2: Touch Hold — press and hold the word area to toggle hide
+    var touchTimer = null;
+    wordArea.addEventListener('touchstart', function (e) {
+      touchTimer = setTimeout(function () {
+        hideWord();
+        vibrate(30);
+      }, 300); // 300ms hold to hide
+    });
+    wordArea.addEventListener('touchend', function () {
+      clearTimeout(touchTimer);
+      // Show word again after 3 seconds (or when user lifts finger from buttons)
+      setTimeout(function () {
+        if (currentPhase === 'PLAYING') showWord();
+      }, 5000);
+    });
+
+    // Method 3: Kill/Guess/Surrender buttons auto-hide word when pressed
+    ['btnKill', 'btnGuessWord'].forEach(function (btnId) {
+      var btn = $(btnId);
+      if (btn) {
+        btn.addEventListener('touchstart', function () {
+          hideWord();
+        });
+      }
+    });
+  }
+
+  // ─── Reconnection Helpers ─────────────────────────────────────
+
+  /** Save room session to localStorage for reconnection after refresh/sleep/etc. */
+  function saveReconnectSession() {
+    if (!room) return;
+    try {
+      // Colyseus 0.15: reconnectionToken is set after join
+      var token = room.reconnectionToken || reconnectToken;
+      if (!token) {
+        console.warn('[save] no reconnectionToken yet, skipping save');
+        return;
+      }
+      var data = {
+        roomId: room.id,
+        sessionId: room.sessionId,
+        reconnectionToken: token,
+        roomCode: (room.state && room.state.roomCode) ? room.state.roomCode : '',
+        nickname: nickname,
+        avatar: avatar,
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(RECONNECT_STORAGE_KEY, JSON.stringify(data));
+      console.log('[save] session saved, token:', token.substring(0, 20) + '...');
+    } catch (_) { /* localStorage unavailable */ }
+  }
+
+  /** Clear saved reconnect session from localStorage. */
+  function clearReconnectSession() {
+    try {
+      localStorage.removeItem(RECONNECT_STORAGE_KEY);
+    } catch (_) {}
+  }
+
+  /** Get saved reconnect session, or null if expired / missing. */
+  function getSavedReconnectSession() {
+    try {
+      var raw = localStorage.getItem(RECONNECT_STORAGE_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      // Expire after 10 minutes (generous — server allows 5 min, but we add buffer for retries)
+      if (Date.now() - data.savedAt > 10 * 60 * 1000) {
+        clearReconnectSession();
+        return null;
+      }
+      return data;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /** Show the reconnection overlay with progress info. */
+  function showReconnectOverlay(attemptNum, maxAttempts) {
+    var overlay = $('reconnectOverlay');
+    var text = $('reconnectText');
+    var attempt = $('reconnectAttempt');
+    var cancelBtn = $('btnCancelReconnect');
+
+    if (text) text.textContent = '\uD83D\uDD04 \u0E01\u0E33\u0E25\u0E31\u0E07\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E43\u0E2B\u0E21\u0E48...'; // กำลังเชื่อมต่อใหม่...
+    if (attempt) attempt.textContent = '\u0E04\u0E23\u0E31\u0E49\u0E07\u0E17\u0E35\u0E48 ' + attemptNum + '/' + maxAttempts; // ครั้งที่
+    if (cancelBtn) cancelBtn.textContent = '\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01'; // ยกเลิก
+    if (overlay) overlay.classList.remove('hidden');
+  }
+
+  /** Hide the reconnection overlay. */
+  function hideReconnectOverlay() {
+    var overlay = $('reconnectOverlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+
+  /** Calculate exponential backoff delay: 1s, 2s, 4s, 8s, ... capped at 30s. */
+  function getReconnectDelay(attempt) {
+    var delay = Math.min(1000 * Math.pow(2, attempt), RECONNECT_MAX_DELAY_MS);
+    // Add small jitter (0-500ms) to prevent thundering herd
+    return delay + Math.floor(Math.random() * 500);
+  }
+
+  /** Attempt to reconnect to a saved room session with exponential backoff. */
+  function startReconnectFlow(savedSession) {
+    if (isReconnecting) return;
+    isReconnecting = true;
+    reconnectAttempts = 0;
+
+    function attemptReconnect() {
+      reconnectAttempts++;
+      if (reconnectAttempts > RECONNECT_MAX_ATTEMPTS) {
+        // Exhausted all attempts
+        isReconnecting = false;
+        hideReconnectOverlay();
+        clearReconnectSession();
+        showToast('\u0E2B\u0E49\u0E2D\u0E07\u0E2B\u0E21\u0E14\u0E2D\u0E32\u0E22\u0E38 \u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E44\u0E14\u0E49', 4000); // ห้องหมดอายุ หรือไม่สามารถเชื่อมต่อได้
+        showScreen('home');
+        checkRejoinBanner();
+        return;
+      }
+
+      showReconnectOverlay(reconnectAttempts, RECONNECT_MAX_ATTEMPTS);
+
+      initClient();
+      // Colyseus 0.15: reconnect(reconnectionToken) — token contains roomId already
+      var token = savedSession.reconnectionToken;
+      console.log('[reconnect] attempt', reconnectAttempts, 'token:', token ? token.substring(0, 20) + '...' : 'MISSING');
+      if (!token) {
+        console.error('[reconnect] no token! cannot reconnect');
+        isReconnecting = false;
+        hideReconnectOverlay();
+        clearReconnectSession();
+        showToast('ไม่มี token สำหรับเชื่อมต่อใหม่');
+        showScreen('home');
+        return;
+      }
+      client.reconnect(token).then(function (reconnectedRoom) {
+        // Success!
+        isReconnecting = false;
+        reconnectAttempts = 0;
+        hideReconnectOverlay();
+
+        room = reconnectedRoom;
+        mySessionId = room.sessionId;
+        reconnectToken = room.reconnectionToken;
+        nickname = savedSession.nickname || nickname;
+        avatar = savedSession.avatar || avatar;
+
+        setupRoomListeners();
+        saveReconnectSession(); // Update with new token
+
+        // The phase listener will show the correct screen
+        var phase = room.state ? room.state.phase : 'LOBBY';
+        onPhaseChange(phase, '');
+
+        showToast('\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E43\u0E2B\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!'); // เชื่อมต่อใหม่สำเร็จ!
+
+        // Request wake lock again
+        requestWakeLock();
+      }).catch(function (err) {
+        console.warn('[reconnect] attempt', reconnectAttempts, 'failed:', err.message || err);
+        // Schedule next attempt with exponential backoff
+        var delay = getReconnectDelay(reconnectAttempts - 1);
+        reconnectTimer = setTimeout(attemptReconnect, delay);
+      });
+    }
+
+    attemptReconnect();
+  }
+
+  /** Stop any ongoing reconnection flow. */
+  function cancelReconnectFlow() {
+    isReconnecting = false;
+    reconnectAttempts = 0;
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    hideReconnectOverlay();
+  }
+
+  // ─── Wake Lock (prevent screen off during active game) ───────
+
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', function () {
+        wakeLockSentinel = null;
+      });
+    } catch (_) { /* Wake Lock not available or denied */ }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLockSentinel) {
+      try { wakeLockSentinel.release(); } catch (_) {}
+      wakeLockSentinel = null;
+    }
+  }
+
+  // ─── Rejoin Banner (shown on home screen) ────────────────────
+
+  function checkRejoinBanner() {
+    var saved = getSavedReconnectSession();
+    var banner = $('rejoinBanner');
+    if (!banner) return;
+
+    if (saved && saved.roomCode) {
+      var text = $('rejoinBannerText');
+      var rejoinBtn = $('btnRejoinRoom');
+      var dismissBtn = $('btnDismissRejoin');
+      if (text) text.textContent = '\uD83C\uDFAE \u0E04\u0E38\u0E13\u0E21\u0E35\u0E40\u0E01\u0E21\u0E04\u0E49\u0E32\u0E07\u0E2D\u0E22\u0E39\u0E48 (\u0E2B\u0E49\u0E2D\u0E07 ' + saved.roomCode + ')'; // คุณมีเกมค้างอยู่ (ห้อง X)
+      if (rejoinBtn) rejoinBtn.textContent = '\u0E01\u0E25\u0E31\u0E1A\u0E40\u0E02\u0E49\u0E32\u0E2B\u0E49\u0E2D\u0E07'; // กลับเข้าห้อง
+      if (dismissBtn) dismissBtn.textContent = '\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01'; // ยกเลิก
+      banner.classList.remove('hidden');
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
+
   // ─── Colyseus Connection ──────────────────────────────────────
   function initClient() {
     client = new Colyseus.Client(SERVER_URL);
@@ -394,15 +722,30 @@
   async function createRoom() {
     try {
       initClient();
+      // Step 1: Get a room code from REST API
+      var apiResp = await fetch('/api/rooms/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: 'common' }),
+      });
+      var apiData = await apiResp.json();
+      if (!apiData.success) throw new Error(apiData.error || 'ไม่สามารถสร้างห้องได้');
+      var roomCode = apiData.roomCode;
+      console.log('Got room code from API:', roomCode);
+
+      // Step 2: Create Colyseus room with the code
       room = await client.create(ROOM_NAME, {
         nickname: nickname,
         avatar: avatar,
+        roomCode: roomCode,
       });
       mySessionId = room.sessionId;
       reconnectToken = room.reconnectionToken;
       setupRoomListeners();
+      saveReconnectSession();
+      requestWakeLock();
       showScreen('lobby');
-      showToast('สร้างห้องสำเร็จ!');
+      showToast('สร้างห้องสำเร็จ! รหัส: ' + roomCode);
     } catch (err) {
       console.error('Create room error:', err);
       showToast('ไม่สามารถสร้างห้องได้: ' + (err.message || 'ลองอีกครั้ง'));
@@ -412,8 +755,16 @@
   async function joinRoom(code) {
     try {
       initClient();
-      // Attempt joinById first (code may be the room ID)
-      room = await client.joinById(code, {
+      code = code.toUpperCase().trim();
+      console.log('Joining room with code:', code);
+
+      // Step 1: Check if room exists via REST API
+      var checkResp = await fetch('/api/rooms/' + code);
+      var checkData = await checkResp.json();
+      console.log('Room check:', checkData);
+
+      // Step 2: Join via Colyseus with roomCode
+      room = await client.join(ROOM_NAME, {
         nickname: nickname,
         avatar: avatar,
         roomCode: code,
@@ -421,12 +772,15 @@
       mySessionId = room.sessionId;
       reconnectToken = room.reconnectionToken;
       setupRoomListeners();
+      saveReconnectSession();
+      requestWakeLock();
       showScreen('lobby');
       showToast('เข้าร่วมห้องสำเร็จ!');
     } catch (err) {
-      // Fallback: join by room name (never create — use client.join to avoid spawning a wrong room)
+      console.error('Join room error:', err);
+      // Fallback: try joinById (in case code is a room ID)
       try {
-        room = await client.join(ROOM_NAME, {
+        room = await client.joinById(code, {
           nickname: nickname,
           avatar: avatar,
           roomCode: code,
@@ -434,6 +788,8 @@
         mySessionId = room.sessionId;
         reconnectToken = room.reconnectionToken;
         setupRoomListeners();
+        saveReconnectSession();
+        requestWakeLock();
         showScreen('lobby');
         showToast('เข้าร่วมห้องสำเร็จ!');
       } catch (err2) {
@@ -445,12 +801,14 @@
 
   function leaveRoom() {
     stopLocalTimer();
+    stopKeepalive();
+    cancelReconnectFlow();
     if (voteProgressInterval !== null) {
       clearInterval(voteProgressInterval);
       voteProgressInterval = null;
     }
     if (room) {
-      try { room.leave(); } catch (_) {}
+      try { room.leave(true); } catch (_) {} // consented=true
       room = null;
     }
     mySessionId = null;
@@ -460,17 +818,38 @@
     hasVoted = false;
     hasGuessed = false;
     reconnectToken = null;
+    clearReconnectSession();
+    releaseWakeLock();
     showScreen('home');
+    checkRejoinBanner();
+  }
+
+  // ─── Keepalive Ping (prevent Cloud Run WebSocket idle timeout) ──
+  var keepaliveInterval = null;
+
+  function startKeepalive() {
+    if (keepaliveInterval) clearInterval(keepaliveInterval);
+    keepaliveInterval = setInterval(function () {
+      if (room) {
+        try { room.send('PING'); } catch (e) { /* ignore */ }
+      }
+    }, 30000); // every 30s
+  }
+
+  function stopKeepalive() {
+    if (keepaliveInterval) { clearInterval(keepaliveInterval); keepaliveInterval = null; }
   }
 
   // ─── Room Listeners ───────────────────────────────────────────
   function setupRoomListeners() {
     if (!room) return;
+    startKeepalive();
 
-    // Phase change
+    // Phase change — also save reconnect session on every transition
     room.state.listen('phase', function (value) {
       var oldPhase = currentPhase;
       currentPhase = value;
+      saveReconnectSession();
       onPhaseChange(value, oldPhase);
     });
 
@@ -611,22 +990,59 @@
 
     room.onMessage('ROOM_EXPIRED', function (data) {
       showToast(data.message || 'ห้องหมดเวลา');
+      clearReconnectSession();
       leaveRoom();
     });
 
-    room.onLeave(function (code) {
-      console.log('Left room, code:', code);
-      stopLocalTimer();
-      if (code >= 4000) {
-        showToast('ถูกตัดการเชื่อมต่อ');
+    // Reconnection token — save/update whenever server sends it
+    room.onMessage('ROOM_TOKEN', function (data) {
+      if (data && data.token) {
+        reconnectToken = data.token;
+        saveReconnectSession();
       }
+    });
+
+    // Player reconnected notification
+    room.onMessage('PLAYER_RECONNECTED', function (data) {
+      if (data && data.nickname) {
+        showToast(data.nickname + ' \u0E01\u0E25\u0E31\u0E1A\u0E21\u0E32\u0E41\u0E25\u0E49\u0E27'); // กลับมาแล้ว
+      }
+    });
+
+    room.onLeave(function (code) {
+      console.log('[room] onLeave, code:', code);
+      stopLocalTimer();
+
+      // code 1000 = normal close (consented leave or kicked)
+      // code 4000+ = server-side forced close
+      // code < 1000 or other = unexpected disconnect
+      if (code === 1000) {
+        // Normal leave — already handled by leaveRoom() or KICKED handler
+        room = null;
+        showScreen('home');
+        checkRejoinBanner();
+        return;
+      }
+
+      // Unexpected disconnect — try to reconnect
       room = null;
-      showScreen('home');
+      var saved = getSavedReconnectSession();
+      if (saved && saved.reconnectionToken) {
+        console.log('[room] unexpected disconnect, starting reconnect flow...');
+        startReconnectFlow(saved);
+      } else {
+        showToast('\u0E16\u0E39\u0E01\u0E15\u0E31\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D'); // ถูกตัดการเชื่อมต่อ
+        showScreen('home');
+        checkRejoinBanner();
+      }
     });
 
     room.onError(function (code, message) {
-      console.error('Room error:', code, message);
-      showToast('ข้อผิดพลาด: ' + (message || code));
+      console.error('[room] onError:', code, message);
+      // Don't show toast for transient errors during reconnection
+      if (!isReconnecting) {
+        showToast('\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14: ' + (message || code)); // ข้อผิดพลาด:
+      }
     });
   }
 
@@ -1139,12 +1555,17 @@
       table.appendChild(row);
     });
 
-    // Only host sees "Next" button
+    // Host sees "Next" button, others see waiting text
     var nextBtn = $('btnNextFromRoundend');
     if (nextBtn) {
-      // The server auto-advances to SCOREBOARD after 5 s, but
-      // having the button is a UX hint for the host.
-      nextBtn.style.display = isHost ? '' : 'none';
+      if (isHost) {
+        nextBtn.style.display = '';
+        nextBtn.textContent = '▶ รอบถัดไป';
+      } else {
+        nextBtn.style.display = '';
+        nextBtn.textContent = '⏳ รอโฮสต์...';
+        nextBtn.disabled = true;
+      }
     }
   }
 
@@ -1348,6 +1769,16 @@
       showCategoriesModal();
     });
 
+    // ── Rules modal ────────────────────────────────────────────
+    $('btnShowRules').addEventListener('click', function () {
+      vibrate(15);
+      $('rulesModal').classList.add('active');
+    });
+    $('btnCloseRules').addEventListener('click', function () {
+      vibrate(15);
+      $('rulesModal').classList.remove('active');
+    });
+
     // ── Nickname modal ──────────────────────────────────────────
 
     $('btnConfirmNickname').addEventListener('click', function () {
@@ -1492,55 +1923,52 @@
 
     $('btnKill').addEventListener('click', function () {
       vibrate(50);
-      window.soundManager.tap();
       var me = getMyPlayer();
       if (me && !me.isAlive) {
-        showToast('คุณถูกคัดออกแล้ว');
+        showToast('คุณตายไปแล้ว');
         return;
       }
-      if (room && room.state && room.state.currentAccusation) {
-        showToast('กำลังโหวตอยู่ รอสักครู่');
-        return;
-      }
-      showTargetModal();
+      // Show confirm death modal
+      $('confirmDeathModal').classList.remove('hidden');
+    });
+
+    $('btnConfirmDeath').addEventListener('click', function () {
+      vibrate([100, 50, 100]);
+      if (window.soundManager) window.soundManager.eliminated();
+      $('confirmDeathModal').classList.add('hidden');
+      if (room) room.send('SURRENDER');
+      showToast('💀 คุณตายแล้ว! คำของคุณคือ "' + myWord + '"');
+    });
+
+    $('btnDenyDeath').addEventListener('click', function () {
+      vibrate(15);
+      $('confirmDeathModal').classList.add('hidden');
+      showToast('เล่นต่อ! ระวังอย่าพูดคำต้องห้าม');
     });
 
     $('btnGuessWord').addEventListener('click', function () {
       vibrate(30);
-      window.soundManager.tap();
+      if (window.soundManager) window.soundManager.tap();
       var me = getMyPlayer();
+      if (me && !me.isAlive) {
+        showToast('คุณตายแล้ว — รู้คำตัวเองแล้วไม่ต้องเดา');
+        return;
+      }
       if (me && me.hasGuessed) {
         showToast('คุณเดาคำแล้ว');
         return;
       }
-      var guess = prompt('เดาคำของคุณ (ถ้าถูกได้ +3 คะแนน):');
+      var guess = prompt('เดาคำของคุณ (ถ้ารอดจนจบ + ทายถูก ได้โบนัส +3):');
       if (guess !== null && guess.trim()) {
         sendGuessWord(guess);
       }
     });
 
-    $('btnSurrender').addEventListener('click', function () {
-      vibrate(30);
-      if (confirm('ยอมแพ้? คุณจะเสีย 3 คะแนน')) {
-        sendSurrender();
-      }
-    });
+    // Surrender button removed — merged into "ตาย" button
 
-    $('btnCancelTarget').addEventListener('click', function () {
-      hideTargetModal();
-    });
+    // Target modal removed (self-report death)
 
-    // ── Voting screen ───────────────────────────────────────────
-
-    $('btnVoteGuilty').addEventListener('click', function () {
-      vibrate(30);
-      sendVote(true);
-    });
-
-    $('btnVoteNotYet').addEventListener('click', function () {
-      vibrate(30);
-      sendVote(false);
-    });
+    // ── Voting screen removed (self-report death) ────────────────
 
     // ── Guess phase screen ──────────────────────────────────────
 
@@ -1572,9 +2000,8 @@
 
     $('btnNextFromRoundend').addEventListener('click', function () {
       vibrate(30);
-      window.soundManager.tap();
-      // Server auto-advances to SCOREBOARD after ~5s.
-      // This button is cosmetic; phase change handles the rest.
+      if (window.soundManager) window.soundManager.tap();
+      sendNextRound();
     });
 
     // ── Scoreboard screen ───────────────────────────────────────
@@ -1629,10 +2056,113 @@
     }, 500);
   }
 
+  // ─── Reconnection Event Bindings ───────────────────────────────
+
+  function bindReconnectEvents() {
+    // ── 1. Page visibility change (screen off/on, tab switch) ───
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        console.log('[reconnect] page became visible');
+        // Re-acquire wake lock (browser releases it when page is hidden)
+        if (room && currentPhase && currentPhase !== 'LOBBY' && currentPhase !== 'GAME_OVER') {
+          requestWakeLock();
+        }
+        // If we lost the room while hidden, attempt reconnect
+        if (!room && !isReconnecting) {
+          var saved = getSavedReconnectSession();
+          if (saved && saved.reconnectionToken) {
+            console.log('[reconnect] room lost while hidden, reconnecting...');
+            startReconnectFlow(saved);
+          }
+        }
+      }
+    });
+
+    // ── 2. Online/offline network events ────────────────────────
+    window.addEventListener('online', function () {
+      console.log('[reconnect] network online');
+      if (!room && !isReconnecting) {
+        var saved = getSavedReconnectSession();
+        if (saved && saved.reconnectionToken) {
+          console.log('[reconnect] network restored, reconnecting...');
+          startReconnectFlow(saved);
+        }
+      }
+    });
+
+    window.addEventListener('offline', function () {
+      console.log('[reconnect] network offline');
+      if (room) {
+        showToast('\u0E02\u0E32\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D \u0E23\u0E2D\u0E2A\u0E31\u0E0D\u0E0D\u0E32\u0E13\u0E01\u0E25\u0E31\u0E1A\u0E21\u0E32...'); // ขาดการเชื่อมต่อ รอสัญญาณกลับมา...
+      }
+    });
+
+    // ── 3. beforeunload warning for active game ─────────────────
+    window.addEventListener('beforeunload', function (e) {
+      if (room && currentPhase && currentPhase !== 'LOBBY' && currentPhase !== 'GAME_OVER') {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    });
+
+    // ── 4. Cancel reconnect button ──────────────────────────────
+    var btnCancel = _$('btnCancelReconnect');
+    if (btnCancel) {
+      btnCancel.addEventListener('click', function () {
+        cancelReconnectFlow();
+        clearReconnectSession();
+        showScreen('home');
+        checkRejoinBanner();
+      });
+    }
+
+    // ── 5. Rejoin banner buttons ────────────────────────────────
+    var btnRejoin = _$('btnRejoinRoom');
+    if (btnRejoin) {
+      btnRejoin.addEventListener('click', function () {
+        vibrate(30);
+        var saved = getSavedReconnectSession();
+        if (saved && saved.reconnectionToken) {
+          $('rejoinBanner').classList.add('hidden');
+          startReconnectFlow(saved);
+        } else {
+          showToast('\u0E44\u0E21\u0E48\u0E1E\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2B\u0E49\u0E2D\u0E07\u0E40\u0E01\u0E48\u0E32'); // ไม่พบข้อมูลห้องเก่า
+          clearReconnectSession();
+          $('rejoinBanner').classList.add('hidden');
+        }
+      });
+    }
+
+    var btnDismiss = _$('btnDismissRejoin');
+    if (btnDismiss) {
+      btnDismiss.addEventListener('click', function () {
+        clearReconnectSession();
+        $('rejoinBanner').classList.add('hidden');
+      });
+    }
+  }
+
   // ─── Init ─────────────────────────────────────────────────────
   function init() {
     showScreen('home');
-    bindEvents();
+    loadCategoriesFromServer();
+    try { bindEvents(); } catch(e) { console.error('[init] bindEvents crashed:', e); }
+    try { bindReconnectEvents(); } catch(e) { console.error('[init] bindReconnectEvents crashed:', e); }
+    try { initWordHideSystem(); } catch(e) { console.error('[init] initWordHideSystem crashed:', e); }
+
+    // ── Auto-reconnect on page load (covers refresh, wake from sleep) ──
+    var savedSession = getSavedReconnectSession();
+    if (savedSession && savedSession.reconnectionToken) {
+      // Restore nickname/avatar so the UI is consistent
+      nickname = savedSession.nickname || nickname;
+      avatar = savedSession.avatar || avatar;
+      console.log('[init] found saved session, attempting reconnect to room', savedSession.roomCode);
+      startReconnectFlow(savedSession);
+    } else {
+      // Show rejoin banner if there's an expired/partial session
+      checkRejoinBanner();
+    }
 
     // Deep link support: ?room=XXXX
     var params = new URLSearchParams(window.location.search);

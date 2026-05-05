@@ -37,12 +37,69 @@
       <button class="btn btn-secondary" id="btnJoinRoom">เข้าร่วมห้อง</button>
     </div>
 
+    <button class="btn btn-ghost home-rules-btn" id="btnShowRules">📖 กติกาการเล่น</button>
+
     <div class="home-categories" id="btnBrowseCategories">
       📚 หมวดคำ ►
     </div>
 
     <div class="home-footer">
       v1.0 — เทพลีลา x คำต้องห้าม
+    </div>
+
+    <!-- ===== Rules Modal ===== -->
+    <div class="modal" id="rulesModal">
+      <div class="modal-content rules-modal-content">
+        <h2>📖 กติกาการเล่น</h2>
+
+        <div class="rules-section">
+          <h3>🎯 เป้าหมาย</h3>
+          <p>หลอกให้คนอื่นพูด <strong>"คำต้องห้าม"</strong> ของเขา โดยที่ตัวเองไม่พูดคำของตัวเอง!</p>
+        </div>
+
+        <div class="rules-section">
+          <h3>📱 วิธีเล่น</h3>
+          <ol class="rules-list">
+            <li>ผู้เล่น 2-8 คน <strong>นั่งล้อมวง</strong> ด้วยกัน</li>
+            <li>แต่ละคนจะได้ <strong>"คำต้องห้าม"</strong> บนจอมือถือ</li>
+            <li><strong>ถือโทรศัพท์หงายจอออก</strong> (หรือแปะที่หน้าผาก) — คนอื่นเห็นคำของเรา แต่เราไม่เห็นคำตัวเอง!</li>
+            <li><strong>สนทนากันอิสระ</strong> — ถาม ตอบ เล่าเรื่อง ยั่วยุ พูดได้เต็มที่!</li>
+            <li><strong>พยายามหลอกให้คนอื่น</strong> พูดคำของตัวเขาเอง</li>
+            <li><strong>ระวัง!</strong> อย่าพูดคำของตัวเอง (ซึ่งไม่รู้ว่าคืออะไร)</li>
+          </ol>
+        </div>
+
+        <div class="rules-section">
+          <h3>💀 ตาย!</h3>
+          <ol class="rules-list">
+            <li>ถ้าใครพูดคำต้องห้ามของตัวเอง เพื่อนๆ จะตะโกน <strong>"มึงตายแล้ว!"</strong></li>
+            <li>คนที่ตาย <strong>กดปุ่ม "💀 ตาย!"</strong> บนจอตัวเอง</li>
+            <li>จะเห็นคำที่ตัวเองพลาดพูด</li>
+            <li>นั่งดูเพื่อนเล่นต่อจนจบรอบ</li>
+          </ol>
+        </div>
+
+        <div class="rules-section">
+          <h3>🏆 คะแนน</h3>
+          <div class="rules-scoring">
+            <div class="score-item score-negative">💀 ตาย (พูดคำตัวเอง) <span>-3</span></div>
+            <div class="score-item score-positive">⭐ รอดจนจบรอบ <span>+5</span></div>
+            <div class="score-item score-positive">🧠 ทายคำตัวเองถูก <span>+3</span></div>
+          </div>
+        </div>
+
+        <div class="rules-section">
+          <h3>💡 เคล็ดลับ</h3>
+          <ul class="rules-tips">
+            <li>กล้าถาม กล้าตอบ — ยิ่งพูดเยอะยิ่งสนุก!</li>
+            <li>อย่าพูดซ้ำคำถาม เช่น ถูกถามว่า "กินอะไร?" ตอบตรงๆ อย่าเอ่ยว่า "กิน"</li>
+            <li>สังเกตสีหน้าเพื่อน — ถ้าเขาพยายามเลี่ยงหัวข้อ แสดงว่าใกล้แล้ว!</li>
+            <li>ตอนจะจบรอบ ลองทายคำตัวเอง — ถ้าถูกได้โบนัส!</li>
+          </ul>
+        </div>
+
+        <button class="btn btn-primary" id="btnCloseRules">เข้าใจแล้ว เล่นเลย! 🎮</button>
+      </div>
     </div>
   </div>
 
@@ -70,15 +127,7 @@
         <span class="config-label">หมวดคำ</span>
         <select class="config-select" id="configCategory">
           <option value="common">💬 คำทั่วไป</option>
-          <option value="food">🍜 อาหาร</option>
-          <option value="animals">🐘 สัตว์</option>
-          <option value="jobs">👨‍⚕️ อาชีพ</option>
-          <option value="places">🏛️ สถานที่</option>
-          <option value="emotions">😊 อารมณ์</option>
-          <option value="sports">⚽ กีฬา</option>
-          <option value="colors">🎨 สี</option>
-          <option value="body">🦷 ร่างกาย</option>
-          <option value="family">👨‍👩‍👧 ครอบครัว</option>
+          <!-- Populated dynamically from /api/categories -->
         </select>
       </div>
       <div class="config-row">
@@ -121,51 +170,37 @@
 
     <div class="playing-secondary-actions">
       <button class="btn btn-ghost btn-small" id="btnGuessWord">🧠 เดาคำ</button>
-      <button class="btn btn-ghost btn-small" id="btnSurrender">🏳️ ยอมแพ้</button>
     </div>
 
     <div class="playing-bottom">
-      <button class="btn btn-kill" id="btnKill">ฆ่า!</button>
+      <button class="btn btn-kill" id="btnKill">💀 ตาย!</button>
+      <div class="dead-hint">เพื่อนบอกว่าคุณพูดคำต้องห้าม? กดเลย!</div>
+    </div>
+
+    <!-- Confirm Death Modal -->
+    <div class="confirm-modal hidden" id="confirmDeathModal">
+      <div class="confirm-modal-content">
+        <div class="confirm-icon">💀</div>
+        <div class="confirm-title">ยอมรับว่าตาย?</div>
+        <div class="confirm-text">เพื่อนบอกว่าคุณพูดคำต้องห้ามของตัวเอง<br>กด "ตายจริง" เพื่อยอมรับ</div>
+        <div class="confirm-buttons">
+          <button class="btn btn-kill" id="btnConfirmDeath">ตายจริง 💀</button>
+          <button class="btn btn-ghost" id="btnDenyDeath">ยังไม่ตาย!</button>
+        </div>
+      </div>
     </div>
 
     <!-- Spectator overlay (shown when eliminated) -->
     <div class="spectator-overlay hidden" id="spectatorOverlay">
-      <div class="spectator-icon">👻</div>
-      <div class="spectator-text">คุณถูกกำจัดแล้ว</div>
+      <div class="spectator-icon">💀</div>
+      <div class="spectator-text">คุณตายแล้ว!</div>
+      <div class="spectator-word" id="spectatorWord"></div>
       <div class="label">รอจนจบรอบ...</div>
     </div>
   </div>
 
-  <!-- ========== SCREEN: VOTING ========== -->
-  <div class="screen" id="screen-voting">
-    <div class="voting-header">
-      <div class="voting-title">🗳️ โหวต</div>
-      <div class="vote-timer" id="voteTimerDisplay">0:15</div>
-    </div>
-
-    <div class="accused-section">
-      <div class="accused-name" id="accusedName">---</div>
-      <div class="accused-label">พูดคำว่า...</div>
-      <div class="accused-word" id="accusedWord">---</div>
-    </div>
-
-    <div class="voter-list" id="voterList"></div>
-
-    <div class="vote-progress">
-      <div class="vote-progress-bar">
-        <div class="vote-progress-fill" id="voteProgressFill" style="width: 0%"></div>
-      </div>
-      <div class="vote-progress-text" id="voteProgressText">0/0 โหวตแล้ว</div>
-      <div class="vote-waiting-text" id="voteWaitingText"></div>
-    </div>
-
-    <div class="vote-status" id="voteStatus"></div>
-
-    <div class="vote-buttons" id="voteButtonsContainer">
-      <button class="btn btn-vote btn-vote-guilty" id="btnVoteGuilty">โดนแล้ว</button>
-      <button class="btn btn-vote btn-vote-not-yet" id="btnVoteNotYet">ยังนะ</button>
-    </div>
-  </div>
+  <!-- VOTING screen removed — self-report death mechanic -->
+  <div class="screen" id="screen-voting"></div>
 
   <!-- ========== SCREEN: GUESS PHASE ========== -->
   <div class="screen" id="screen-guess">
@@ -279,6 +314,25 @@
     <div class="vote-result-icon" id="voteResultIcon"></div>
     <div class="vote-result-text" id="voteResultText"></div>
     <div class="vote-result-detail" id="voteResultDetail"></div>
+  </div>
+
+  <!-- ========== RECONNECTING OVERLAY ========== -->
+  <div class="reconnect-overlay hidden" id="reconnectOverlay">
+    <div class="reconnect-content">
+      <div class="reconnect-spinner"></div>
+      <div class="reconnect-text" id="reconnectText"></div>
+      <div class="reconnect-attempt" id="reconnectAttempt"></div>
+      <button class="btn btn-ghost reconnect-cancel" id="btnCancelReconnect"></button>
+    </div>
+  </div>
+
+  <!-- ========== REJOIN BANNER (home screen) ========== -->
+  <div class="rejoin-banner hidden" id="rejoinBanner">
+    <div class="rejoin-banner-text" id="rejoinBannerText"></div>
+    <div class="rejoin-banner-buttons">
+      <button class="btn btn-primary btn-sm" id="btnRejoinRoom"></button>
+      <button class="btn btn-ghost btn-sm" id="btnDismissRejoin"></button>
+    </div>
   </div>
 
   <script src="https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js"></script>

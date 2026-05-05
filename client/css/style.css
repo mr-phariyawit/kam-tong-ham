@@ -1273,6 +1273,24 @@ h3 {
 }
 
 /* === MODALS & OVERLAYS === */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  overflow-y: auto;
+}
+.modal.active {
+  display: flex;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1695,3 +1713,310 @@ h3 {
 .justify-center { justify-content: center; }
 .w-full { width: 100%; }
 .hidden { display: none !important; }
+
+/* ============================================================
+   Rules Modal
+   ============================================================ */
+.home-rules-btn {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #a0a0b0;
+}
+.rules-modal-content {
+  max-height: 85vh;
+  overflow-y: auto;
+  text-align: left;
+  padding-bottom: 24px;
+}
+.rules-modal-content h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #FF4757;
+}
+.rules-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+}
+.rules-section h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+.rules-section p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #ccc;
+}
+.rules-list {
+  padding-left: 20px;
+  margin: 0;
+}
+.rules-list li {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #ccc;
+  margin-bottom: 4px;
+}
+.rules-list li strong {
+  color: #fff;
+}
+.rules-scoring {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.score-positive {
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ED573;
+}
+.score-negative {
+  background: rgba(255, 71, 87, 0.15);
+  color: #FF4757;
+}
+.score-item span {
+  font-size: 20px;
+  font-weight: 800;
+}
+.rules-tips {
+  padding-left: 18px;
+  margin: 0;
+}
+.rules-tips li {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+.rules-modal-content .btn-primary {
+  margin-top: 16px;
+  width: 100%;
+}
+
+/* ============================================================
+   Word Hide System — prevent seeing own word
+   ============================================================ */
+.playing-word-area {
+  position: relative;
+}
+.word-hidden-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+  border-radius: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+.word-hidden-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.word-hidden-icon {
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+.word-hidden-text {
+  font-size: 16px;
+  color: #888;
+  text-align: center;
+  padding: 0 20px;
+}
+.hide-word-hint {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+/* Tilt-based: when phone is tilted toward user */
+.word-display.tilted {
+  filter: blur(30px);
+  transition: filter 0.2s ease;
+}
+
+/* ============================================================
+   Dead Button & Hint
+   ============================================================ */
+.dead-hint {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+}
+.spectator-word {
+  font-size: 24px;
+  font-weight: 800;
+  color: #FF4757;
+  margin: 8px 0;
+}
+
+/* ============================================================
+   Confirm Death Modal
+   ============================================================ */
+.confirm-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+.confirm-modal.hidden {
+  display: none;
+}
+.confirm-modal-content {
+  background: #2a2a3e;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  width: 85%;
+  max-width: 320px;
+  animation: scaleIn 0.25s ease;
+}
+.confirm-icon {
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+.confirm-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FF4757;
+  margin-bottom: 8px;
+}
+.confirm-text {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.confirm-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.confirm-buttons .btn-kill {
+  font-size: 18px;
+  padding: 16px;
+}
+.confirm-buttons .btn-ghost {
+  font-size: 14px;
+  color: #888;
+}
+
+/* === RECONNECTION OVERLAY === */
+.reconnect-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26, 26, 46, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+.reconnect-overlay.hidden { display: none; }
+
+.reconnect-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+}
+
+.reconnect-spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: var(--primary, #FF4757);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.reconnect-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.reconnect-attempt {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+}
+
+.reconnect-cancel {
+  margin-top: 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* === REJOIN BANNER === */
+.rejoin-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(135deg, #2d2d5e 0%, #1a1a2e 100%);
+  border-top: 2px solid var(--primary, #FF4757);
+  padding: 16px 20px;
+  z-index: 500;
+  animation: slideUp 0.3s ease;
+}
+.rejoin-banner.hidden { display: none; }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.rejoin-banner-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.rejoin-banner-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* === DISCONNECTED PLAYER INDICATOR === */
+.player-item.disconnected {
+  opacity: 0.45;
+}
+.player-item.disconnected::after {
+  content: "offline";
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+}

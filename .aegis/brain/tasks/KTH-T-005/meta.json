@@ -3,7 +3,7 @@
   "type": "task",
   "title": "Create BaseRoom class (extract shared logic from KhamTongHamRoom)",
   "description": "Extract lobby management, player join/leave, host transfer, timer, and common message handlers into a BaseRoom class that all game rooms will extend.",
-  "status": "todo",
+  "status": "in_review",
   "priority": "critical",
   "points": 3,
   "sprint": "sprint-2",

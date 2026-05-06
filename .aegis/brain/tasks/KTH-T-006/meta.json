@@ -3,7 +3,7 @@
   "type": "task",
   "title": "Create BaseState schema (shared player, phase, timer state)",
   "description": "Define a Colyseus BaseState schema with shared fields: players map, phase, timer, host, roomCode. Game-specific states extend this.",
-  "status": "todo",
+  "status": "in_review",
   "priority": "critical",
   "points": 2,
   "sprint": "sprint-2",

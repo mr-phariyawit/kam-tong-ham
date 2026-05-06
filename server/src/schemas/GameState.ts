@@ -1,4 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
+import { BaseState, BasePlayer } from "./BaseState";
 
 export type GamePhase =
   | "LOBBY"
@@ -12,26 +13,21 @@ export type GamePhase =
 
 export type VoteChoice = "guilty" | "not_yet";
 
-export const PLAYER_COLORS = [
-  "#1E90FF", // Blue
-  "#9C59D1", // Purple
-  "#FF6B35", // Orange
-  "#1ABC9C", // Teal
-  "#FF6B9D", // Pink
-  "#FFC312", // Yellow
-  "#E84393", // Red
-  "#574BC8", // Indigo
-];
+/**
+ * Re-export PLAYER_COLORS for backward compatibility.
+ * Canonical source is BaseState.ts.
+ */
+export { PLAYER_COLORS } from "./BaseState";
 
-export class Player extends Schema {
-  @type("string") id: string = "";
-  @type("string") nickname: string = "";
-  @type("string") avatar: string = "";
-  @type("boolean") isHost: boolean = false;
-  @type("boolean") isAlive: boolean = true;
-  @type("boolean") isConnected: boolean = true;
-  @type("number") score: number = 0;
-  @type("string") color: string = "";
+/**
+ * Player schema for Forbidden Word game.
+ * Extends BasePlayer with game-specific fields (vote, guess, round scoring).
+ *
+ * Colyseus serializes based on runtime instance type, so these extra
+ * @type fields are correctly synced even though the players MapSchema
+ * in BaseState is typed as MapSchema<BasePlayer>.
+ */
+export class Player extends BasePlayer {
   @type("string") vote: string = ""; // "guilty" | "not_yet" | ""
   @type("boolean") hasGuessed: boolean = false;
   @type("boolean") guessCorrect: boolean = false;
@@ -45,9 +41,9 @@ export class Accusation extends Schema {
   @type("string") accuserName: string = "";
   @type("string") targetId: string = "";
   @type("string") targetName: string = "";
-  // targetWord is intentionally NOT in the shared schema — it must stay server-side only
+  // targetWord is intentionally NOT in the shared schema -- it must stay server-side only
   @type("number") voteDeadline: number = 0;
-  // yesCount and noCount are NOT @type-decorated — they must NOT sync to clients before reveal
+  // yesCount and noCount are NOT @type-decorated -- they must NOT sync to clients before reveal
   // (blind voting: no vote counts exposed until VOTE_REVEAL event fires)
   yesCount: number = 0;
   noCount: number = 0;
@@ -62,11 +58,18 @@ export class GameConfig extends Schema {
   @type("number") roundDurationSecs: number = 180;
 }
 
-export class GameState extends Schema {
-  @type("string") roomCode: string = "";
-  @type("string") phase: string = "LOBBY";
+/**
+ * GameState -- Forbidden Word game state.
+ * Extends BaseState (shared lobby fields) with game-specific fields.
+ *
+ * Inherited from BaseState (DO NOT re-declare @type):
+ *   roomCode, phase, gameType, playerCount, createdAt, players
+ *
+ * Added here: config, currentRound, roundTimer, voteTimer,
+ *   countdownTimer, guessTimer, aliveCount, currentAccusation
+ */
+export class GameState extends BaseState {
   @type(GameConfig) config: GameConfig = new GameConfig();
-  @type({ map: Player }) players = new MapSchema<Player>();
   @type("number") currentRound: number = 0;
   @type("number") roundTimer: number = 0;
   @type("number") voteTimer: number = 0;
@@ -74,6 +77,4 @@ export class GameState extends Schema {
   @type("number") guessTimer: number = 0;
   @type("number") aliveCount: number = 0;
   @type(Accusation) currentAccusation: Accusation | null = null;
-  @type("number") createdAt: number = Date.now();
-  @type("number") playerCount: number = 0;
 }

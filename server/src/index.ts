@@ -3,8 +3,17 @@ import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { KhamTongHamRoom } from "./rooms/KhamTongHamRoom";
 import { createApp } from "./app";
+import { registerDefaultGames } from "./utils/gameRegistry";
 
 const PORT = parseInt(process.env.PORT || "2567", 10);
+
+// ─── Register all games in the registry ───────────────────────────────────────
+// Active games get their Room class; coming-soon games get null.
+// The registry is the single source of truth for GET /api/games and room creation.
+registerDefaultGames({
+  "forbidden-word": KhamTongHamRoom,
+});
+
 const app = createApp();
 
 // Create HTTP server
@@ -16,6 +25,8 @@ const gameServer = new Server({
 });
 
 // Define the room
+// Note: "kham_tong_ham" is the Colyseus room name for backward compatibility.
+// The gameType field in room options determines which game logic runs.
 gameServer.define("kham_tong_ham", KhamTongHamRoom)
   .filterBy(["roomCode"])
   .enableRealtimeListing();
@@ -23,9 +34,10 @@ gameServer.define("kham_tong_ham", KhamTongHamRoom)
 // ─── START SERVER ─────────────────────────────────────────────
 
 gameServer.listen(PORT).then(() => {
-  console.log(`🎭 คำต้องห้าม server listening on port ${PORT}`);
+  console.log(`🎭 Party Games TH server listening on port ${PORT}`);
   console.log(`   WebSocket: ws://localhost:${PORT}`);
   console.log(`   HTTP API:  http://localhost:${PORT}/api`);
+  console.log(`   Games:     GET http://localhost:${PORT}/api/games`);
 });
 
 // Graceful shutdown

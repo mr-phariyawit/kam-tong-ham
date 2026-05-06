@@ -1,31 +1,31 @@
 # Sprint 2 -- Platform Foundation
 
-> Updated: 2026-05-07 03:45 | Sprint active
+> Updated: 2026-05-07 11:00 | Sprint active
 
-## TODO (6 tasks, 13 pts)
-
-| ID | Title | Pts | Assignee | Priority |
-|----|-------|-----|----------|----------|
-| KTH-T-007 | Game registry + GET /api/games | 2 | @spider-man | high |
-| KTH-T-008 | Home screen (game selector grid) | 3 | @spider-man | high |
-| KTH-T-009 | Refactor ForbiddenWordRoom extends BaseRoom | 3 | @spider-man | critical |
-| KTH-T-010 | Migrate client to games/ structure | 2 | @spider-man | high |
-| KTH-T-011 | Shared lobby UI components | 2 | @spider-man | medium |
-| KTH-T-012 | Regression verification (172 tests + new) | 1 | @war-machine | critical |
-
-## IN_PROGRESS (0 tasks, 0 pts)
+## TODO (0 tasks, 0 pts)
 
 | ID | Title | Pts | Assignee | Priority |
 |----|-------|-----|----------|----------|
 
-## IN_REVIEW (2 tasks, 5 pts)
+## IN_PROGRESS (1 task, 1 pt)
+
+| ID | Title | Pts | Assignee | Priority |
+|----|-------|-----|----------|----------|
+| KTH-T-012 | Regression verification | 1 | @war-machine | critical |
+
+## IN_REVIEW (0 tasks, 0 pts)
+
+| ID | Title | Pts | Assignee | Priority |
+|----|-------|-----|----------|----------|
+
+## DONE (7 tasks, 17 pts)
 
 | ID | Title | Pts | Assignee | Priority |
 |----|-------|-----|----------|----------|
 | KTH-T-005 | Create BaseRoom class | 3 | @spider-man | critical |
 | KTH-T-006 | Create BaseState schema | 2 | @spider-man | critical |
-
-## DONE (0 tasks, 0 pts)
-
-| ID | Title | Pts | Assignee | Priority |
-|----|-------|-----|----------|----------|
+| KTH-T-007 | Game registry + GET /api/games | 2 | @spider-man | high |
+| KTH-T-009 | Refactor ForbiddenWordRoom extends BaseRoom | 3 | @spider-man | critical |
+| KTH-T-008 | Home screen (game selector grid) | 3 | @spider-man | high |
+| KTH-T-010 | Migrate client to games/ structure | 2 | @spider-man | high |
+| KTH-T-011 | Shared lobby UI components | 2 | @spider-man | medium |

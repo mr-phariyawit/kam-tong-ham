@@ -1,0 +1,54 @@
+# aegis-approval-gate — default destructive-op rule set.
+#
+# Each rule has a name + a regex. The PreToolUse check.mjs matches the
+# incoming Bash command string against every regex; if any matches, the
+# command is BLOCKED unless an active approval marker covering this rule
+# exists in .aegis/brain/approvals/.
+#
+# Per-project override: copy this file to the project's
+# .aegis/brain/gate-rules.yaml and edit. Built-in defaults loaded from
+# the AEGIS source via $CLAUDE_PROJECT_DIR or the script's own dir.
+#
+# Conservative initial set per Mega Plan §11 R8 (avoid Paperclip-creep).
+# Add rules incrementally as real incidents surface.
+
+rules:
+  - name: rm-rf
+    regex: '(?:^|[\s|;&])rm\s+(?:-[A-Za-z]*r[A-Za-z]*f|-[A-Za-z]*f[A-Za-z]*r|--recursive\s+--force|--force\s+--recursive|-fr|-rf)\b'
+    severity: high
+    note: "rm -rf / rm --recursive --force"
+
+  - name: git-force-push
+    regex: '(?:^|[\s|;&])git\s+push\s+(?:.*\s)?(?:--force\b|--force-with-lease\b|-f\b)'
+    severity: high
+    note: "git push --force / -f / --force-with-lease"
+
+  - name: git-reset-hard
+    regex: '(?:^|[\s|;&])git\s+reset\s+(?:.*\s)?--hard\b'
+    severity: medium
+    note: "git reset --hard"
+
+  - name: git-clean-force
+    regex: '(?:^|[\s|;&])git\s+clean\s+(?:.*\s)?(?:-fd|-df|-f\b|--force\b)'
+    severity: medium
+    note: "git clean -f"
+
+  - name: drop-table
+    regex: '\b[Dd][Rr][Oo][Pp]\s+(?:[Tt][Aa][Bb][Ll][Ee]|[Dd][Aa][Tt][Aa][Bb][Aa][Ss][Ee]|[Ss][Cc][Hh][Ee][Mm][Aa])\b'
+    severity: high
+    note: "SQL DROP TABLE/DATABASE/SCHEMA"
+
+  - name: dd-to-device
+    regex: '(?:^|[\s|;&])dd\s+.*of=/dev/'
+    severity: high
+    note: "dd of=/dev/* (disk write)"
+
+  - name: chmod-777-root
+    regex: '(?:^|[\s|;&])chmod\s+(?:-R\s+)?777\s+/'
+    severity: medium
+    note: "chmod -R 777 / (path under root)"
+
+  - name: sudo-rm
+    regex: '(?:^|[\s|;&])sudo\s+rm\b'
+    severity: high
+    note: "sudo rm (any flags)"

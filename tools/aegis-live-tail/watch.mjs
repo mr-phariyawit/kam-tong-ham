@@ -27,7 +27,11 @@ const FIFO = path.join(LIVE_DIR, "current.fifo");
 
 const RECYCLE_AFTER_MS = 24 * 60 * 60 * 1000; // 24h
 const MEM_CHECK_MS = 60 * 1000;               // 1m
-const DEFAULT_MAX_MEM_MB = 20;
+// Node 25 baseline RSS on macOS for the watcher is ~35–45MB before any
+// load. The original 20MB sprint-plan budget was unachievable. Bumping to
+// 96MB so a healthy watcher does not self-recycle on first event.
+// Override per-project via --max-mem-mb.
+const DEFAULT_MAX_MEM_MB = 96;
 
 // ── arg parse ────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);

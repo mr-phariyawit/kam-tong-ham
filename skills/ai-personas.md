@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["switch persona", "change character", "persona", "who are you"]
   th: ["เปลี่ยนตัวละคร", "persona", "ใครเป็นใคร"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

@@ -1,0 +1,51 @@
+# aegis-router policy.yaml — default rules for picking the subagent model.
+#
+# Evaluated in order. First match wins. If none match, `default` is used.
+# Per Mega Plan v1.1 the optimization target is QUALITY FIT, not cost
+# (unlimited token budget assumed).
+#
+# Match keys per rule:
+#   when_persona: [...]      one-of match against the active persona name
+#   when_keyword: [...]      one-of match against task description (case-insens.)
+#   when_length:  N          minimum task description length (use with --task)
+#   when_max_length: N       maximum task description length (use with --task)
+#
+# Pick keys:
+#   model: opus | sonnet | haiku
+#   reason: free-text justification (logged + shown to operator)
+
+rules:
+  - name: adversarial-review-opus
+    when_persona: ["loki", "havoc"]
+    model: opus
+    reason: "Adversarial / red-team review benefits from highest reasoning depth"
+
+  - name: architecture-opus
+    when_persona: ["iron-man"]
+    model: opus
+    reason: "Architecture + spec design needs deep reasoning over trade-offs"
+
+  - name: design-keyword-opus
+    when_keyword: ["design", "architecture", "system design", "trade-off", "decide between"]
+    model: opus
+    reason: "Design-class question — opus for nuanced trade-off analysis"
+
+  - name: implementation-sonnet
+    when_persona: ["spider-man", "thor", "war-machine", "captain-america", "nick-fury"]
+    model: sonnet
+    reason: "Implementation / orchestration — sonnet is the right tier for this work"
+
+  - name: tight-task-haiku
+    when_max_length: 80
+    when_keyword: ["quick", "list", "find", "grep", "look up", "show", "ls "]
+    model: haiku
+    reason: "Trivial lookup — haiku for speed"
+
+  - name: review-keyword-sonnet
+    when_keyword: ["review", "lint", "type-check", "test"]
+    model: sonnet
+    reason: "Standard review / verification — sonnet sufficient"
+
+default:
+  model: sonnet
+  reason: "No specific rule matched — sonnet is the safe quality default"

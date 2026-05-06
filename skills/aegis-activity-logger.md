@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["show activity", "audit log", "what changed today", "activity stats", "view audit"]
   th: ["ดูกิจกรรม", "วันนี้แก้อะไรบ้าง", "สถิติวันนี้", "บันทึกกิจกรรม"]
+reads: [".aegis/brain/activity/"]
+writes: [".aegis/brain/activity/YYYY-MM-DD.jsonl"]
+wires: ["PostToolUse:.*:tools/aegis-activity-logger/log.mjs"]
+tests: ["tests/aegis-activity-logger-test.sh"]
+supersedes: []
 ---
 
 ## Quick Reference

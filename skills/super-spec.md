@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["write spec", "create spec", "BRD", "SRS", "requirements", "specification"]
   th: ["เขียน spec", "ข้อกำหนด", "เขียนข้อกำหนด", "สร้าง spec"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

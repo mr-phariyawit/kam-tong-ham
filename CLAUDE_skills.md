@@ -1,4 +1,15 @@
+<!-- version: 1.0.0 -->
+<!-- Last updated: 2026-05-06 -->
+
+Last reviewed: 2026-05-06
+
 # AEGIS Skills Catalog v11.0
+
+## Changelog
+
+| Date | Version | Change |
+|------|---------|--------|
+| 2026-05-06 | 1.0.0 | Version header pattern introduced (sprint-v12-01). |
 
 ## Profiles
 | Profile | Skills | Context |

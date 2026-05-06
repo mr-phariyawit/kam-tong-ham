@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["security audit", "security scan", "vulnerability check", "OWASP"]
   th: ["ตรวจความปลอดภัย", "security audit", "หาช่องโหว่"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

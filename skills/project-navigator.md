@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["navigate project", "project guide", "what should I do", "recommend"]
   th: ["นำทาง project", "แนะนำ", "ทำอะไรดี", "สแกน project"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

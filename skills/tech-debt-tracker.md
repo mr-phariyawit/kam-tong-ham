@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["tech debt", "technical debt", "TODO scan", "code health", "debt tracker"]
   th: ["หนี้เทคนิค", "tech debt", "สแกน TODO", "สุขภาพโค้ด"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["git workflow", "create PR", "commit", "branch", "changelog"]
   th: ["git workflow", "สร้าง PR", "สร้าง branch", "changelog"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

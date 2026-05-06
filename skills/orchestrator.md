@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["orchestrate", "manage team", "dispatch", "coordinate agents"]
   th: ["จัดการทีม", "orchestrate", "ประสานงาน"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

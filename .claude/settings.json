@@ -13,6 +13,10 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" guard-bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/aegis-approval-gate/check.mjs\""
           }
         ]
       },
@@ -78,6 +82,10 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-with-flags.sh\" on-stop \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-stop.sh\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/aegis-run-logger/archive.mjs\""
           }
         ]
       }
@@ -88,6 +96,15 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/aegis-resume/session-start.mjs\""
           }
         ]
       }

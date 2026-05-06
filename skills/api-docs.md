@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["API docs", "API documentation", "OpenAPI", "Swagger", "SDK examples"]
   th: ["เอกสาร API", "API docs", "สร้างเอกสาร API"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

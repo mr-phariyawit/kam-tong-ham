@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["create issue", "open ticket", "track this work", "list issues", "show my issues", "comment on issue", "close issue", "link to issue"]
   th: ["สร้าง issue", "ปิด issue", "ดู issue ทั้งหมด", "คอมเมนต์ issue", "เปิดทิกเก็ต"]
+reads: [".aegis/brain/issues/"]
+writes: [".aegis/brain/issues/"]
+wires: []
+tests: ["tests/aegis-issue-thread-test.sh"]
+supersedes: []
 ---
 
 ## Quick Reference

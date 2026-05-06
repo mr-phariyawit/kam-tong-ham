@@ -1,6 +1,17 @@
+<!-- version: 1.0.0 -->
+<!-- Last updated: 2026-05-06 -->
+
+Last reviewed: 2026-05-06
+
 # AEGIS v11.0 -- Agent Team Framework
 
 > "Context is King, Memory is Soul"
+
+## Changelog
+
+| Date | Version | Change |
+|------|---------|--------|
+| 2026-05-06 | 1.0.0 | Version header pattern introduced (sprint-v12-01). Doc-version starts at 1.0.0 independent of AEGIS framework version (v11.0 in title above refers to the framework). |
 
 ## Navigation
 | File | When to Read | Priority |

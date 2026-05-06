@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["kanban", "board", "task board", "move task", "task status"]
   th: ["คันบัง", "บอร์ด", "สถานะงาน"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

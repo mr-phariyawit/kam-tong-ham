@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["sprint", "scrum", "ceremony", "standup", "sprint planning", "sprint review", "sprint retro", "velocity"]
   th: ["สปรินต์", "สครัม", "สแตนอัพ", "วางแผนสปรินต์"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

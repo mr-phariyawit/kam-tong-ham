@@ -35,3 +35,9 @@ credentials.*
 # <<< AEGIS Framework <<<
 .aegis/brain/activity/
 .aegis/brain/runs/
+
+# v11+v12 runtime artifacts (matches AEGIS-Team meta repo conventions)
+.aegis/brain/metrics/raw/
+.aegis/brain/metrics/token-profile-*.jsonl
+.claude/settings.json.pre-*
+_aegis-output/

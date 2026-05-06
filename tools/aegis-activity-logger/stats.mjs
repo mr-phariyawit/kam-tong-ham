@@ -25,6 +25,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     switch (a) {
+      case "--today": f.since = new Date().toISOString().slice(0,10); break;
       case "--week":  f.since = daysAgo(7);  break;
       case "--month": f.since = daysAgo(30); break;
       case "--since": f.since = argv[++i]; break;
@@ -47,6 +48,7 @@ function printHelp() {
   process.stdout.write(`Usage: aegis-activity-logger stats [flags]
 
 Flags:
+  --today               just today (UTC)
   --week                last 7 UTC days
   --month               last 30 UTC days
   --since <YYYY-MM-DD>  custom start date (inclusive)

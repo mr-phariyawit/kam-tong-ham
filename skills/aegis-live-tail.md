@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["live tail", "watch session", "show live activity", "open live view", "tail agent", "watch agent", "real time view"]
   th: ["ดูสด", "ติดตามแบบ real-time", "เปิดหน้าจอ live", "ดูสตรีม", "ตามดูเอเจนต์"]
+reads: [".aegis/brain/live/current.fifo"]
+writes: [".aegis/brain/live/current.fifo"]
+wires: ["PostToolUse:.*:tools/aegis-live-tail/emit.mjs"]
+tests: ["tests/aegis-live-tail-test.sh"]
+supersedes: []
 ---
 
 ## Quick Reference

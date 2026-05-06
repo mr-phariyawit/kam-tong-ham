@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["fan out", "run in parallel", "dispatch agents", "parallel review", "multi-agent review", "concurrent subagents"]
   th: ["ทำพร้อมกัน", "กระจายงาน", "รีวิวแบบขนาน", "ส่งงานพร้อมกัน"]
+reads: []
+writes: []
+wires: []
+tests: ["tests/aegis-parallel-dispatch-test.sh"]
+supersedes: []
 ---
 
 ## Quick Reference

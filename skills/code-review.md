@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["review code", "code review", "check code", "review PR"]
   th: ["รีวิวโค้ด", "ตรวจโค้ด", "ตรวจสอบโค้ด"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

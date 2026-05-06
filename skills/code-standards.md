@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["coding standards", "code style", "lint", "naming conventions"]
   th: ["มาตรฐานโค้ด", "coding standards", "รูปแบบโค้ด"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

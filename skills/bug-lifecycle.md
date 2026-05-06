@@ -5,6 +5,11 @@ profile: minimal
 triggers:
   en: ["bug report", "fix bug", "debug", "bug lifecycle", "root cause"]
   th: ["แก้บัก", "จัดการบัก", "รายงานบัก", "หาสาเหตุ"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

@@ -1,0 +1,32 @@
+# aegis-trace-export — default redaction pattern set.
+#
+# Per Mega Plan v1.1 §15 B + §7.4 acceptance criteria. Each pattern:
+#   label:        short name used in audit + replacement text
+#   regex:        ECMAScript regex (no g flag here — applied with /g internally)
+#   replacement:  optional override (defaults to "[REDACTED-{label}]")
+#
+# Override per-project by editing this file. Add patterns immediately on
+# every confirmed leak (Mega Plan R9 mitigation).
+
+patterns:
+  - label: username
+    regex: '\b(phariyawit|mr\.phariyawit|mr-phariyawit)\b'
+
+  - label: email
+    regex: '[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}'
+
+  - label: api-key-anthropic
+    regex: 'sk-[A-Za-z0-9]{32,}'
+
+  - label: api-key-github
+    regex: 'ghp_[A-Za-z0-9]{36}'
+
+  - label: api-key-openai
+    regex: 'sk-proj-[A-Za-z0-9_-]{40,}'
+
+  - label: home-path
+    regex: '/Users/[^/\s]+'
+    replacement: '[HOME]'
+
+  - label: aws-access-key
+    regex: '\bAKIA[A-Z0-9]{16}\b'

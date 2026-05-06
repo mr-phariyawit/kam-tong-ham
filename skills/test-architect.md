@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["test strategy", "test plan", "test architect", "testing framework"]
   th: ["วางแผนเทสต์", "test strategy", "สร้างเทสต์", "ออกแบบเทสต์"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

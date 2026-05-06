@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["pilot week", "bootstrap pilot", "gate check", "phase-2 gate", "pilot status", "daily eod"]
   th: ["ตรวจ gate", "รัน pilot", "เช็ค pilot", "วันสุดท้าย pilot"]
+reads: []
+writes: []
+wires: []
+tests: ["tests/aegis-plus-pilot-test.sh"]
+supersedes: []
 ---
 
 ## Quick Reference

@@ -1,6 +1,17 @@
+<!-- version: 1.0.0 -->
+<!-- Last updated: 2026-05-06 -->
+
+Last reviewed: 2026-05-06
+
 # AEGIS v11.0 -- Safety Rules
 
 > Trigger: "safety rules" | Thai trigger: "กฎความปลอดภัย"
+
+## Changelog
+
+| Date | Version | Change |
+|------|---------|--------|
+| 2026-05-06 | 1.0.0 | Version header pattern introduced (sprint-v12-01). |
 
 This document defines hard safety boundaries for all AEGIS agents. Violations trigger immediate escalation to the human operator. No exceptions.
 

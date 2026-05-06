@@ -5,6 +5,11 @@ profile: standard
 triggers:
   en: ["breakdown", "user story", "epic", "decompose", "work breakdown", "story map"]
   th: ["แตกงาน", "ยูสเซอร์สตอรี่", "อีพิค", "แยกย่อย"]
+reads: []
+writes: []
+wires: []
+tests: []
+supersedes: []
 ---
 
 ## Quick Reference

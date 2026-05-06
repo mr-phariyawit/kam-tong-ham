@@ -7,6 +7,7 @@ import { generateRoomCode } from "./utils/roomCode";
 import { getAvailableCategories, loadWordPack, saveWordPack, deleteWordPack, isCustomPack, getCustomDir } from "./utils/wordPicker";
 import type { WordPack } from "./utils/wordPicker";
 import { activeRoomCodes } from "./utils/roomRegistry";
+import { gameRegistry } from "./utils/gameRegistry";
 
 export function createApp() {
   const app = express();
@@ -19,18 +20,68 @@ export function createApp() {
   // In dev:    /kam-tong-ham/server/dist → ../../client = /kam-tong-ham/client ✓
   app.use(express.static(path.join(__dirname, "..", "..", "client")));
 
+  // ─── GAME REGISTRY API ─────────────────────────────────────────
+
+  /**
+   * GET /api/games
+   * Return the list of all registered games with public metadata.
+   * roomClass is omitted from the response (server-only).
+   */
+  app.get("/api/games", (_req, res) => {
+    try {
+      const games = gameRegistry.getAll();
+      res.json({ success: true, games });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        error: "ไม่สามารถโหลดรายการเกมได้",
+      });
+    }
+  });
+
+  // ─── ROOM API ──────────────────────────────────────────────────
+
   /**
    * POST /api/rooms/create
    * Create a new room and return the room code.
+   * Accepts optional `gameType` in request body. Defaults to "forbidden-word".
+   *
+   * Room codes are globally unique across all game types (Loki F6a):
+   * the shared activeRoomCodes set prevents collisions between different games.
    */
-  app.post("/api/rooms/create", async (_req, res) => {
+  app.post("/api/rooms/create", async (req, res) => {
     try {
+      const gameType = req.body?.gameType || "forbidden-word";
+
+      // Validate gameType exists in registry
+      if (!gameRegistry.has(gameType)) {
+        res.status(400).json({
+          success: false,
+          error: `ไม่พบเกม "${gameType}"`,
+          code: "INVALID_GAME_TYPE",
+        });
+        return;
+      }
+
+      // Check if game is playable (not coming soon)
+      const gameDef = gameRegistry.get(gameType);
+      if (gameDef?.comingSoon) {
+        res.status(400).json({
+          success: false,
+          error: `เกม "${gameDef.displayNameTh}" ยังไม่พร้อมให้เล่น`,
+          code: "GAME_COMING_SOON",
+        });
+        return;
+      }
+
+      // Generate globally unique room code (shared across all game types)
       const roomCode = generateRoomCode(activeRoomCodes);
       activeRoomCodes.add(roomCode);
 
       res.json({
         success: true,
         roomCode,
+        gameType,
       });
     } catch (err) {
       res.status(500).json({

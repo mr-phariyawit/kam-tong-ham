@@ -3,6 +3,12 @@ const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // Excluded I and O to avoid confusion
 /**
  * Generate a unique 4-letter uppercase room code.
  * Checks against existing room codes to prevent collisions.
+ *
+ * Room codes are globally unique across all game types (Loki F6a resolution).
+ * The activeRoomCodes set in roomRegistry.ts is shared across all games,
+ * so a code "ABCD" for forbidden-word blocks "ABCD" for werewolf too.
+ * This prevents players from accidentally joining the wrong game type
+ * when sharing room codes.
  */
 export function generateRoomCode(existingCodes: Set<string>): string {
   const maxAttempts = 100;

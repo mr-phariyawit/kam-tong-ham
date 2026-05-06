@@ -1,10 +1,8 @@
 /**
- * REST API endpoint tests — AEG-67
+ * REST API endpoint tests -- AEG-67 + KTH-T-007
  *
  * These tests cover the HTTP layer (POST /api/rooms/create, GET /api/rooms/:code,
- * GET /api/categories, GET /api/health) that the client uses directly.
- * This layer was previously untested, allowing the "cannot create rooms" regression
- * to go undetected.
+ * GET /api/categories, GET /api/health, GET /api/games) that the client uses directly.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import request from "supertest";
@@ -20,10 +18,107 @@ vi.mock("../utils/roomRegistry", () => ({
   activeRoomCodes: new Set<string>(),
 }));
 
+// ─── Mock gameRegistry ────────────────────────────────────────────────────────
+// Note: vi.mock is hoisted, so all data must be inlined (no top-level variable refs).
+vi.mock("../utils/gameRegistry", () => {
+  const games = [
+    {
+      id: "forbidden-word",
+      displayName: "Forbidden Word",
+      displayNameTh: "คำต้องห้าม",
+      minPlayers: 2,
+      maxPlayers: 8,
+      comingSoon: false,
+      mechanic: "word-survival",
+      description: "desc",
+      icon: "\u{1f910}",
+    },
+    {
+      id: "werewolf",
+      displayName: "Werewolf",
+      displayNameTh: "หมาป่า",
+      minPlayers: 5,
+      maxPlayers: 15,
+      comingSoon: true,
+      mechanic: "social-deduction",
+      description: "desc",
+      icon: "\u{1f43a}",
+    },
+  ];
+  const registry = {
+    getAll: vi.fn().mockReturnValue(games),
+    getPlayable: vi.fn().mockReturnValue(games.filter((g: any) => !g.comingSoon)),
+    has: vi.fn().mockImplementation((id: string) => games.some((g: any) => g.id === id)),
+    get: vi.fn().mockImplementation((id: string) => {
+      const found = games.find((g: any) => g.id === id);
+      return found || undefined;
+    }),
+  };
+  return { gameRegistry: registry };
+});
+
 import * as matchMaker from "@colyseus/core/build/MatchMaker";
 import { activeRoomCodes } from "../utils/roomRegistry";
 
 const app = createApp();
+
+// ─── GET /api/games (KTH-T-007) ──────────────────────────────────────────────
+
+describe("GET /api/games", () => {
+  it("GAMES-01: returns success=true with a games array", async () => {
+    const res = await request(app).get("/api/games");
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.games)).toBe(true);
+  });
+
+  it("GAMES-02: returns all 2 registered games (mock)", async () => {
+    const res = await request(app).get("/api/games");
+
+    expect(res.body.games).toHaveLength(2);
+  });
+
+  it("GAMES-03: each game has the required public fields", async () => {
+    const res = await request(app).get("/api/games");
+
+    for (const game of res.body.games) {
+      expect(typeof game.id).toBe("string");
+      expect(typeof game.displayName).toBe("string");
+      expect(typeof game.displayNameTh).toBe("string");
+      expect(typeof game.minPlayers).toBe("number");
+      expect(typeof game.maxPlayers).toBe("number");
+      expect(typeof game.comingSoon).toBe("boolean");
+      expect(typeof game.mechanic).toBe("string");
+      expect(typeof game.description).toBe("string");
+      expect(typeof game.icon).toBe("string");
+    }
+  });
+
+  it("GAMES-04: roomClass is NOT included in the response", async () => {
+    const res = await request(app).get("/api/games");
+
+    for (const game of res.body.games) {
+      expect(game).not.toHaveProperty("roomClass");
+    }
+  });
+
+  it("GAMES-05: forbidden-word is marked as active (comingSoon=false)", async () => {
+    const res = await request(app).get("/api/games");
+
+    const fw = res.body.games.find((g: any) => g.id === "forbidden-word");
+    expect(fw).toBeDefined();
+    expect(fw.comingSoon).toBe(false);
+  });
+
+  it("GAMES-06: werewolf is marked as coming soon", async () => {
+    const res = await request(app).get("/api/games");
+
+    const ww = res.body.games.find((g: any) => g.id === "werewolf");
+    expect(ww).toBeDefined();
+    expect(ww.comingSoon).toBe(true);
+  });
+});
 
 // ─── POST /api/rooms/create ───────────────────────────────────────────────────
 
@@ -58,6 +153,41 @@ describe("POST /api/rooms/create", () => {
     const res2 = await request(app).post("/api/rooms/create");
 
     expect(res1.body.roomCode).not.toBe(res2.body.roomCode);
+  });
+
+  it("API-17: defaults to forbidden-word gameType when none specified", async () => {
+    const res = await request(app).post("/api/rooms/create");
+
+    expect(res.body.gameType).toBe("forbidden-word");
+  });
+
+  it("API-18: accepts explicit gameType in request body", async () => {
+    const res = await request(app)
+      .post("/api/rooms/create")
+      .send({ gameType: "forbidden-word" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.gameType).toBe("forbidden-word");
+  });
+
+  it("API-19: rejects invalid gameType with 400", async () => {
+    const res = await request(app)
+      .post("/api/rooms/create")
+      .send({ gameType: "nonexistent-game" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.code).toBe("INVALID_GAME_TYPE");
+  });
+
+  it("API-20: rejects coming-soon game with 400", async () => {
+    const res = await request(app)
+      .post("/api/rooms/create")
+      .send({ gameType: "werewolf" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.code).toBe("GAME_COMING_SOON");
   });
 });
 
@@ -151,14 +281,6 @@ describe("GET /api/categories", () => {
 });
 
 // ─── Regression: AEG-66 — room code isolation (filterBy fix) ─────────────────
-//
-// Root cause: gameServer.define() was missing .filterBy(["roomCode"]), so
-// client.join() could match ANY available room regardless of the requested code.
-// Players joining with code "ABCD" might land in a room with code "XYZA".
-//
-// Fix: added .filterBy(["roomCode"]) to the room definition in index.ts.
-// These tests confirm the HTTP lookup layer correctly isolates rooms by code,
-// which is the REST-layer equivalent of the matchmaker isolation guarantee.
 
 describe("Regression AEG-66: room code isolation", () => {
   afterEach(() => {

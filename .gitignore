@@ -18,7 +18,7 @@ _aegis-output/.cache/
 _aegis-backup/
 _aegis-backup-*/
 .aegis/brain/logs/*.log
-!.aegis/brain/logs/activity.log
+# disabled-by-remediate: !.aegis/brain/logs/activity.log
 .aegis/brain/state/
 .claude/worktrees/
 .claude/settings.json.v8-backup
@@ -41,3 +41,4 @@ credentials.*
 .aegis/brain/metrics/token-profile-*.jsonl
 .claude/settings.json.pre-*
 _aegis-output/
+.aegis/brain/logs/

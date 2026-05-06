@@ -99,13 +99,120 @@ else
 fi
 
 # 4. Configure issue prefix + create live storage dirs.
-info "Step 4/4 — configuring issue prefix + live storage"
+info "Step 4/6 — configuring issue prefix + live storage"
 mkdir -p "$PILOT/.aegis/brain/issues" \
          "$PILOT/.aegis/brain/live" \
          "$PILOT/.aegis/brain/activity" \
          "$PILOT/.aegis/brain/memory"
 echo "prefix: $ISSUE_PREFIX" > "$PILOT/.aegis/brain/issues/_config.yaml"
 success "issue prefix set: $ISSUE_PREFIX"
+
+# 5. Self-heal: drop hook entries whose target file doesn't exist post-install
+#    (Day-0 friction signal F1: pilots bootstrapped with older install.sh end up
+#    with hooks referencing tools/aegis-token-profile.sh that was never copied,
+#    producing non-blocking "No such file" noise on every Bash call.)
+info "Step 5/6 — self-heal: scanning hooks for missing targets"
+SETTINGS="$PILOT/.claude/settings.json"
+if [[ -f "$SETTINGS" ]] && command -v python3 >/dev/null 2>&1; then
+    HEAL_REPORT=$(PILOT="$PILOT" META="$META_DIR" python3 - "$SETTINGS" <<'PYEOF'
+import json, os, re, shutil, sys
+settings_path = sys.argv[1]
+pilot = os.environ["PILOT"]
+meta = os.environ["META"]
+with open(settings_path) as f:
+    s = json.load(f)
+healed, dropped, copied = [], [], []
+for event_name, event_entries in (s.get("hooks") or {}).items():
+    for entry in event_entries or []:
+        keep = []
+        for h in entry.get("hooks") or []:
+            cmd = h.get("command", "")
+            # Extract any tools/<file>.{sh,mjs,js} or .claude/hooks/<file>.sh path
+            m = re.findall(r'(tools/[^"\s)]+\.(?:sh|mjs|js)|\.claude/hooks/[^"\s)]+\.sh)', cmd)
+            missing_targets = []
+            for rel in m:
+                if not os.path.isfile(os.path.join(pilot, rel)):
+                    missing_targets.append(rel)
+            if not missing_targets:
+                keep.append(h)
+                continue
+            # Try self-heal: copy from meta if it exists there
+            healed_all = True
+            for rel in missing_targets:
+                meta_src = os.path.join(meta, rel)
+                pilot_dst = os.path.join(pilot, rel)
+                if os.path.isfile(meta_src):
+                    os.makedirs(os.path.dirname(pilot_dst), exist_ok=True)
+                    shutil.copy2(meta_src, pilot_dst)
+                    os.chmod(pilot_dst, 0o755)
+                    copied.append(rel)
+                else:
+                    healed_all = False
+            if healed_all:
+                keep.append(h)
+                healed.append(cmd[:60])
+            else:
+                dropped.append({"event": event_name, "matcher": entry.get("matcher", ""), "cmd": cmd[:60]})
+        entry["hooks"] = keep
+with open(settings_path, "w") as f:
+    json.dump(s, f, indent=2)
+    f.write("\n")
+print(f"copied={len(copied)} healed={len(healed)} dropped={len(dropped)}")
+for d in dropped:
+    print(f"  dropped: [{d['event']}:{d['matcher']}] {d['cmd']}...", file=sys.stderr)
+for c in copied:
+    print(f"  copied:  {c}", file=sys.stderr)
+PYEOF
+2>&1)
+    success "$HEAL_REPORT"
+else
+    warn "settings.json or python3 missing — skipping self-heal"
+fi
+
+# 6. If pilot is a git repo, untrack runtime brain dirs that should be ignored
+#    (Day-0 friction signal F3: pre-v12-04 bootstraps tracked .aegis/brain/{activity,
+#    runs,logs,state}/, causing every hook write to race with merges.)
+info "Step 6/6 — untracking runtime brain dirs (if tracked)"
+if [[ -d "$PILOT/.git" ]]; then
+    UNTRACK_PATHS=(
+        ".aegis/brain/activity"
+        ".aegis/brain/runs"
+        ".aegis/brain/logs"
+        ".aegis/brain/state"
+    )
+    untracked_count=0
+    for p in "${UNTRACK_PATHS[@]}"; do
+        # Only attempt if there are tracked files at this path
+        if (cd "$PILOT" && git ls-files --error-unmatch "$p" >/dev/null 2>&1); then
+            (cd "$PILOT" && git rm --cached -rq "$p" 2>/dev/null) && untracked_count=$((untracked_count+1))
+        fi
+    done
+    # Ensure entries are in .gitignore.
+    # Use anchored regex so e.g. ".aegis/brain/logs/*.log" doesn't make us
+    # think ".aegis/brain/logs/" is already there. Also disable any explicit
+    # "!<path>/<file>" re-include lines that would undo our intent (this was
+    # the bug that let kam-tong-ham re-track activity.log after F3).
+    GI="$PILOT/.gitignore"
+    for p in "${UNTRACK_PATHS[@]}"; do
+        line="$p/"
+        if [[ -f "$GI" ]]; then
+            if ! grep -qE "^${line}$" "$GI"; then
+                echo "$line" >> "$GI"
+            fi
+            if grep -qE "^!${p}/" "$GI"; then
+                sed -i.bak "s|^!${p}/|# disabled-by-bootstrap: !${p}/|g" "$GI"
+                rm -f "$GI.bak"
+            fi
+        fi
+    done
+    if [[ $untracked_count -gt 0 ]]; then
+        success "untracked $untracked_count runtime dir(s); .gitignore updated. Commit the change to make it permanent."
+    else
+        success "no tracked runtime dirs found (already clean)"
+    fi
+else
+    info "pilot is not a git repo — skipping untrack"
+fi
 
 # Seed the friction log if absent.
 FB="$PILOT/.aegis/brain/memory/aegis-plus-feedback.md"

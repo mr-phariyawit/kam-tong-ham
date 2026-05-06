@@ -12,13 +12,23 @@ server/dist/
 
 
 
+.aegis/brain/activity/
+.aegis/brain/runs/
+
+# v11+v12 runtime artifacts (matches AEGIS-Team meta repo conventions)
+.aegis/brain/metrics/raw/
+.aegis/brain/metrics/token-profile-*.jsonl
+.claude/settings.json.pre-*
+_aegis-output/
+.aegis/brain/logs/
+
 # >>> AEGIS Framework (managed by install.sh — do not edit between markers) >>>
 _aegis-output/*.tmp
 _aegis-output/.cache/
 _aegis-backup/
 _aegis-backup-*/
 .aegis/brain/logs/*.log
-# disabled-by-remediate: !.aegis/brain/logs/activity.log
+# disabled-by-bootstrap: !.aegis/brain/logs/activity.log
 .aegis/brain/state/
 .claude/worktrees/
 .claude/settings.json.v8-backup
@@ -33,12 +43,3 @@ _aegis-backup-*/
 *secret*
 credentials.*
 # <<< AEGIS Framework <<<
-.aegis/brain/activity/
-.aegis/brain/runs/
-
-# v11+v12 runtime artifacts (matches AEGIS-Team meta repo conventions)
-.aegis/brain/metrics/raw/
-.aegis/brain/metrics/token-profile-*.jsonl
-.claude/settings.json.pre-*
-_aegis-output/
-.aegis/brain/logs/

@@ -37,15 +37,69 @@ CONFIDENCE=""
 ANSWER=""
 REASONING=""
 
+print_usage() {
+    cat <<'USAGE'
+aegis-log-decision.sh — Nick Fury's decision-audit logger (S2-02)
+
+Usage:
+  tools/aegis-log-decision.sh \
+    --question "<one-line question>" \
+    --source <source-tag> \
+    --confidence <0.0-1.0> \
+    --answer "<one-line answer>" \
+    [--source-id <id>] \
+    [--reasoning "<why>"]
+
+Required flags: --question, --source, --confidence, --answer
+  (--reasoning becomes required when --source=judgment)
+
+Allowed --source values:
+  instinct:promoted | instinct:active | instinct:pending
+  resonance:<file> | adr:<id> | identity | framework
+  retro:<date> | judgment | auto-defer-to-captain
+
+Examples:
+  # Instinct-driven decision:
+  tools/aegis-log-decision.sh \
+    --question "Which gitignore mode?" \
+    --source "instinct:promoted" \
+    --source-id "sentinel-markers-over-comment-regex" \
+    --confidence 1.0 \
+    --answer "shared mode with sentinels"
+
+  # Judgment fallback (REQUIRES --reasoning):
+  tools/aegis-log-decision.sh \
+    --question "Add npm to allow list?" \
+    --source judgment \
+    --confidence 0.45 \
+    --answer "no, require approval" \
+    --reasoning "npm install runs arbitrary install hooks"
+
+Exit codes:
+  0 — logged
+  1 — usage / validation error
+  3 — logged AND judgment threshold exceeded (caller should route next decision to Captain America)
+
+Spec: .claude/references/decision-audit-protocol.md
+Sprint: sprint-v9-02 / S2-02 (--help added in v12 pilot Day-0 friction fix F2)
+USAGE
+}
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        -h|--help)    print_usage; exit 0 ;;
         --question)   QUESTION="$2";   shift 2 ;;
         --source)     SOURCE="$2";     shift 2 ;;
         --source-id)  SOURCE_ID="$2";  shift 2 ;;
         --confidence) CONFIDENCE="$2"; shift 2 ;;
         --answer)     ANSWER="$2";     shift 2 ;;
         --reasoning)  REASONING="$2";  shift 2 ;;
-        *) echo "Unknown arg: $1" >&2; exit 1 ;;
+        --*)          echo "Unknown flag: $1" >&2
+                      echo "Run 'tools/aegis-log-decision.sh --help' for usage." >&2
+                      exit 1 ;;
+        *)            echo "Unknown arg: $1 (this script takes flags only — no positional args)" >&2
+                      echo "Run 'tools/aegis-log-decision.sh --help' for usage." >&2
+                      exit 1 ;;
     esac
 done
 

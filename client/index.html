@@ -3,340 +3,386 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#FF4757">
+  <meta name="theme-color" content="#6C5CE7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="คำต้องห้าม">
-  <meta name="description" content="คำต้องห้าม — เกมปาร์ตี้สุดฮา เล่นกับเพื่อนได้ทุกที่">
-  <title>คำต้องห้าม</title>
+  <meta name="apple-mobile-web-app-title" content="Party Games TH">
+  <meta name="description" content="เกมปาร์ตี้ออนไลน์ เล่นกับเพื่อนได้ทุกที่ ไม่ต้องดาวน์โหลด!">
+  <title>เกมปาร์ตี้ | Party Games TH</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ─── Platform Home Styles ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1e2d50;
+      --accent: #6C5CE7;
+      --accent-light: #a29bfe;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0c8;
+      --badge-coming-soon: #ffa502;
+      --badge-active: #2ed573;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      --radius: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* ─── Header ─────────────────────────────────── */
+    .platform-header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    .platform-logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .platform-title {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-light), #fd79a8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+
+    .platform-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Game Grid ──────────────────────────────── */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 20px 16px;
+      max-width: 420px;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    .game-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      border: 2px solid transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .game-card:active {
+      transform: scale(0.96);
+    }
+
+    .game-card:not(.coming-soon):hover,
+    .game-card:not(.coming-soon):focus {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .game-card.coming-soon {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    .game-card-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .game-card-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .game-card-players {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .game-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ─── Badges ──────────────────────────────────── */
+    .badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    .badge-active {
+      background: var(--badge-active);
+      color: #1a1a2e;
+    }
+
+    .badge-coming-soon {
+      background: var(--badge-coming-soon);
+      color: #1a1a2e;
+    }
+
+    /* ─── Coming Soon Toast ──────────────────────── */
+    .toast-overlay {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast-overlay.show {
+      opacity: 1;
+    }
+
+    /* ─── Footer ──────────────────────────────────── */
+    .platform-footer {
+      text-align: center;
+      padding: 16px 20px calc(16px + var(--safe-bottom));
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    /* ─── Loading State ──────────────────────────── */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--text-secondary);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #ff6b6b;
+    }
+
+    .error-state button {
+      margin-top: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Sarabun', sans-serif;
+      font-weight: 600;
+    }
+
+    /* ─── Responsive ─────────────────────────────── */
+    @media (min-width: 480px) {
+      .game-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 600px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Sound Toggle (global) -->
-  <button class="sound-toggle" id="soundToggle" aria-label="เปิด/ปิดเสียง">🔊</button>
+  <!-- Header -->
+  <header class="platform-header">
+    <div class="platform-logo">🎮</div>
+    <h1 class="platform-title">เกมปาร์ตี้</h1>
+    <p class="platform-subtitle">เล่นกับเพื่อน ไม่ต้องดาวน์โหลด!</p>
+  </header>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
-
-  <!-- Confetti Container -->
-  <div class="confetti-container" id="confettiContainer"></div>
-
-  <!-- ========== SCREEN: HOME ========== -->
-  <div class="screen active" id="screen-home">
-    <div class="home-logo">🎭</div>
-    <h1 class="home-title">คำต้องห้าม</h1>
-    <p class="home-subtitle">เกมปาร์ตี้สุดฮา เล่นกับเพื่อน!</p>
-
-    <div class="home-buttons">
-      <button class="btn btn-primary" id="btnCreateRoom">สร้างห้อง</button>
-      <button class="btn btn-secondary" id="btnJoinRoom">เข้าร่วมห้อง</button>
+  <!-- Game Grid -->
+  <main class="game-grid" id="gameGrid">
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <div>กำลังโหลดเกม...</div>
     </div>
+  </main>
 
-    <button class="btn btn-ghost home-rules-btn" id="btnShowRules">📖 กติกาการเล่น</button>
+  <!-- Coming Soon Toast -->
+  <div class="toast-overlay" id="comingSoonToast">เร็วๆ นี้!</div>
 
-    <div class="home-categories" id="btnBrowseCategories">
-      📚 หมวดคำ ►
-    </div>
+  <!-- Footer -->
+  <footer class="platform-footer">
+    Party Games TH v2.0
+  </footer>
 
-    <div class="home-footer">
-      v1.0 — เทพลีลา x คำต้องห้าม
-    </div>
+  <script>
+    (function () {
+      'use strict';
 
-    <!-- ===== Rules Modal ===== -->
-    <div class="modal" id="rulesModal">
-      <div class="modal-content rules-modal-content">
-        <h2>📖 กติกาการเล่น</h2>
+      const gameGrid = document.getElementById('gameGrid');
+      const loadingState = document.getElementById('loadingState');
+      const comingSoonToast = document.getElementById('comingSoonToast');
+      let toastTimeout = null;
 
-        <div class="rules-section">
-          <h3>🎯 เป้าหมาย</h3>
-          <p>หลอกให้คนอื่นพูด <strong>"คำต้องห้าม"</strong> ของเขา โดยที่ตัวเองไม่พูดคำของตัวเอง!</p>
-        </div>
+      /**
+       * Fetch the game list from the server and render game cards.
+       */
+      async function loadGames() {
+        try {
+          const res = await fetch('/api/games');
+          const data = await res.json();
 
-        <div class="rules-section">
-          <h3>📱 วิธีเล่น</h3>
-          <ol class="rules-list">
-            <li>ผู้เล่น 2-8 คน <strong>นั่งล้อมวง</strong> ด้วยกัน</li>
-            <li>แต่ละคนจะได้ <strong>"คำต้องห้าม"</strong> บนจอมือถือ</li>
-            <li><strong>ถือโทรศัพท์หงายจอออก</strong> (หรือแปะที่หน้าผาก) — คนอื่นเห็นคำของเรา แต่เราไม่เห็นคำตัวเอง!</li>
-            <li><strong>สนทนากันอิสระ</strong> — ถาม ตอบ เล่าเรื่อง ยั่วยุ พูดได้เต็มที่!</li>
-            <li><strong>พยายามหลอกให้คนอื่น</strong> พูดคำของตัวเขาเอง</li>
-            <li><strong>ระวัง!</strong> อย่าพูดคำของตัวเอง (ซึ่งไม่รู้ว่าคืออะไร)</li>
-          </ol>
-        </div>
+          if (!data.success || !Array.isArray(data.games)) {
+            throw new Error('Invalid response');
+          }
 
-        <div class="rules-section">
-          <h3>💀 ตาย!</h3>
-          <ol class="rules-list">
-            <li>ถ้าใครพูดคำต้องห้ามของตัวเอง เพื่อนๆ จะตะโกน <strong>"มึงตายแล้ว!"</strong></li>
-            <li>คนที่ตาย <strong>กดปุ่ม "💀 ตาย!"</strong> บนจอตัวเอง</li>
-            <li>จะเห็นคำที่ตัวเองพลาดพูด</li>
-            <li>นั่งดูเพื่อนเล่นต่อจนจบรอบ</li>
-          </ol>
-        </div>
+          renderGames(data.games);
+        } catch (err) {
+          console.error('Failed to load games:', err);
+          gameGrid.innerHTML = `
+            <div class="error-state" style="grid-column: 1 / -1;">
+              <div style="font-size: 48px; margin-bottom: 12px;">😵</div>
+              <div>ไม่สามารถโหลดรายการเกมได้</div>
+              <button onclick="location.reload()">ลองอีกครั้ง</button>
+            </div>
+          `;
+        }
+      }
 
-        <div class="rules-section">
-          <h3>🏆 คะแนน</h3>
-          <div class="rules-scoring">
-            <div class="score-item score-negative">💀 ตาย (พูดคำตัวเอง) <span>-3</span></div>
-            <div class="score-item score-positive">⭐ รอดจนจบรอบ <span>+5</span></div>
-            <div class="score-item score-positive">🧠 ทายคำตัวเองถูก <span>+3</span></div>
-          </div>
-        </div>
+      /**
+       * Render game cards in the grid.
+       */
+      function renderGames(games) {
+        gameGrid.innerHTML = '';
 
-        <div class="rules-section">
-          <h3>💡 เคล็ดลับ</h3>
-          <ul class="rules-tips">
-            <li>กล้าถาม กล้าตอบ — ยิ่งพูดเยอะยิ่งสนุก!</li>
-            <li>อย่าพูดซ้ำคำถาม เช่น ถูกถามว่า "กินอะไร?" ตอบตรงๆ อย่าเอ่ยว่า "กิน"</li>
-            <li>สังเกตสีหน้าเพื่อน — ถ้าเขาพยายามเลี่ยงหัวข้อ แสดงว่าใกล้แล้ว!</li>
-            <li>ตอนจะจบรอบ ลองทายคำตัวเอง — ถ้าถูกได้โบนัส!</li>
-          </ul>
-        </div>
+        games.forEach(function (game) {
+          var card = document.createElement('div');
+          card.className = 'game-card' + (game.comingSoon ? ' coming-soon' : '');
+          card.setAttribute('role', 'button');
+          card.setAttribute('tabindex', '0');
+          card.setAttribute('aria-label', game.displayNameTh);
 
-        <button class="btn btn-primary" id="btnCloseRules">เข้าใจแล้ว เล่นเลย! 🎮</button>
-      </div>
-    </div>
-  </div>
+          // Badge
+          var badgeHtml = '';
+          if (game.comingSoon) {
+            badgeHtml = '<span class="badge badge-coming-soon">เร็วๆ นี้</span>';
+          }
 
-  <!-- ========== SCREEN: LOBBY ========== -->
-  <div class="screen" id="screen-lobby">
-    <div class="lobby-header">
-      <button class="lobby-back" id="btnLobbyBack">← ออก</button>
-      <span class="label" id="lobbyHostLabel"></span>
-    </div>
+          card.innerHTML =
+            badgeHtml +
+            '<span class="game-card-icon">' + game.icon + '</span>' +
+            '<div class="game-card-name">' + game.displayNameTh + '</div>' +
+            '<div class="game-card-players">' + game.minPlayers + '-' + game.maxPlayers + ' คน</div>' +
+            '<div class="game-card-desc">' + game.description + '</div>';
 
-    <div class="room-code-section">
-      <div class="room-code-label">รหัสห้อง</div>
-      <div class="room-code-display" id="roomCodeDisplay" title="แตะเพื่อคัดลอก">----</div>
-      <div class="room-code-copied" id="roomCodeCopied">คัดลอกแล้ว!</div>
-      <div class="qr-container" id="qrContainer">
-        <canvas id="qrCanvas" width="120" height="120"></canvas>
-      </div>
-    </div>
+          card.addEventListener('click', function () {
+            if (game.comingSoon) {
+              showComingSoonToast(game.displayNameTh);
+            } else {
+              navigateToGame(game.id);
+            }
+          });
 
-    <div class="player-list-header" id="playerCountLabel">ผู้เล่น 0/8</div>
-    <div class="player-list" id="lobbyPlayerList"></div>
+          // Keyboard accessibility
+          card.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              card.click();
+            }
+          });
 
-    <div class="lobby-config" id="lobbyConfig">
-      <div class="config-row">
-        <span class="config-label">หมวดคำ</span>
-        <select class="config-select" id="configCategory">
-          <option value="common">💬 คำทั่วไป</option>
-          <!-- Populated dynamically from /api/categories -->
-        </select>
-      </div>
-      <div class="config-row">
-        <span class="config-label">จำนวนรอบ</span>
-        <div class="config-options" id="configRounds">
-          <button class="config-option" data-value="1">1</button>
-          <button class="config-option active" data-value="3">3</button>
-          <button class="config-option" data-value="5">5</button>
-        </div>
-      </div>
-      <div class="config-row">
-        <span class="config-label">เวลา/รอบ</span>
-        <div class="config-options" id="configTimer">
-          <button class="config-option" data-value="120">2 นาที</button>
-          <button class="config-option active" data-value="180">3 นาที</button>
-          <button class="config-option" data-value="300">5 นาที</button>
-        </div>
-      </div>
-    </div>
+          gameGrid.appendChild(card);
+        });
+      }
 
-    <div class="lobby-host-actions hidden" id="lobbyHostActions">
-      <button class="btn btn-ghost btn-small" id="btnTransferHost">🔑 โอนตำแหน่งโฮสต์</button>
-    </div>
+      /**
+       * Navigate to a game's page.
+       */
+      function navigateToGame(gameId) {
+        // Map game IDs to their client paths
+        var gamePaths = {
+          'forbidden-word': '/games/forbidden-word/index.html'
+        };
 
-    <div class="lobby-bottom">
-      <button class="btn btn-primary" id="btnStartGame" disabled>เริ่มเกม</button>
-    </div>
-  </div>
+        var path = gamePaths[gameId];
+        if (path) {
+          window.location.href = path;
+        } else {
+          showComingSoonToast('เกมนี้');
+        }
+      }
 
-  <!-- ========== SCREEN: PLAYING ========== -->
-  <div class="screen" id="screen-playing">
-    <div class="playing-topbar">
-      <div class="timer-display" id="playingTimer">3:00</div>
-      <div class="alive-count" id="aliveCount">👁️ 4 คน</div>
-    </div>
+      /**
+       * Show a "coming soon" toast notification.
+       */
+      function showComingSoonToast(gameName) {
+        comingSoonToast.textContent = gameName + ' — เร็วๆ นี้!';
+        comingSoonToast.classList.add('show');
 
-    <div class="playing-word-area" id="playingWordArea">
-      <div class="word-display" id="wordDisplay">---</div>
-    </div>
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function () {
+          comingSoonToast.classList.remove('show');
+        }, 2000);
+      }
 
-    <div class="playing-secondary-actions">
-      <button class="btn btn-ghost btn-small" id="btnGuessWord">🧠 เดาคำ</button>
-    </div>
-
-    <div class="playing-bottom">
-      <button class="btn btn-kill" id="btnKill">💀 ตาย!</button>
-      <div class="dead-hint">เพื่อนบอกว่าคุณพูดคำต้องห้าม? กดเลย!</div>
-    </div>
-
-    <!-- Confirm Death Modal -->
-    <div class="confirm-modal hidden" id="confirmDeathModal">
-      <div class="confirm-modal-content">
-        <div class="confirm-icon">💀</div>
-        <div class="confirm-title">ยอมรับว่าตาย?</div>
-        <div class="confirm-text">เพื่อนบอกว่าคุณพูดคำต้องห้ามของตัวเอง<br>กด "ตายจริง" เพื่อยอมรับ</div>
-        <div class="confirm-buttons">
-          <button class="btn btn-kill" id="btnConfirmDeath">ตายจริง 💀</button>
-          <button class="btn btn-ghost" id="btnDenyDeath">ยังไม่ตาย!</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Spectator overlay (shown when eliminated) -->
-    <div class="spectator-overlay hidden" id="spectatorOverlay">
-      <div class="spectator-icon">💀</div>
-      <div class="spectator-text">คุณตายแล้ว!</div>
-      <div class="spectator-word" id="spectatorWord"></div>
-      <div class="label">รอจนจบรอบ...</div>
-    </div>
-  </div>
-
-  <!-- VOTING screen removed — self-report death mechanic -->
-  <div class="screen" id="screen-voting"></div>
-
-  <!-- ========== SCREEN: GUESS PHASE ========== -->
-  <div class="screen" id="screen-guess">
-    <div class="guess-title">🧠 เดาคำของคุณ!</div>
-    <div class="guess-timer" id="guessTimerDisplay">0:10</div>
-    <div class="guess-prompt">คุณคิดว่าคำของคุณคืออะไร?</div>
-
-    <div class="guess-input-area">
-      <input type="text" class="input-field" id="guessInput" placeholder="พิมพ์คำที่นี่..." maxlength="30" autocomplete="off">
-      <button class="btn btn-primary" id="btnSubmitGuess">ส่งคำตอบ</button>
-      <button class="btn btn-ghost" id="btnSkipGuess">ข้าม</button>
-    </div>
-
-    <div class="guess-result-display hidden" id="guessResultDisplay">
-      <div class="guess-result-icon" id="guessResultIcon"></div>
-      <div class="guess-result-text" id="guessResultText"></div>
-      <div class="guess-result-word" id="guessResultWord"></div>
-    </div>
-  </div>
-
-  <!-- ========== SCREEN: ROUND END ========== -->
-  <div class="screen" id="screen-roundend">
-    <div class="roundend-title" id="roundendTitle">จบรอบ 1/3</div>
-    <div class="roundend-table" id="roundendTable"></div>
-    <div class="roundend-bottom">
-      <button class="btn btn-primary" id="btnNextFromRoundend">ต่อไป →</button>
-    </div>
-  </div>
-
-  <!-- ========== SCREEN: SCOREBOARD ========== -->
-  <div class="screen" id="screen-scoreboard">
-    <div class="scoreboard-title">🏆 คะแนน</div>
-    <div class="scoreboard-round" id="scoreboardRound">รอบ 1/3</div>
-    <div class="scoreboard-list" id="scoreboardList"></div>
-    <div class="scoreboard-bottom" id="scoreboardBottom">
-      <button class="btn btn-primary" id="btnNextRound">เล่นรอบถัดไป</button>
-      <button class="btn btn-secondary" id="btnEndGame">จบเกม</button>
-    </div>
-  </div>
-
-  <!-- ========== SCREEN: GAME OVER ========== -->
-  <div class="screen" id="screen-gameover">
-    <div class="gameover-title">🎉 จบเกม!</div>
-
-    <div class="gameover-winner" id="gameoverWinner">
-      <div class="gameover-winner-label">👑 ผู้ชนะ</div>
-      <div class="gameover-winner-avatar" id="gameoverWinnerAvatar">🎭</div>
-      <div class="gameover-winner-name" id="gameoverWinnerName">---</div>
-      <div class="gameover-winner-score" id="gameoverWinnerScore">0 คะแนน</div>
-    </div>
-
-    <div class="gameover-rankings" id="gameoverRankings"></div>
-
-    <div class="gameover-buttons">
-      <button class="btn btn-secondary" id="btnShareResults">📤 แชร์ผล</button>
-      <button class="btn btn-primary" id="btnPlayAgain">🔄 เล่นอีก</button>
-      <button class="btn btn-ghost" id="btnExit">🚪 ออก</button>
-    </div>
-  </div>
-
-  <!-- ========== MODAL: NICKNAME ENTRY ========== -->
-  <div class="modal-overlay hidden" id="nicknameModal">
-    <div class="modal-content nickname-modal">
-      <div class="modal-title">ตั้งชื่อของคุณ</div>
-      <input type="text" class="input-field" id="nicknameInput" placeholder="ชื่อเล่น (1-15 ตัวอักษร)" maxlength="15" autocomplete="off">
-      <div class="nickname-error hidden" id="nicknameError"></div>
-      <div class="label mb-8" style="margin-top:12px">เลือกอวาตาร์</div>
-      <div class="emoji-grid" id="emojiGrid"></div>
-      <button class="btn btn-primary" id="btnConfirmNickname" style="margin-top:12px">ยืนยัน</button>
-    </div>
-  </div>
-
-  <!-- ========== MODAL: JOIN ROOM ========== -->
-  <div class="modal-overlay hidden" id="joinModal">
-    <div class="modal-content">
-      <div class="modal-title">เข้าร่วมห้อง</div>
-      <input type="text" class="input-field input-code" id="joinCodeInput" placeholder="รหัส" maxlength="4" autocomplete="off">
-      <button class="btn btn-primary" id="btnConfirmJoin" style="margin-top:12px">เข้าร่วม</button>
-      <button class="btn btn-ghost" id="btnCancelJoin" style="margin-top:8px">ยกเลิก</button>
-    </div>
-  </div>
-
-  <!-- ========== MODAL: TARGET SELECTION ========== -->
-  <div class="modal-overlay hidden" id="targetModal">
-    <div class="modal-content">
-      <div class="modal-title">เลือกเป้าหมาย</div>
-      <div class="target-list" id="targetList"></div>
-      <button class="btn btn-ghost" id="btnCancelTarget" style="margin-top:12px">ยกเลิก</button>
-    </div>
-  </div>
-
-  <!-- ========== MODAL: CATEGORIES ========== -->
-  <div class="modal-overlay hidden" id="categoriesModal">
-    <div class="modal-content">
-      <div class="modal-title">📚 หมวดคำ</div>
-      <div class="category-list" id="categoryList"></div>
-      <button class="btn btn-ghost" id="btnCloseCategories" style="margin-top:12px">ปิด</button>
-    </div>
-  </div>
-
-  <!-- ========== COUNTDOWN OVERLAY ========== -->
-  <div class="countdown-overlay hidden" id="countdownOverlay">
-    <div id="countdownContent"></div>
-  </div>
-
-  <!-- ========== CHALLENGE PENALTY TOAST ========== -->
-  <div class="penalty-toast hidden" id="penaltyToast"></div>
-
-  <!-- ========== VOTE RESULT OVERLAY ========== -->
-  <div class="vote-result-overlay hidden" id="voteResultOverlay">
-    <div class="vote-result-icon" id="voteResultIcon"></div>
-    <div class="vote-result-text" id="voteResultText"></div>
-    <div class="vote-result-detail" id="voteResultDetail"></div>
-  </div>
-
-  <!-- ========== RECONNECTING OVERLAY ========== -->
-  <div class="reconnect-overlay hidden" id="reconnectOverlay">
-    <div class="reconnect-content">
-      <div class="reconnect-spinner"></div>
-      <div class="reconnect-text" id="reconnectText"></div>
-      <div class="reconnect-attempt" id="reconnectAttempt"></div>
-      <button class="btn btn-ghost reconnect-cancel" id="btnCancelReconnect"></button>
-    </div>
-  </div>
-
-  <!-- ========== REJOIN BANNER (home screen) ========== -->
-  <div class="rejoin-banner hidden" id="rejoinBanner">
-    <div class="rejoin-banner-text" id="rejoinBannerText"></div>
-    <div class="rejoin-banner-buttons">
-      <button class="btn btn-primary btn-sm" id="btnRejoinRoom"></button>
-      <button class="btn btn-ghost btn-sm" id="btnDismissRejoin"></button>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js"></script>
-  <script src="js/sounds.js"></script>
-  <script src="js/app.js"></script>
+      // Load games on page load
+      loadGames();
+    })();
+  </script>
 </body>
 </html>

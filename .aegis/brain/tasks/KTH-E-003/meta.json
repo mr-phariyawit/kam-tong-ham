@@ -1,0 +1,15 @@
+{
+  "id": "KTH-E-003",
+  "type": "epic",
+  "title": "Platform Foundation (BaseRoom, Home Screen, Shared UI)",
+  "description": "Extract shared game logic into BaseRoom, create home screen game selector, establish multi-game architecture. Refactor existing ForbiddenWord to extend BaseRoom.",
+  "status": "todo",
+  "priority": "critical",
+  "points": 18,
+  "sprint": "sprint-2",
+  "block0_mode": "full",
+  "tags": ["feature", "refactor"],
+  "tasks": ["KTH-T-005", "KTH-T-006", "KTH-T-007", "KTH-T-008", "KTH-T-009", "KTH-T-010", "KTH-T-011", "KTH-T-012"],
+  "created": "2026-05-07T00:00:00Z",
+  "source": "PLATFORM_SPEC_v2.md"
+}

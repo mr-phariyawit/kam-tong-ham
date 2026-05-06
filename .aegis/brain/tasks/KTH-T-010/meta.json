@@ -1,0 +1,22 @@
+{
+  "id": "KTH-T-010",
+  "type": "task",
+  "title": "Migrate existing client to games/forbidden-word/ structure",
+  "description": "Restructure client code into platform layout. Move current game UI to client/games/forbidden-word/. Create shared lobby and socket wrapper in client/shared/.",
+  "status": "todo",
+  "priority": "high",
+  "points": 2,
+  "sprint": "sprint-2",
+  "block0_mode": "standard",
+  "tags": ["refactor"],
+  "epic": "KTH-E-003",
+  "sub_tasks": [
+    "Create client/games/forbidden-word/ directory",
+    "Extract game-specific JS from app.js to games/forbidden-word/game.js",
+    "Create client/shared/socket.js (Colyseus client wrapper)",
+    "Create client/shared/lobby.js (shared lobby UI)",
+    "Verify game still works end-to-end"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-07T00:00:00Z"
+}

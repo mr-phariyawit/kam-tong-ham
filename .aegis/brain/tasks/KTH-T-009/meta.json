@@ -1,0 +1,22 @@
+{
+  "id": "KTH-T-009",
+  "type": "task",
+  "title": "Refactor ForbiddenWordRoom to extend BaseRoom",
+  "description": "Refactor KhamTongHamRoom into ForbiddenWordRoom extending BaseRoom. Move shared logic (lobby, players, host transfer) to BaseRoom, keep game-specific logic in ForbiddenWordRoom. Zero behavior change.",
+  "status": "todo",
+  "priority": "critical",
+  "points": 3,
+  "sprint": "sprint-2",
+  "block0_mode": "full",
+  "tags": ["refactor"],
+  "epic": "KTH-E-003",
+  "sub_tasks": [
+    "Rename KhamTongHamRoom.ts to ForbiddenWordRoom.ts",
+    "Make ForbiddenWordRoom extend BaseRoom",
+    "Move shared handlers to BaseRoom (onCreate, onJoin, onLeave shared parts)",
+    "Update app.ts room registration",
+    "Run full test suite - must be 172/172 PASS"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-07T00:00:00Z"
+}

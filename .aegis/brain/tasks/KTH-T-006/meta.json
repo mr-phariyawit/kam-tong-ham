@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-006",
+  "type": "task",
+  "title": "Create BaseState schema (shared player, phase, timer state)",
+  "description": "Define a Colyseus BaseState schema with shared fields: players map, phase, timer, host, roomCode. Game-specific states extend this.",
+  "status": "todo",
+  "priority": "critical",
+  "points": 2,
+  "sprint": "sprint-2",
+  "block0_mode": "standard",
+  "tags": ["feature"],
+  "epic": "KTH-E-003",
+  "sub_tasks": [
+    "Analyze GameState.ts for shared vs game-specific fields",
+    "Create BaseState.ts with shared Colyseus schema fields",
+    "Create ForbiddenWordState.ts extending BaseState",
+    "Verify schema compatibility with existing client"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-07T00:00:00Z"
+}

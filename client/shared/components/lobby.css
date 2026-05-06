@@ -1,0 +1,248 @@
+/**
+ * Shared Lobby Component Styles
+ *
+ * Generic lobby styles reusable across all party games.
+ * Import via: <link rel="stylesheet" href="/shared/components/lobby.css">
+ *
+ * Theme variables (override per-game if needed):
+ *   --lobby-bg: background color
+ *   --lobby-card-bg: card/section background
+ *   --lobby-accent: primary accent color
+ *   --lobby-text: primary text color
+ *   --lobby-text-secondary: secondary text color
+ */
+
+/* ─── Variables (defaults) ──────────────────────────────── */
+:root {
+  --lobby-bg: #1a1a2e;
+  --lobby-card-bg: #16213e;
+  --lobby-accent: #6C5CE7;
+  --lobby-text: #ffffff;
+  --lobby-text-secondary: #b0b0c8;
+  --lobby-radius: 12px;
+  --lobby-danger: #ff4757;
+  --lobby-success: #2ed573;
+}
+
+/* ─── SharedLobby Container ─────────────────────────────── */
+.shared-lobby {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--lobby-bg);
+  color: var(--lobby-text);
+  font-family: 'Sarabun', sans-serif;
+}
+
+/* ─── Header ────────────────────────────────────────────── */
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.lobby-back-btn {
+  background: none;
+  border: none;
+  color: var(--lobby-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.lobby-back-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lobby-game-label {
+  font-size: 14px;
+  color: var(--lobby-accent);
+  font-weight: 600;
+}
+
+/* ─── RoomCodeDisplay ───────────────────────────────────── */
+.shared-room-code {
+  text-align: center;
+  padding: 16px;
+}
+
+.room-code-label {
+  font-size: 13px;
+  color: var(--lobby-text-secondary);
+  margin-bottom: 8px;
+}
+
+.room-code-value {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 8px 16px;
+  background: var(--lobby-card-bg);
+  border-radius: var(--lobby-radius);
+  display: inline-block;
+  min-width: 160px;
+  transition: background 0.2s;
+}
+
+.room-code-value:active {
+  background: rgba(108, 92, 231, 0.2);
+}
+
+.room-code-copied {
+  font-size: 12px;
+  color: var(--lobby-success);
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.room-code-copied.show {
+  opacity: 1;
+}
+
+/* ─── PlayerList ────────────────────────────────────────── */
+.shared-player-list {
+  padding: 0 16px;
+  flex: 1;
+}
+
+.player-count {
+  font-size: 14px;
+  color: var(--lobby-text-secondary);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+
+.player-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--lobby-card-bg);
+  border-radius: var(--lobby-radius);
+  transition: opacity 0.3s;
+}
+
+.player-row.is-me {
+  border-left: 3px solid var(--lobby-accent);
+}
+
+.player-row.disconnected {
+  opacity: 0.5;
+}
+
+.player-avatar {
+  font-size: 24px;
+  width: 36px;
+  text-align: center;
+}
+
+.player-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.player-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.host-badge {
+  font-size: 16px;
+}
+
+.offline-badge {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+/* ─── KickButton ────────────────────────────────────────── */
+.kick-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  opacity: 0.5;
+}
+
+.kick-btn:hover,
+.kick-btn:active {
+  background: rgba(255, 71, 87, 0.2);
+  opacity: 1;
+}
+
+/* ─── Host Actions ──────────────────────────────────────── */
+.lobby-host-actions {
+  padding: 8px 16px;
+  text-align: center;
+}
+
+.lobby-host-actions.hidden {
+  display: none;
+}
+
+.lobby-transfer-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--lobby-text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.lobby-transfer-btn:active {
+  border-color: var(--lobby-accent);
+  color: var(--lobby-text);
+}
+
+/* ─── Bottom / Start Button ─────────────────────────────── */
+.lobby-bottom {
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.lobby-start-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--lobby-accent);
+  color: white;
+  border: none;
+  border-radius: var(--lobby-radius);
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.lobby-start-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.lobby-start-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,0 +1,15 @@
+{
+  "id": "KTH-E-009",
+  "type": "epic",
+  "title": "Cross-Game Polish + Performance",
+  "description": "QR sharing, performance optimization, lazy loading, cross-game UI polish, final QA.",
+  "status": "todo",
+  "priority": "medium",
+  "points": 5,
+  "sprint": "sprint-8",
+  "block0_mode": "standard",
+  "tags": ["chore"],
+  "tasks": [],
+  "created": "2026-05-07T00:00:00Z",
+  "source": "PLATFORM_SPEC_v2.md"
+}

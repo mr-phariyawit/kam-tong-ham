@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-012",
+  "type": "task",
+  "title": "Verify all 172 existing tests still pass after refactor",
+  "description": "Full regression test after platform refactoring. All 172 existing tests must pass with zero failures. Add BaseRoom unit tests.",
+  "status": "todo",
+  "priority": "critical",
+  "points": 1,
+  "sprint": "sprint-2",
+  "block0_mode": "lite",
+  "tags": ["qa"],
+  "epic": "KTH-E-003",
+  "sub_tasks": [
+    "Run npm test -- verify 172/172 PASS",
+    "Add BaseRoom unit tests (create, join, leave, host transfer)",
+    "Add game registry tests",
+    "Run full suite again after adding new tests"
+  ],
+  "assignee": "war-machine",
+  "created": "2026-05-07T00:00:00Z"
+}

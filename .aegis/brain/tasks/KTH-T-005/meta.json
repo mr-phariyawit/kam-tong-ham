@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-005",
+  "type": "task",
+  "title": "Create BaseRoom class (extract shared logic from KhamTongHamRoom)",
+  "description": "Extract lobby management, player join/leave, host transfer, timer, and common message handlers into a BaseRoom class that all game rooms will extend.",
+  "status": "todo",
+  "priority": "critical",
+  "points": 3,
+  "sprint": "sprint-2",
+  "block0_mode": "full",
+  "tags": ["feature", "refactor"],
+  "epic": "KTH-E-003",
+  "sub_tasks": [
+    "Read KhamTongHamRoom.ts and identify shared logic",
+    "Create BaseRoom.ts with lobby, player management, host transfer",
+    "Create BaseRoom tests",
+    "Verify existing tests still compile"
+  ],
+  "assignee": "spider-man",
+  "created": "2026-05-07T00:00:00Z"
+}

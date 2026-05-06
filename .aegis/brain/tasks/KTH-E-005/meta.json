@@ -1,0 +1,15 @@
+{
+  "id": "KTH-E-005",
+  "type": "epic",
+  "title": "Spy Game (สายลับ)",
+  "description": "Full implementation of Spy location deduction game. Location data, question flow, spy guess, voting.",
+  "status": "todo",
+  "priority": "high",
+  "points": 11,
+  "sprint": "sprint-4",
+  "block0_mode": "full",
+  "tags": ["feature"],
+  "tasks": [],
+  "created": "2026-05-07T00:00:00Z",
+  "source": "PLATFORM_SPEC_v2.md"
+}

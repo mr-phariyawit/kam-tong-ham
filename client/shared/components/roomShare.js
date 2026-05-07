@@ -67,9 +67,14 @@
   }
 
   // ─── Get room URL ──────────────────────────────────────────────
+  // Pure URL builder — testable in node without jsdom (Sprint 13 — Issue #12).
+  // The browser-side wrapper just supplies window.location.{origin,pathname}.
+  function buildRoomURL(origin, pathname, roomCode) {
+    return (origin || '') + (pathname || '/') + '?join=' + String(roomCode || '').toUpperCase();
+  }
+
   function getRoomURL(roomCode) {
-    var base = window.location.origin + window.location.pathname;
-    return base + '?join=' + (roomCode || '').toUpperCase();
+    return buildRoomURL(window.location.origin, window.location.pathname, roomCode);
   }
 
   // ─── Render QR into element ────────────────────────────────────
@@ -153,11 +158,21 @@
   }
 
   // ─── Public API ────────────────────────────────────────────────
-  window.RoomShare = {
+  var api = {
     renderQR: renderQR,
     getRoomURL: getRoomURL,
+    buildRoomURL: buildRoomURL, // pure helper — node-testable
     copyToClipboard: copyToClipboard,
     showShareModal: showShareModal,
     hideShareModal: hideShareModal,
   };
+
+  if (typeof window !== 'undefined') {
+    window.RoomShare = api;
+  }
+  // CommonJS export for node-side unit tests (Sprint 13 — Issue #12).
+  // The IIFE returns nothing in browser; node requires a direct module export.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = api;
+  }
 })();

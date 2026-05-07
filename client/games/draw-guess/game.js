@@ -140,6 +140,8 @@
       configDrawTime = data.drawTime;
       $('roundsValue').textContent = data.rounds;
       $('timeValue').textContent = data.drawTime;
+      // Sprint 13 — Issue #14: keep strictness UI in sync with server state
+      if (data.guessStrictness) applyStrictnessActive(data.guessStrictness);
     });
 
     room.onMessage('DRAW_WORD', function (data) {
@@ -487,6 +489,14 @@
     $('toolEraser').classList.toggle('active', currentTool === 'eraser');
   }
 
+  // Sprint 13 — Issue #14: visually mark active strictness button
+  function applyStrictnessActive(strictness) {
+    var btns = document.querySelectorAll('.config-btn-strict');
+    btns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-strictness') === strictness);
+    });
+  }
+
   function renderSizeButtons() {
     var btns = $('sizeButtons').querySelectorAll('.size-btn');
     btns.forEach(function (btn) {
@@ -656,6 +666,17 @@
     });
     $('timePlus').addEventListener('click', function () {
       if (configDrawTime < 120) { configDrawTime += 10; $('timeValue').textContent = configDrawTime; if (room) room.send('CONFIG', { drawTime: configDrawTime }); }
+    });
+
+    // Sprint 13 — Issue #14: strictness selector
+    var strictnessBtns = document.querySelectorAll('.config-btn-strict');
+    strictnessBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var v = btn.getAttribute('data-strictness');
+        if (!v || !isHost) return;
+        if (room) room.send('CONFIG', { guessStrictness: v });
+        applyStrictnessActive(v); // optimistic; server CONFIG_UPDATED reconciles
+      });
     });
 
     // Drawing tools

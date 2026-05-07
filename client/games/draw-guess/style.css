@@ -1,0 +1,243 @@
+/* ─── Draw & Guess (วาดทาย) Styles ───────────────────────────── */
+
+:root {
+  --dg-bg: #1a1a2e;
+  --dg-surface: #16213e;
+  --dg-primary: #9b59b6;
+  --dg-primary-dark: #7d3c98;
+  --dg-accent: #f39c12;
+  --dg-success: #27ae60;
+  --dg-error: #e74c3c;
+  --dg-text: #ecf0f1;
+  --dg-text-secondary: #95a5a6;
+  --dg-border: #2c3e50;
+  --dg-canvas-bg: #ffffff;
+  --dg-radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--dg-bg);
+  color: var(--dg-text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ─── Screens ─────────────────────────────────────────────────── */
+.screen {
+  display: none;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ─── Home ────────────────────────────────────────────────────── */
+.home-container { text-align: center; max-width: 360px; width: 100%; }
+.home-icon { font-size: 72px; margin-bottom: 8px; }
+.home-title { font-size: 32px; font-weight: 800; color: var(--dg-primary); margin-bottom: 8px; }
+.home-subtitle { font-size: 15px; color: var(--dg-text-secondary); margin-bottom: 32px; }
+.home-buttons { display: flex; flex-direction: column; gap: 12px; }
+.home-back { position: absolute; top: 20px; left: 16px; background: none; border: none; color: var(--dg-text-secondary); font-size: 15px; font-family: inherit; cursor: pointer; }
+
+/* ─── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 24px; border-radius: var(--dg-radius); font-size: 16px;
+  font-weight: 700; font-family: inherit; cursor: pointer; border: none;
+  transition: transform 0.1s, opacity 0.2s; text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--dg-primary); color: #fff; }
+.btn-primary:hover { background: var(--dg-primary-dark); }
+.btn-secondary { background: var(--dg-surface); color: var(--dg-text); border: 1px solid var(--dg-border); }
+.btn-ghost { background: transparent; color: var(--dg-text-secondary); font-size: 14px; }
+
+/* ─── Nickname ────────────────────────────────────────────────── */
+.nickname-container { max-width: 360px; width: 100%; text-align: center; }
+.avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.avatar-option { width: 44px; height: 44px; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+.avatar-option.selected { border-color: var(--dg-primary); background: rgba(155,89,182,0.15); transform: scale(1.15); }
+.nickname-input, .join-code-input {
+  width: 100%; padding: 14px 16px; border-radius: var(--dg-radius);
+  border: 1px solid var(--dg-border); background: var(--dg-surface);
+  color: var(--dg-text); font-size: 16px; font-family: inherit;
+  margin-bottom: 12px; outline: none;
+}
+.nickname-input:focus, .join-code-input:focus { border-color: var(--dg-primary); }
+
+/* ─── Lobby ───────────────────────────────────────────────────── */
+.lobby-container { max-width: 400px; width: 100%; text-align: center; }
+.lobby-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.room-code-display {
+  font-size: 36px; font-weight: 800; letter-spacing: 10px;
+  color: var(--dg-accent); cursor: pointer; user-select: all;
+}
+.player-list { margin-top: 20px; text-align: left; }
+.player-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: var(--dg-surface); border-radius: 8px; margin-bottom: 6px;
+}
+.player-avatar { font-size: 24px; }
+.player-name { flex: 1; font-weight: 600; }
+.player-host { color: var(--dg-accent); font-size: 12px; }
+
+/* ─── Config Panel ────────────────────────────────────────────── */
+.config-panel { margin: 16px 0; padding: 16px; background: var(--dg-surface); border-radius: var(--dg-radius); }
+.config-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.config-row:last-child { margin-bottom: 0; }
+.config-row label { font-size: 14px; color: var(--dg-text-secondary); }
+.config-stepper { display: flex; align-items: center; gap: 12px; }
+.config-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--dg-border);
+  background: var(--dg-bg); color: var(--dg-text); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.config-value { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; }
+
+/* ─── Game Screen ─────────────────────────────────────────────── */
+#screen-game.active {
+  display: flex; flex-direction: column; padding: 8px;
+  justify-content: flex-start;
+}
+
+.game-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--dg-surface); border-radius: 8px;
+  margin-bottom: 8px;
+}
+.game-info { font-size: 13px; color: var(--dg-text-secondary); }
+.game-info .divider { margin: 0 6px; }
+.game-timer {
+  font-size: 24px; font-weight: 800; color: var(--dg-accent);
+  min-width: 40px; text-align: center;
+}
+.game-timer.urgent { color: var(--dg-error); animation: pulse 0.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+.word-display {
+  text-align: center; padding: 8px; margin-bottom: 6px;
+  font-size: 14px; color: var(--dg-text-secondary);
+}
+.word-display .word-secret {
+  font-size: 24px; font-weight: 800; color: var(--dg-accent); display: block; margin-top: 4px;
+}
+.word-display .word-hint {
+  font-size: 18px; font-weight: 600; color: var(--dg-text); letter-spacing: 4px;
+}
+
+/* ─── Canvas ──────────────────────────────────────────────────── */
+.canvas-container {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: var(--dg-canvas-bg); border-radius: var(--dg-radius);
+  overflow: hidden; position: relative; min-height: 200px;
+  touch-action: none;
+}
+#drawCanvas { display: block; }
+
+/* ─── Drawing Tools ───────────────────────────────────────────── */
+.tools-panel {
+  display: flex; align-items: center; gap: 8px; padding: 8px;
+  background: var(--dg-surface); border-radius: 8px; margin-top: 6px;
+  flex-wrap: wrap; justify-content: center;
+}
+.color-palette { display: flex; gap: 4px; }
+.color-swatch {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+  cursor: pointer; transition: transform 0.1s;
+}
+.color-swatch.active { border-color: var(--dg-text); transform: scale(1.2); }
+.tool-buttons { display: flex; gap: 4px; }
+.tool-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--dg-border);
+  background: var(--dg-bg); color: var(--dg-text); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.tool-btn.active { background: var(--dg-primary); border-color: var(--dg-primary); }
+.size-buttons { display: flex; gap: 4px; align-items: center; }
+.size-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--dg-border);
+  background: var(--dg-bg); color: var(--dg-text); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.size-btn.active { background: var(--dg-primary); border-color: var(--dg-primary); }
+
+/* ─── Guess Area ──────────────────────────────────────────────── */
+.guess-area { margin-top: 6px; }
+.guess-feed {
+  max-height: 120px; overflow-y: auto; padding: 6px 8px;
+  background: var(--dg-surface); border-radius: 8px; margin-bottom: 6px;
+  font-size: 13px;
+}
+.guess-feed .guess-item { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.guess-feed .guess-correct { color: var(--dg-success); font-weight: 700; }
+.guess-input-row { display: flex; gap: 6px; }
+.guess-input {
+  flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--dg-border);
+  background: var(--dg-surface); color: var(--dg-text); font-size: 14px;
+  font-family: inherit; outline: none;
+}
+.guess-input:focus { border-color: var(--dg-primary); }
+.guess-input:disabled { opacity: 0.5; }
+.guess-submit { padding: 10px 16px; font-size: 14px; }
+
+/* ─── Score Sidebar ───────────────────────────────────────────── */
+.score-sidebar {
+  position: fixed; right: 8px; top: 60px;
+  background: var(--dg-surface); border-radius: 8px; padding: 8px;
+  font-size: 12px; min-width: 100px; max-height: 200px; overflow-y: auto;
+  display: none;
+}
+.score-sidebar.visible { display: block; }
+.score-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.score-row .score-name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-row .score-pts { font-weight: 700; color: var(--dg-accent); }
+
+/* ─── Round End ───────────────────────────────────────────────── */
+.roundend-container { text-align: center; max-width: 360px; width: 100%; }
+.roundend-container h2 { font-size: 18px; color: var(--dg-text-secondary); margin-bottom: 12px; }
+.revealed-word { font-size: 36px; font-weight: 800; color: var(--dg-accent); margin-bottom: 20px; }
+.round-results { text-align: left; }
+.result-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--dg-surface); border-radius: 8px; margin-bottom: 4px; }
+.result-name { font-weight: 600; }
+.result-pts { font-weight: 700; color: var(--dg-success); }
+.result-drawer { color: var(--dg-primary); font-size: 12px; }
+
+/* ─── Scoreboard ──────────────────────────────────────────────── */
+.scoreboard-container { text-align: center; max-width: 360px; width: 100%; }
+.scoreboard-container h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+.scoreboard-list .score-entry {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--dg-surface); border-radius: 8px;
+  margin-bottom: 6px;
+}
+.score-entry .rank { font-size: 20px; font-weight: 800; color: var(--dg-accent); min-width: 30px; }
+.score-entry .name { flex: 1; font-weight: 600; margin-left: 12px; }
+.score-entry .pts { font-weight: 700; color: var(--dg-success); font-size: 18px; }
+.score-entry:first-child { background: linear-gradient(135deg, rgba(243,156,18,0.2), rgba(155,89,182,0.2)); }
+
+/* ─── Game Over ───────────────────────────────────────────────── */
+.gameover-container { text-align: center; max-width: 360px; width: 100%; }
+.winner-crown { font-size: 64px; margin-bottom: 8px; }
+.gameover-container h2 { font-size: 28px; font-weight: 800; color: var(--dg-accent); margin-bottom: 4px; }
+.winner-score { font-size: 18px; color: var(--dg-text-secondary); margin-bottom: 20px; }
+.final-scores .score-entry { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--dg-surface); border-radius: 8px; margin-bottom: 4px; }
+
+/* ─── Toast ───────────────────────────────────────────────────── */
+.toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 10px 20px; border-radius: 8px; background: var(--dg-surface); color: var(--dg-text); font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideDown 0.3s ease; }
+.toast.error { background: var(--dg-error); }
+@keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .tools-panel { gap: 4px; padding: 6px; }
+  .color-swatch { width: 24px; height: 24px; }
+  .tool-btn { width: 30px; height: 30px; font-size: 14px; }
+  .score-sidebar { display: none !important; }
+}

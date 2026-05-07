@@ -220,7 +220,7 @@ export function registerDefaultGames(
     minPlayers: 3,
     maxPlayers: 8,
     roomClass: roomClasses["draw-guess"] || null,
-    comingSoon: true,
+    comingSoon: false,
     mechanic: "drawing",
     description: "วาดรูปให้เพื่อนทาย ห้ามพิมพ์ ห้ามพูด!",
     icon: "🎨",

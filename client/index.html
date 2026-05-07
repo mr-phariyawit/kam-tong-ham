@@ -367,20 +367,57 @@
       /**
        * Navigate to a game's page.
        */
-      function navigateToGame(gameId) {
+      function navigateToGame(gameId, joinCode) {
         // Map game IDs to their client paths
         var gamePaths = {
           'forbidden-word': '/games/forbidden-word/index.html',
           'word-link': '/games/word-link/index.html',
           'spy': '/games/spy/index.html',
-          'werewolf': '/games/werewolf/index.html'
+          'werewolf': '/games/werewolf/index.html',
+          'knights': '/games/knights/index.html',
+          'draw-guess': '/games/draw-guess/index.html'
         };
 
         var path = gamePaths[gameId];
         if (path) {
+          if (joinCode) {
+            path += '?join=' + encodeURIComponent(joinCode);
+          }
           window.location.href = path;
         } else {
           showComingSoonToast('เกมนี้');
+        }
+      }
+
+      /**
+       * Sprint 11 — KTH-T-075: Deep-link join handler.
+       * If URL has ?join=<code>, look up the room's gameType via /api/rooms/:code,
+       * then route to that game's page with the join code preserved.
+       * Returns true if a deep-link redirect was initiated (caller should skip the
+       * normal home render).
+       */
+      async function tryHandleDeepLinkJoin() {
+        try {
+          var urlParams = new URLSearchParams(window.location.search);
+          var joinCode = (urlParams.get('join') || '').trim().toUpperCase();
+          if (!joinCode || joinCode.length < 4) return false;
+
+          var res = await fetch('/api/rooms/' + encodeURIComponent(joinCode));
+          if (!res.ok) {
+            showComingSoonToast('ไม่พบห้อง ' + joinCode);
+            // Strip the bad join param so reload doesn't loop on the error
+            window.history.replaceState({}, '', window.location.pathname);
+            return false;
+          }
+          var data = await res.json();
+          if (data.success && data.gameType) {
+            navigateToGame(data.gameType, joinCode);
+            return true;
+          }
+          return false;
+        } catch (err) {
+          console.error('Deep-link lookup failed:', err);
+          return false;
         }
       }
 
@@ -397,8 +434,11 @@
         }, 2000);
       }
 
-      // Load games on page load
-      loadGames();
+      // On page load: first check for deep-link join. If present and valid,
+      // we redirect away — skip the normal game-list render to avoid a flash.
+      tryHandleDeepLinkJoin().then(function (redirected) {
+        if (!redirected) loadGames();
+      });
     })();
   </script>
 </body>

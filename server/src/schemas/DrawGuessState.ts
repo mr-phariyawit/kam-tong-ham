@@ -127,6 +127,14 @@ export class DrawGuessState extends BaseState {
   /** Drawing time in seconds per turn. */
   @type("number") drawTimeSecs: number = DRAW_GUESS_CONFIG.DEFAULT_DRAW_TIME_SECS;
 
+  /**
+   * Guess matching strictness (Sprint 11). One of: "strict" | "normal" | "lenient".
+   * - strict:  exact normalized match only
+   * - normal:  ≥ 0.85 similarity (default; typo-tolerant)
+   * - lenient: ≥ 0.75 similarity (forgiving)
+   */
+  @type("string") guessStrictness: string = "normal";
+
   // ─── Round Tracking ──────────────────────────────────────────
 
   /** Current round number (1-based). */

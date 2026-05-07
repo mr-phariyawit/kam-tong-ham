@@ -10,7 +10,7 @@ import {
 } from "../schemas/DrawGuessState";
 import { BaseRoom, type GameRoomConfig } from "./BaseRoom";
 import { BasePlayer } from "../schemas/BaseState";
-import { isCorrectGuess } from "../utils/thaiNormalize";
+import { checkGuess, type GuessStrictness } from "../utils/thaiNormalize";
 import { loadWordPack, getAvailableCategories } from "../utils/wordPicker";
 
 /**
@@ -123,7 +123,7 @@ export class DrawGuessRoom extends BaseRoom<DrawGuessState> {
 
   protected registerMessageHandlers(): void {
     // Game config (host sets before START_GAME)
-    this.onMessage("CONFIG", (client, data: { rounds?: number; drawTime?: number }) =>
+    this.onMessage("CONFIG", (client, data: { rounds?: number; drawTime?: number; guessStrictness?: string }) =>
       this.handleConfig(client, data),
     );
 
@@ -207,7 +207,7 @@ export class DrawGuessRoom extends BaseRoom<DrawGuessState> {
 
   // ─── CONFIGURATION ───────────────────────────────────────────
 
-  private handleConfig(client: Client, data: { rounds?: number; drawTime?: number }): void {
+  private handleConfig(client: Client, data: { rounds?: number; drawTime?: number; guessStrictness?: string }): void {
     const player = this.state.players.get(client.sessionId);
     if (!player || !player.isHost) {
       this.sendError(client, "NOT_HOST", "เฉพาะเจ้าของห้องที่ตั้งค่าได้");
@@ -231,10 +231,17 @@ export class DrawGuessRoom extends BaseRoom<DrawGuessState> {
         Math.min(DRAW_GUESS_CONFIG.MAX_DRAW_TIME_SECS, Math.floor(data.drawTime)),
       );
     }
+    if (data.guessStrictness !== undefined) {
+      const v = data.guessStrictness;
+      if (v === "strict" || v === "normal" || v === "lenient") {
+        this.state.guessStrictness = v;
+      }
+    }
 
     this.broadcast("CONFIG_UPDATED", {
       rounds: this.state.totalRounds,
       drawTime: this.state.drawTimeSecs,
+      guessStrictness: this.state.guessStrictness,
     });
   }
 
@@ -774,9 +781,12 @@ export class DrawGuessRoom extends BaseRoom<DrawGuessState> {
     if (!text || text.trim().length === 0) return;
     const trimmedGuess = text.trim().slice(0, 50); // Cap length
 
-    // Check if correct
-    if (isCorrectGuess(trimmedGuess, this.currentWord)) {
-      // CORRECT GUESS
+    // Check guess with fuzzy matching (Sprint 11 — KTH-T-072)
+    const strictness = (state.guessStrictness as GuessStrictness) || "normal";
+    const result = checkGuess(trimmedGuess, this.currentWord, strictness);
+
+    if (result.kind === "exact" || result.kind === "near") {
+      // CORRECT or NEAR-MISS counts as correct (the point of the feature)
       player.hasGuessedCorrectly = true;
       this.correctGuessOrder.push(client.sessionId);
       state.correctGuessCount++;
@@ -795,12 +805,14 @@ export class DrawGuessRoom extends BaseRoom<DrawGuessState> {
       player.score += points;
       player.roundPoints += points;
 
-      // DG-003.5: Announce correct guess (but don't reveal the word)
+      // DG-003.5: Announce correct guess (but don't reveal the word).
+      // Distinguish exact vs near so clients can show "ใกล้เคียง!" feedback (Sprint 11).
       this.broadcast("CORRECT_GUESS", {
         playerId: client.sessionId,
         nickname: player.nickname,
         guessOrder: order,
         points,
+        matchKind: result.kind, // "exact" | "near"
       });
 
       // Check if ALL guessers have guessed correctly

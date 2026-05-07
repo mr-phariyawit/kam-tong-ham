@@ -173,11 +173,17 @@
     });
 
     room.onMessage('CORRECT_GUESS', function (data) {
-      addGuessFeedItem(data.nickname + ' ทายถูก! (+' + data.points + ')', true);
+      // Sprint 11: distinguish exact vs near-miss for friendlier feedback
+      var prefix = data.matchKind === 'near'
+        ? data.nickname + ' ใกล้เคียง! (+' + data.points + ')'
+        : data.nickname + ' ทายถูก! (+' + data.points + ')';
+      addGuessFeedItem(prefix, true);
       if (data.playerId === mySessionId) {
         hasGuessedCorrectly = true;
         $('guessInput').disabled = true;
-        $('guessInput').placeholder = 'ทายถูกแล้ว!';
+        $('guessInput').placeholder = data.matchKind === 'near'
+          ? 'ใกล้เคียง — ถือว่าถูก!'
+          : 'ทายถูกแล้ว!';
       }
     });
 
@@ -580,6 +586,20 @@
     initCanvas();
     renderColorPalette();
     renderSizeButtons();
+
+    // Sprint 11 — KTH-T-075: Deep-link auto-join.
+    // If URL has ?join=<code>, prefill join code and route to nickname screen.
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var deepJoinCode = (urlParams.get('join') || '').trim().toUpperCase();
+      if (deepJoinCode && deepJoinCode.length >= 4) {
+        pendingAction = 'join';
+        joinCode = deepJoinCode;
+        $('joinCodeInput').value = deepJoinCode;
+        $('joinCodeGroup').style.display = 'block';
+        showScreen('nickname');
+      }
+    } catch (_) { /* URLSearchParams unsupported — fall through to normal home */ }
 
     // Home screen
     $('btnCreate').addEventListener('click', function () {

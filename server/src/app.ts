@@ -4,7 +4,7 @@ import path from "path";
 import * as matchMaker from "@colyseus/core/build/MatchMaker";
 import type { RoomListingData } from "@colyseus/core/build/matchmaker/driver";
 import { generateRoomCode } from "./utils/roomCode";
-import { getAvailableCategories, loadWordPack, saveWordPack, deleteWordPack, isCustomPack, getCustomDir } from "./utils/wordPicker";
+import { getAvailableCategories, loadWordPack, saveWordPack, deleteWordPack, isCustomPack } from "./utils/wordPicker";
 import type { WordPack } from "./utils/wordPicker";
 import { activeRoomCodes } from "./utils/roomRegistry";
 import { gameRegistry } from "./utils/gameRegistry";
@@ -360,7 +360,7 @@ export function createApp() {
       status: "ok",
       timestamp: Date.now(),
       rooms: activeRoomCodes.size,
-      customWordpackDir: getCustomDir(),
+      // SA-05: customWordpackDir removed -- don't expose internal paths
     });
   });
 

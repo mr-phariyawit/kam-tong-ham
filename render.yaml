@@ -1,0 +1,26 @@
+# Render.com Blueprint — kam-tong-ham Party Games Platform
+# https://render.com/docs/blueprint-spec
+#
+# Usage:
+#   1. Push this repo to a GitHub/GitLab repo accessible from Render
+#   2. Go to https://dashboard.render.com/select-repo?type=blueprint
+#   3. Select the repo and Render will auto-detect this file
+#   4. Click "Apply" to create the service
+#
+# Alternatively, create a Web Service manually:
+#   - Environment: Docker
+#   - Region: Oregon (free) or Singapore (paid, for APAC RTT)
+#   - Plan: Free
+#   - Health Check Path: /api/games
+
+services:
+  - type: web
+    name: kam-tong-ham
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon  # Singapore available on paid tier for APAC <100ms RTT
+    healthCheckPath: /api/games
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -18,6 +18,8 @@ server/dist/
 # v11+v12 runtime artifacts (matches AEGIS-Team meta repo conventions)
 .aegis/brain/metrics/raw/
 .aegis/brain/metrics/token-profile-*.jsonl
+.aegis/brain/metrics/judgment-fallback-counter.json
+.aegis/brain/metrics/judgment-fallback-counter.json.lock
 .claude/settings.json.pre-*
 _aegis-output/
 .aegis/brain/logs/

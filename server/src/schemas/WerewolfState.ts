@@ -72,6 +72,7 @@ export type WerewolfPhase =
   | "NIGHT"
   | "DAY_ANNOUNCE"
   | "DAY_DISCUSSION"
+  | "DAY_DEFENSE"    // WW-003.4: accused player defends before vote opens
   | "DAY_VOTE"
   | "GAME_OVER";
 
@@ -134,6 +135,9 @@ export class WerewolfState extends BaseState {
 
   /** Night timer setting (per action, default 30 seconds). */
   @type("number") nightTimerSetting: number = 30;
+
+  /** Defense timer setting (WW-003.4: accused player defends, default 30 seconds). */
+  @type("number") defenseTimerSetting: number = 30;
 
   // ─── Day Announce ──────────────────────────────────────────────
 

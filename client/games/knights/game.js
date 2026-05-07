@@ -267,6 +267,7 @@
     html += '<h2 class="lobby-title">อัศวิน</h2>';
     html += '<div class="lobby-code">' + roomCode + '</div>';
     html += '<p class="lobby-count">' + playerKeys.length + ' ผู้เล่น (ต้องมีอย่างน้อย 5 คน)</p>';
+    html += '<button class="btn-share-room" id="btnShareRoom" style="margin-top:8px;">\u{1f4f1} แชร์ห้อง / Share</button>';
     html += '</div>';
 
     html += '<div class="lobby-players">';
@@ -293,6 +294,14 @@
     if (startBtn) {
       startBtn.addEventListener('click', function () {
         room.send('START_GAME');
+      });
+    }
+
+    // Share room button
+    var btnShare = $('btnShareRoom');
+    if (btnShare && window.RoomShare) {
+      btnShare.addEventListener('click', function () {
+        window.RoomShare.showShareModal(roomCode);
       });
     }
   }

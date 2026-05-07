@@ -633,6 +633,17 @@
     });
     $('btnStart').addEventListener('click', function () { if (room) room.send('START_GAME'); });
 
+    // Share room button
+    var btnShare = $('btnShareRoom');
+    if (btnShare && window.RoomShare) {
+      btnShare.addEventListener('click', function () {
+        var code = $('roomCodeDisplay') ? $('roomCodeDisplay').textContent : '';
+        if (code && code !== '----') {
+          window.RoomShare.showShareModal(code);
+        }
+      });
+    }
+
     // Config steppers
     $('roundsMinus').addEventListener('click', function () {
       if (configRounds > 1) { configRounds--; $('roundsValue').textContent = configRounds; if (room) room.send('CONFIG', { rounds: configRounds }); }

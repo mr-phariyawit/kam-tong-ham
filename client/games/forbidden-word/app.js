@@ -1868,6 +1868,18 @@
       }
     });
 
+    // Share room button
+    var btnShare = $('btnShareRoom');
+    if (btnShare && window.RoomShare) {
+      btnShare.addEventListener('click', function () {
+        var code = $('roomCodeDisplay') ? $('roomCodeDisplay').textContent : '';
+        if (code && code !== '----') {
+          vibrate(30);
+          window.RoomShare.showShareModal(code);
+        }
+      });
+    }
+
     $('btnStartGame').addEventListener('click', function () {
       vibrate(50);
       window.soundManager.tap();

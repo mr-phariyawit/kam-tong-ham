@@ -276,8 +276,8 @@
       html += '<div class="lobby-player' + (p.isHost ? ' host' : '') + '">';
       html += '<span class="lobby-avatar">' + p.avatar + '</span>';
       html += '<span class="lobby-name">' + p.nickname + '</span>';
-      if (p.isHost) html += '<span class="lobby-badge">HOST</span>';
-      if (!p.isConnected) html += '<span class="lobby-badge offline">OFFLINE</span>';
+      if (p.isHost) html += '<span class="lobby-badge">\u{1F451}</span>';
+      if (!p.isConnected) html += '<span class="lobby-badge offline">\u{1F4F4}</span>';
       html += '</div>';
     });
     html += '</div>';

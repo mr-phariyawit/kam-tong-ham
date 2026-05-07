@@ -246,6 +246,42 @@
       font-weight: 600;
     }
 
+    /* ─── Cold-Start Overlay ────────────────────── */
+    .cold-start-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.4s ease;
+    }
+
+    .cold-start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cold-start-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--text-secondary);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .cold-start-msg {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 0 24px;
+    }
+
     /* ─── Responsive ─────────────────────────────── */
     @media (min-width: 480px) {
       .game-grid {
@@ -256,6 +292,15 @@
   </style>
 </head>
 <body>
+
+  <!-- Cold-Start Overlay (visible immediately, hides once /api/games responds) -->
+  <div class="cold-start-overlay" id="coldStartOverlay">
+    <div class="cold-start-spinner"></div>
+    <div class="cold-start-msg">
+      กำลังเริ่มเซิร์ฟเวอร์...<br>
+      First hit may take ~30s
+    </div>
+  </div>
 
   <!-- Header -->
   <header class="platform-header">
@@ -291,7 +336,16 @@
       const gameGrid = document.getElementById('gameGrid');
       const loadingState = document.getElementById('loadingState');
       const comingSoonToast = document.getElementById('comingSoonToast');
+      const coldStartOverlay = document.getElementById('coldStartOverlay');
       let toastTimeout = null;
+
+      /** Hide the cold-start overlay with a fade-out transition. */
+      function dismissColdStart() {
+        if (coldStartOverlay) {
+          coldStartOverlay.classList.add('hidden');
+          setTimeout(function () { coldStartOverlay.remove(); }, 500);
+        }
+      }
 
       /**
        * Fetch the game list from the server and render game cards.
@@ -305,8 +359,10 @@
             throw new Error('Invalid response');
           }
 
+          dismissColdStart();
           renderGames(data.games);
         } catch (err) {
+          dismissColdStart();
           console.error('Failed to load games:', err);
           gameGrid.innerHTML = `
             <div class="error-state" style="grid-column: 1 / -1;">

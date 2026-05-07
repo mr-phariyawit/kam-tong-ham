@@ -119,6 +119,45 @@ npm test             # Runs 514+ unit tests
 npm test -- --grep smoke  # Runs smoke tests only
 ```
 
+## Performance Baseline (Sprint 15)
+
+Pre-deploy performance measurements captured on 2026-05-07.
+
+### Bundle Sizes
+
+| Component | Size | Files |
+|-----------|------|-------|
+| Server dist (JS) | 292.5KB | 25 |
+| Client JS | 269.5KB | 13 |
+| Client CSS | 112.1KB | 11 |
+| Client HTML | 70.0KB | 7 |
+| **Client total** | **451.6KB** | **31** |
+
+### Cold Start
+
+Server cold start (`node server/dist/index.js` to first `/api/health` 200): **311ms**
+
+### Load Smoke (synthetic)
+
+10 rooms across 6 game types, 40 total players, 500 messages:
+
+| Metric | Value |
+|--------|-------|
+| Rooms | 10 (2x forbidden-word, 2x word-link, 2x spy, 1x werewolf, 1x knights, 2x draw-guess) |
+| Total players | 40 |
+| Messages sent | 500 |
+| Errors | 0 |
+| Peak heap | 28.97MB |
+| Elapsed | 52ms |
+
+Run the benchmarks yourself:
+```bash
+node tools/perf-baseline.js   # Bundle sizes + cold start
+node tools/load-smoke.js      # Multi-room load smoke
+```
+
+Results are saved to `.aegis/brain/metrics/perf-baseline-YYYY-MM-DD.json`.
+
 ## CI/CD
 
 GitHub Actions runs on every push to `main` and on PRs:

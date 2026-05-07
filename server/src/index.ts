@@ -6,6 +6,7 @@ import { WordLinkRoom } from "./rooms/WordLinkRoom";
 import { SpyRoom } from "./rooms/SpyRoom";
 import { WerewolfRoom } from "./rooms/WerewolfRoom";
 import { KnightsRoom } from "./rooms/KnightsRoom";
+import { DrawGuessRoom } from "./rooms/DrawGuessRoom";
 import { createApp } from "./app";
 import { registerDefaultGames } from "./utils/gameRegistry";
 
@@ -20,6 +21,7 @@ registerDefaultGames({
   "spy": SpyRoom,
   "werewolf": WerewolfRoom,
   "knights": KnightsRoom,
+  "draw-guess": DrawGuessRoom,
 });
 
 const app = createApp();
@@ -52,6 +54,10 @@ gameServer.define("werewolf", WerewolfRoom)
   .enableRealtimeListing();
 
 gameServer.define("knights", KnightsRoom)
+  .filterBy(["roomCode"])
+  .enableRealtimeListing();
+
+gameServer.define("draw_guess", DrawGuessRoom)
   .filterBy(["roomCode"])
   .enableRealtimeListing();
 

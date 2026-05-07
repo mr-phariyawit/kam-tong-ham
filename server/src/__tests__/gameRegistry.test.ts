@@ -179,17 +179,18 @@ describe("registerDefaultGames", () => {
     expect(gameRegistry.has("draw-guess")).toBe(true);
   });
 
-  it("REG-09: forbidden-word, word-link, spy, werewolf, and knights are the active (non-comingSoon) games", () => {
-    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any, "spy": FakeRoom as any, "werewolf": FakeRoom as any, "knights": FakeRoom as any });
+  it("REG-09: all 6 games are active (non-comingSoon)", () => {
+    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any, "spy": FakeRoom as any, "werewolf": FakeRoom as any, "knights": FakeRoom as any, "draw-guess": FakeRoom as any });
 
     const playable = gameRegistry.getPlayable();
-    expect(playable).toHaveLength(5);
+    expect(playable).toHaveLength(6);
     const ids = playable.map((g) => g.id);
     expect(ids).toContain("forbidden-word");
     expect(ids).toContain("word-link");
     expect(ids).toContain("spy");
     expect(ids).toContain("werewolf");
     expect(ids).toContain("knights");
+    expect(ids).toContain("draw-guess");
   });
 
   it("REG-10: forbidden-word gets the provided roomClass", () => {
@@ -199,13 +200,17 @@ describe("registerDefaultGames", () => {
     expect(fw!.roomClass).toBe(FakeRoom);
   });
 
-  it("REG-11: coming-soon games have roomClass=null", () => {
-    registerDefaultGames({ "forbidden-word": FakeRoom as any });
+  it("REG-11: all 6 games are now active (no coming-soon remain)", () => {
+    registerDefaultGames({ "forbidden-word": FakeRoom as any, "draw-guess": FakeRoom as any });
 
-    // Knights is now active (Sprint 6), only draw-guess remains coming-soon
+    // Sprint 7: draw-guess is now active -- all 6 games playable
     const dg = gameRegistry.get("draw-guess");
-    expect(dg!.roomClass).toBeNull();
-    expect(dg!.comingSoon).toBe(true);
+    expect(dg!.comingSoon).toBe(false);
+
+    // No game should be coming-soon
+    const all = gameRegistry.getAll();
+    const comingSoon = all.filter((g) => g.comingSoon);
+    expect(comingSoon).toHaveLength(0);
   });
 
   it("REG-12: all games have Thai display names", () => {

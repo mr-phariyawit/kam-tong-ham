@@ -1,0 +1,17 @@
+{
+  "id": "KTH-T-031",
+  "title": "Reconnect handling (no info leak)",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 1,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "standard",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Override onPlayerReconnected: re-send only own role, not others",
+    "During night: reconnecting player sees night screen, no pending action results",
+    "Override onPlayerDisconnectedDuringGame: mark as forfeited if timeout",
+    "If deferred: note in close.md for Sprint 8 polish"
+  ]
+}

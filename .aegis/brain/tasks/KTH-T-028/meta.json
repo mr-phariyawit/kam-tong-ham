@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-028",
+  "title": "Night phase -- wolf vote, seer peek, doctor save",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 3,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Wolf vote: wolves select a victim (consensus among alive wolves)",
+    "Seer peek: seer selects a player to inspect (learn if wolf or not)",
+    "Doctor save: doctor selects a player to protect",
+    "Night resolution: kill vs save, queue morning announcement",
+    "Night timer (30 seconds per action phase)",
+    "All actions are private -- no timing leak, resolve at end of night"
+  ]
+}

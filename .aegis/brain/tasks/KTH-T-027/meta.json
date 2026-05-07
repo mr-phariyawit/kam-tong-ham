@@ -1,0 +1,17 @@
+{
+  "id": "KTH-T-027",
+  "title": "WerewolfRoom -- phase machine + role assignment",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 3,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Create WerewolfRoom extending BaseRoom<WerewolfState>",
+    "Implement phase machine: LOBBY -> ROLE_REVEAL -> NIGHT -> DAY_ANNOUNCE -> DAY_DISCUSSION -> DAY_VOTE -> GAME_OVER",
+    "Implement role assignment based on player count table",
+    "Register message handlers for game-specific messages"
+  ]
+}

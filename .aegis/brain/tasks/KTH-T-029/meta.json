@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-029",
+  "title": "Day phase -- discussion, nomination, elimination vote",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 2,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Morning announcement: who died (if anyone) + role reveal of dead",
+    "Discussion timer (60-120 seconds, host configurable)",
+    "Nomination: any alive player nominates another for elimination",
+    "Elimination vote: all alive players vote eliminate/spare",
+    "Majority vote = eliminated; tie = no elimination",
+    "Eliminated player role revealed"
+  ]
+}

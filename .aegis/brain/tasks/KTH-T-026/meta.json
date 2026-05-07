@@ -1,0 +1,16 @@
+{
+  "id": "KTH-T-026",
+  "title": "WerewolfState schema + WerewolfPlayer",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 2,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Define WerewolfPlayer extending BasePlayer (role, isWolf, isSeer, isDoctor, isAlive)",
+    "Define WerewolfState extending BaseState (phases, nightActions, dayVotes, winState)",
+    "Add role distribution table as constant"
+  ]
+}

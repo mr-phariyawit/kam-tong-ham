@@ -30,8 +30,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Run unit tests (excluding smoke)
-        run: npx vitest run --exclude '**/smoke.test.ts'
+      - name: Run unit tests (excluding smoke and adversarial)
+        run: npx vitest run --exclude '**/smoke.test.ts' --exclude '**/adversarial/**'
 
   smoke:
     name: Smoke Playthroughs
@@ -53,3 +53,24 @@ jobs:
 
       - name: Run smoke tests (6 games)
         run: npx vitest run server/src/__tests__/smoke.test.ts
+
+  adversarial:
+    name: Adversarial E2E
+    runs-on: ubuntu-latest
+    needs: smoke
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run adversarial tests (Spy + Werewolf)
+        run: npx vitest run server/src/__tests__/adversarial/

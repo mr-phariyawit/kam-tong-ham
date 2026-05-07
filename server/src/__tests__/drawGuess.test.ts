@@ -17,7 +17,14 @@ import {
   SCORING,
   DRAWABLE_CATEGORIES,
 } from "../schemas/DrawGuessState";
-import { normalizeThaiGuess, isCorrectGuess } from "../utils/thaiNormalize";
+import {
+  normalizeThaiGuess,
+  isCorrectGuess,
+  levenshtein,
+  similarityScore,
+  checkGuess,
+  STRICTNESS_THRESHOLDS,
+} from "../utils/thaiNormalize";
 import { makeMockClient, type MockClient } from "./integration/helpers";
 
 // ─── Test Setup ──────────────────────────────────────────────
@@ -179,6 +186,112 @@ describe("Thai Text Normalization", () => {
     expect(isCorrectGuess("ผีเสือ", "ผีเสื้อ")).toBe(true);
     // Note: ี and ื are vowels, NOT tone marks -- they are preserved
     expect(isCorrectGuess("ผเสอ", "ผีเสื้อ")).toBe(false); // vowels differ
+  });
+});
+
+describe("Fuzzy Thai Matching (Sprint 11 — KTH-T-071)", () => {
+  it("FZ-01: levenshtein zero for identical strings", () => {
+    expect(levenshtein("", "")).toBe(0);
+    expect(levenshtein("แมว", "แมว")).toBe(0);
+    expect(levenshtein("cat", "cat")).toBe(0);
+  });
+
+  it("FZ-02: levenshtein counts each Thai codepoint as 1 edit", () => {
+    // Insert one Thai char
+    expect(levenshtein("แมว", "แมวๆ")).toBe(1);
+    // Substitute one char
+    expect(levenshtein("แมว", "แมก")).toBe(1);
+    // Delete one
+    expect(levenshtein("แมวน้อย", "แมวน้อ")).toBe(1);
+  });
+
+  it("FZ-03: levenshtein on empty strings", () => {
+    expect(levenshtein("", "abc")).toBe(3);
+    expect(levenshtein("abc", "")).toBe(3);
+  });
+
+  it("FZ-04: similarityScore returns 1 for normalized-equal strings", () => {
+    expect(similarityScore("แมว", "แมว")).toBe(1);
+    expect(similarityScore(" แมว ", "แมว")).toBe(1);
+    expect(similarityScore("น้ำ", "นำ")).toBe(1); // tone mark stripped
+  });
+
+  it("FZ-05: similarityScore returns 0 for completely different inputs", () => {
+    expect(similarityScore("", "")).toBe(0); // empty falsy guard
+    const score = similarityScore("abc", "xyz");
+    expect(score).toBeLessThan(0.5);
+  });
+
+  it("FZ-06: similarityScore preserves ใ/ไ distinction (Loki S7 M4)", () => {
+    // ใจ vs ไจ are distinct Thai vowels — should NOT be treated as exact
+    const score = similarityScore("ใจ", "ไจ");
+    expect(score).toBeLessThan(1);
+    // But they ARE 1-edit apart so similarity is high
+    expect(score).toBeGreaterThan(0.4);
+  });
+
+  it("FZ-07: STRICTNESS_THRESHOLDS has the expected values", () => {
+    expect(STRICTNESS_THRESHOLDS.strict).toBe(1.0);
+    expect(STRICTNESS_THRESHOLDS.normal).toBe(0.85);
+    expect(STRICTNESS_THRESHOLDS.lenient).toBe(0.75);
+  });
+
+  it("FZ-08: checkGuess returns 'exact' on exact normalized match (any strictness)", () => {
+    expect(checkGuess("แมว", "แมว", "strict").kind).toBe("exact");
+    expect(checkGuess("แมว", "แมว", "normal").kind).toBe("exact");
+    expect(checkGuess("แมว", "แมว", "lenient").kind).toBe("exact");
+    expect(checkGuess(" แมว ", "แมว", "strict").kind).toBe("exact");
+    expect(checkGuess("น้ำ", "นำ", "strict").kind).toBe("exact"); // tone-stripped match
+  });
+
+  it("FZ-09: checkGuess strict rejects all near-misses", () => {
+    // 1-character typo
+    expect(checkGuess("แมก", "แมว", "strict").kind).toBe("wrong");
+    // High-similarity near miss
+    expect(checkGuess("แมวน้อ", "แมวน้อย", "strict").kind).toBe("wrong");
+  });
+
+  it("FZ-10: checkGuess normal accepts near-misses ≥ 0.85", () => {
+    // แมวน้อ vs แมวน้อย: normalize strips tone mark → 5 vs 6 codepoints, dist=1, score≈0.833 → wrong at 0.85
+    expect(checkGuess("แมวน้อ", "แมวน้อย", "normal").kind).toBe("wrong");
+    // คอมพิวเตอ vs คอมพิวเตอร์: target normalizes (strip ์) to 10 chars, guess=9, dist=1, score=0.9 → near
+    const r1 = checkGuess("คอมพิวเตอ", "คอมพิวเตอร์", "normal");
+    expect(r1.kind).toBe("near");
+    expect(r1.score).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it("FZ-11: checkGuess lenient accepts at 0.75+", () => {
+    // แมก vs แมว: 1 substitute on 3 chars: 1 - 1/3 ≈ 0.667 → wrong even at lenient
+    expect(checkGuess("แมก", "แมว", "lenient").kind).toBe("wrong");
+    // แมวน้อ vs แมวน้อย: score ≈ 0.833 → near at lenient (0.75) but wrong at normal (0.85)
+    const r2 = checkGuess("แมวน้อ", "แมวน้อย", "lenient");
+    expect(r2.kind).toBe("near");
+    // Same input at normal must reject
+    expect(checkGuess("แมวน้อ", "แมวน้อย", "normal").kind).toBe("wrong");
+  });
+
+  it("FZ-12: checkGuess defaults to 'normal' when strictness omitted", () => {
+    // Use FZ-10's near-at-normal case
+    const r = checkGuess("คอมพิวเตอ", "คอมพิวเตอร์");
+    expect(r.kind).toBe("near");
+  });
+
+  it("FZ-13: checkGuess returns wrong with score for empty inputs", () => {
+    expect(checkGuess("", "แมว", "normal").kind).toBe("wrong");
+    expect(checkGuess("แมว", "", "normal").kind).toBe("wrong");
+    expect(checkGuess("", "", "normal").kind).toBe("wrong");
+  });
+
+  it("FZ-14: checkGuess includes a numeric score for near and wrong cases", () => {
+    const near = checkGuess("คอมพิวเตอ", "คอมพิวเตอร์", "normal");
+    expect(near.kind).toBe("near");
+    expect(typeof near.score).toBe("number");
+    expect(near.score).toBeGreaterThanOrEqual(0.85);
+    expect(near.score).toBeLessThan(1);
+
+    const wrong = checkGuess("xyz", "แมว", "normal");
+    expect(wrong.kind).toBe("wrong");
+    expect(typeof wrong.score).toBe("number");
   });
 });
 

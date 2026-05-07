@@ -20,14 +20,16 @@ See sprint-9/plan.md -- Deploy + Tag + Smoke Tests (13 pts)
 - Bug report infrastructure: GitHub Issues template + triage labels
 - Landing page rules summary
 
-## Sprint 11 (planned, ~15 pts)
+## Sprint 11 (active, 7 pts)
 
-### Polish + Feature Expansion
-- Fuzzy Thai guess matching (Levenshtein) for Draw & Guess
-- Lazy-load game assets per route (perf)
-- Advanced Werewolf roles (Hunter, Witch, Cupid, Bodyguard)
-- QR code room sharing (FR-002.3)
-- APAC region upgrade (Render Singapore -- requires paid tier)
+### Fuzzy Thai Match + QR Room Sharing
+- Fuzzy Thai guess matching (Levenshtein) for Draw & Guess (4 pts)
+- QR code room sharing with deep-link auto-join (3 pts)
+
+### DEFERRED (scope discipline -- main session 2026-05-07)
+- **Lazy-load game assets**: DEFERRED -- premature optimization; no performance issues reported from real users. Revisit after HQ-001 deploy lands and telemetry shows actual load times.
+- **Advanced Werewolf roles**: DEFERRED -- scope creep; no user signal requesting additional roles. Revisit when player feedback indicates demand.
+- **APAC region upgrade**: DEFERRED -- requires paid tier decision (external access category).
 
 ## Unscheduled (nice-to-have)
 

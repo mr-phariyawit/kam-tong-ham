@@ -22,22 +22,22 @@
 
 ## Active
 
-(none -- Sprint 10 complete, Sprint 11 next)
+| Sprint | Title | Points | Status |
+|--------|-------|--------|--------|
+| Sprint 11 | Fuzzy Thai Match + QR Room Sharing | 7 | ACTIVE |
 
 ## Planned
 
-| Sprint | Title | Points (est.) | Status |
-|--------|-------|---------------|--------|
-| Sprint 11 | Polish: Fuzzy Match + Lazy Load + Advanced Roles | ~15 | PLANNED |
+(none -- backlog items deferred pending user feedback)
 
 ## Progress
 
 - Completed: 132 pts (Sprint 0-10) -- v1.0 + deploy infra + telemetry/onboarding
-- Active: 0 pts
-- Planned: ~15 pts (Sprint 11)
-- Total: ~147 pts
+- Active: 7 pts (Sprint 11)
+- Planned: 0 pts
+- Total: ~139 pts
 - v1.0 Progress: 100% SHIPPED
-- v1.1 Progress: 23/23 pts (Sprint 9 + Sprint 10 done)
+- v1.1 Progress: 23/30 pts (Sprint 9 + Sprint 10 done, Sprint 11 active)
 
 ## Key Milestones
 

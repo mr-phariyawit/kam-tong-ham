@@ -1,0 +1,20 @@
+{
+  "id": "KTH-T-075",
+  "type": "task",
+  "title": "Client deep-link auto-join",
+  "epic": "KTH-E-016",
+  "sprint": "sprint-11",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "client"],
+  "block0_mode": "lite",
+  "depends_on": ["KTH-T-074"],
+  "sub_tasks": [
+    "On home-page load, parse ?join=<code> from URL params",
+    "Call GET /api/rooms/:code to verify room exists and get gameType",
+    "Route to correct game join screen with code prefilled",
+    "Show friendly error if room missing or full",
+    "Tests: deep-link parsing, routing, error handling"
+  ]
+}

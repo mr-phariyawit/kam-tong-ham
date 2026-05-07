@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-076",
+  "type": "task",
+  "title": "Client QR generator in lobby",
+  "epic": "KTH-E-016",
+  "sprint": "sprint-11",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "client"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Vendor small QR library (qrcode.js or similar, MIT/BSD/Apache, ~5KB) under client/shared/vendor/",
+    "Add 'Share room' button in lobby (before game start)",
+    "Opens modal with QR code encoding canonical room URL",
+    "Hint text: 'Scan QR to join room'",
+    "Tests: QR modal renders, contains correct URL"
+  ]
+}

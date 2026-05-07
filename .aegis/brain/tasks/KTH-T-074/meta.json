@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-074",
+  "type": "task",
+  "title": "Verify GET /api/rooms/:code returns gameType + roomCode",
+  "epic": "KTH-E-016",
+  "sprint": "sprint-11",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "server"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Verify existing GET /api/rooms/:code endpoint returns gameType and roomCode",
+    "Add gameType to response if missing",
+    "Define canonical room URL: https://<host>/?join=<roomCode>",
+    "Return 404 with friendly message if room not found or full",
+    "Tests: endpoint returns correct shape, 404 for missing room"
+  ]
+}

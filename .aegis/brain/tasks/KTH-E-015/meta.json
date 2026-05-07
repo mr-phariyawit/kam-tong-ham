@@ -1,0 +1,11 @@
+{
+  "id": "KTH-E-015",
+  "type": "epic",
+  "title": "Fuzzy Thai Guess Matching",
+  "sprint": "sprint-11",
+  "points": 4,
+  "status": "TODO",
+  "tasks": ["KTH-T-071", "KTH-T-072", "KTH-T-073"],
+  "tags": ["feature", "server"],
+  "block0_mode": "standard"
+}

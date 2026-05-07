@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-072",
+  "type": "task",
+  "title": "Wire fuzzy match into DrawGuessRoom + tests",
+  "epic": "KTH-E-015",
+  "sprint": "sprint-11",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "server"],
+  "block0_mode": "lite",
+  "depends_on": ["KTH-T-071"],
+  "sub_tasks": [
+    "Replace exact-match in submit-guess handler with fuzzyMatch call",
+    "Add near-miss feedback: show 'Close!' when fuzzy passes but exact didn't",
+    "Emit socket event for near-miss UI feedback",
+    "Add 5+ tests: exact still works, fuzzy match triggers, near-miss feedback emitted"
+  ]
+}

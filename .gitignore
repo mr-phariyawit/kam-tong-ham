@@ -4,6 +4,15 @@ server/data/
 *.js.map
 .env
 
+# Playwright E2E artifacts
+e2e/test-results/
+e2e/playwright-report/
+e2e/.e2e-port
+e2e/.e2e-pid
+test-results/
+playwright-report/
+blob-report/
+
 
 
 

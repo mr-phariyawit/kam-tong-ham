@@ -1,0 +1,11 @@
+{
+  "id": "KTH-E-013",
+  "type": "epic",
+  "title": "In-Game Onboarding Overlays",
+  "sprint": "sprint-10",
+  "points": 4,
+  "status": "TODO",
+  "tasks": ["KTH-T-066", "KTH-T-067", "KTH-T-070"],
+  "tags": ["feature", "client"],
+  "block0_mode": "standard"
+}

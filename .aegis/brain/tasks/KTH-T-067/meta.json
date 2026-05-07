@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-067",
+  "type": "task",
+  "title": "Onboarding content x6 games",
+  "epic": "KTH-E-013",
+  "sprint": "sprint-10",
+  "points": 2,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "client"],
+  "block0_mode": "standard",
+  "sub_tasks": [
+    "Forbidden Word: 3-5 bullet rules + 1 example",
+    "Word Link: 3-5 bullet rules + 1 example",
+    "Spy: 3-5 bullet rules + 1 example",
+    "Werewolf: 3-5 bullet rules + 1 example",
+    "Knights: 3-5 bullet rules + 1 example",
+    "Draw & Guess: 3-5 bullet rules + 1 example",
+    "All content in Thai with EN subtitles where helpful"
+  ]
+}

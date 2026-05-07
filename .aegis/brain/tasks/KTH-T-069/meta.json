@@ -1,0 +1,17 @@
+{
+  "id": "KTH-T-069",
+  "type": "task",
+  "title": "In-game Report a bug link",
+  "epic": "KTH-E-014",
+  "sprint": "sprint-10",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "client"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Add Report a bug link in home screen footer",
+    "Link opens pre-filled GitHub Issue URL with bug_report template",
+    "Include game context (current game type) in pre-filled URL"
+  ]
+}

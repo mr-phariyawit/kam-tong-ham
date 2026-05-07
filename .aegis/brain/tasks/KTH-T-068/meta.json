@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-068",
+  "type": "task",
+  "title": "GitHub Issues templates + label config",
+  "epic": "KTH-E-014",
+  "sprint": "sprint-10",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["chore", "infra"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Create .github/ISSUE_TEMPLATE/bug_report.yml (Thai + EN)",
+    "Create .github/ISSUE_TEMPLATE/feature_request.yml (Thai + EN)",
+    "Create .github/ISSUE_TEMPLATE/config.yml (disable blank issues)",
+    "Create .github/labels.yml with standard label set",
+    "Create tools/aegis-sync-labels.sh for one-time label sync"
+  ]
+}

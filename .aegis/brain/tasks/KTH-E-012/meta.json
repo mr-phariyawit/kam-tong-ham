@@ -1,0 +1,11 @@
+{
+  "id": "KTH-E-012",
+  "type": "epic",
+  "title": "Basic Telemetry",
+  "sprint": "sprint-10",
+  "points": 3,
+  "status": "TODO",
+  "tasks": ["KTH-T-064", "KTH-T-065", "KTH-T-070"],
+  "tags": ["feature", "server"],
+  "block0_mode": "standard"
+}

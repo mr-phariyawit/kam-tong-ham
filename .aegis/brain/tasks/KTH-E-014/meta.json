@@ -1,0 +1,11 @@
+{
+  "id": "KTH-E-014",
+  "type": "epic",
+  "title": "GitHub Issues + Bug Triage Scaffolding",
+  "sprint": "sprint-10",
+  "points": 3,
+  "status": "TODO",
+  "tasks": ["KTH-T-068", "KTH-T-069"],
+  "tags": ["chore", "infra"],
+  "block0_mode": "lite"
+}

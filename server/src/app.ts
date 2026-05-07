@@ -99,18 +99,29 @@ export function createApp() {
     const roomCode = req.params.roomCode.toUpperCase();
 
     try {
-      const rooms = await matchMaker.query({ name: "kham_tong_ham" });
-      const room = rooms.find(
-        (r: RoomListingData) => r.metadata?.roomCode === roomCode && !r.locked
-      );
+      // Query all room types to find the room by code (codes are globally unique)
+      const roomTypes = ["kham_tong_ham", "word_link"];
+      let foundRoom: RoomListingData | undefined;
 
-      if (room) {
+      for (const roomType of roomTypes) {
+        const rooms = await matchMaker.query({ name: roomType });
+        const match = rooms.find(
+          (r: RoomListingData) => r.metadata?.roomCode === roomCode && !r.locked
+        );
+        if (match) {
+          foundRoom = match;
+          break;
+        }
+      }
+
+      if (foundRoom) {
         res.json({
           success: true,
           roomCode,
-          playerCount: room.clients,
-          maxPlayers: 8,
-          joinable: room.clients < 8,
+          gameType: foundRoom.metadata?.gameType || "forbidden-word",
+          playerCount: foundRoom.clients,
+          maxPlayers: foundRoom.maxClients || 8,
+          joinable: foundRoom.clients < (foundRoom.maxClients || 8),
         });
       } else {
         res.status(404).json({

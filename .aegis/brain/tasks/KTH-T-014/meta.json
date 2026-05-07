@@ -1,0 +1,26 @@
+{
+  "id": "KTH-T-014",
+  "type": "task",
+  "title": "WordLinkRoom class (game logic)",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 3,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-013"],
+  "sub_tasks": [
+    "Create WordLinkRoom extending BaseRoom<WordLinkState>",
+    "Implement createState, createPlayer, getGameConfig, onGameStart",
+    "Register game-specific message handlers (GIVE_CLUE, GUESS_CARD, END_TURN)",
+    "Team assignment logic in onGameStart",
+    "Register in gameRegistry + index.ts"
+  ],
+  "acceptance": [
+    "Room creates successfully with WordLinkState",
+    "Teams assigned at game start",
+    "Message handlers wired",
+    "Registered in gameRegistry as active"
+  ],
+  "block0_mode": "standard"
+}

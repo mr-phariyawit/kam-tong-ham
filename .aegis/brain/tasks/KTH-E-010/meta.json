@@ -1,0 +1,14 @@
+{
+  "id": "KTH-E-010",
+  "type": "epic",
+  "title": "Word Link (คำเชื่อม) -- Full Implementation",
+  "description": "Ship Word Link as the second playable game on the party platform. Codenames-style team word association game reusing existing Thai wordpack infrastructure.",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 17,
+  "priority": "Must",
+  "tasks": ["KTH-T-013", "KTH-T-014", "KTH-T-015", "KTH-T-016", "KTH-T-017", "KTH-T-018", "KTH-T-019"],
+  "spec_ref": "PLATFORM_SPEC_v2.md#WL-001..WL-004",
+  "created": "2026-05-07",
+  "block0_mode": "full"
+}

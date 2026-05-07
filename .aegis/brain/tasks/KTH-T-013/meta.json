@@ -1,0 +1,23 @@
+{
+  "id": "KTH-T-013",
+  "type": "task",
+  "title": "WordLinkState schema + WordLinkPlayer",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 2,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": [],
+  "sub_tasks": [
+    "Create WordLinkPlayer extending BasePlayer with team, role (spymaster/guesser) fields",
+    "Create WordLinkState extending BaseState with grid, teams, current turn, clue fields",
+    "Create WordCard schema for grid cells (word, color, revealed)"
+  ],
+  "acceptance": [
+    "TypeScript compiles clean",
+    "Schema fields match spec WL-001..WL-004",
+    "Follows BasePlayer-extension pattern from BaseState.ts"
+  ],
+  "block0_mode": "standard"
+}

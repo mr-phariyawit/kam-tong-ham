@@ -1,0 +1,28 @@
+{
+  "id": "KTH-T-019",
+  "type": "task",
+  "title": "Word Link test suite (20+ tests)",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 2,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-014", "KTH-T-016"],
+  "sub_tasks": [
+    "Unit tests: grid generation (25 words, correct color counts)",
+    "Unit tests: team assignment (balanced teams, spymaster selection)",
+    "Unit tests: clue validation (single word, not a grid word)",
+    "Integration tests: full game flow (clue -> guess -> turn switch -> win)",
+    "Integration tests: assassin word instant loss",
+    "Integration tests: play again flow",
+    "Edge cases: minimum players, disconnects during game"
+  ],
+  "acceptance": [
+    "20+ tests pass",
+    "Covers all WL-001..WL-004 spec requirements",
+    "All 220 existing tests still pass",
+    "Total test count >= 240"
+  ],
+  "block0_mode": "standard"
+}

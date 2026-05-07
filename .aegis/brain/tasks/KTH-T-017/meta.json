@@ -1,0 +1,25 @@
+{
+  "id": "KTH-T-017",
+  "type": "task",
+  "title": "Win condition detection + game over",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 2,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-016"],
+  "sub_tasks": [
+    "Check after each guess: all team words revealed = team wins",
+    "Check after each guess: assassin word guessed = guessing team loses",
+    "GAME_OVER phase with full grid reveal and winner announcement",
+    "Play Again flow: return to LOBBY/SCOREBOARD"
+  ],
+  "acceptance": [
+    "All-words-revealed win detected correctly",
+    "Assassin instant-loss detected correctly",
+    "Full grid revealed at game over",
+    "Play Again returns to lobby"
+  ],
+  "block0_mode": "standard"
+}

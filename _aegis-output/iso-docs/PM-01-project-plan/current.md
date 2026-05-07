@@ -1,8 +1,9 @@
 ---
 document: PM.01
 title: Project Plan — คำต้องห้าม (Kham Tong Ham)
-version: 1
+version: 2
 status: Approved
+updated: 2026-05-07
 created: 2026-05-05
 author: Coulson (AEGIS v11.0)
 project: คำต้องห้าม — Thai Party Game
@@ -12,9 +13,11 @@ project: คำต้องห้าม — Thai Party Game
 
 ## 1. Project Objective
 
-Build and maintain คำต้องห้าม (Kham Tong Ham), a real-time multiplayer mobile web party game that digitizes the popular Thai board game by เทพลีลา. Players receive secret forbidden words they must not say while trying to bait others into saying theirs. The last survivor with the most points wins.
+Build a multi-game party platform (Party Games TH / เกมปาร์ตี้) starting from the existing คำต้องห้าม (Kham Tong Ham) game. The platform hosts 6 real-time multiplayer party games playable on mobile browsers -- zero equipment, zero accounts, instant start.
 
-**Primary goal**: Deliver a production-ready PWA that enables any group of 2-8 Thai-speaking players to play the forbidden word game using only their phones — zero equipment, zero accounts, instant start.
+**Primary goal**: Deliver a production-ready PWA that enables Thai-speaking groups of 2-15 players to choose from 6 party games using only their phones.
+
+**Games**: Forbidden Word (shipped), Werewolf, Spy, Knights, Word Link, Draw & Guess.
 
 ## 2. Scope
 
@@ -67,12 +70,15 @@ Build and maintain คำต้องห้าม (Kham Tong Ham), a real-time m
 
 | # | Milestone | Target | Status |
 |---|-----------|--------|--------|
-| M1 | Core game loop functional | Completed | DONE |
-| M2 | Anti-abuse + stability | Completed (AEG-41/51/53/59) | DONE |
-| M3 | Word pack expansion (10->19 categories) | Sprint 1 | IN PROGRESS |
-| M4 | Test stabilization (all green) | Sprint 1 | IN PROGRESS |
-| M5 | Production deployment | Sprint 2 | PLANNED |
-| M6 | Performance + polish | Sprint 3 | PLANNED |
+| M1 | Core game loop functional | Sprint 0 | DONE |
+| M2 | Anti-abuse + stability (AEG-41/51/53/59) | Sprint 0 | DONE |
+| M3 | Word pack expansion (10->19 categories) | Sprint 1 | DONE |
+| M4 | Test stabilization (172/172 green) | Sprint 1 | DONE |
+| M5 | Multi-game platform architecture | Sprint 2 | IN PROGRESS |
+| M6 | First new game -- Werewolf | Sprint 3 | PLANNED |
+| M7 | Social deduction trio complete | Sprint 5 | PLANNED |
+| M8 | All 6 games playable | Sprint 7 | PLANNED |
+| M9 | Production-ready platform + polish | Sprint 8 | PLANNED |
 
 ## 6. Quality Gates
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#00695C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="คำเชื่อม">
+  <meta name="description" content="คำเชื่อม — เกมใบ้คำแบบทีม ใบ้ด้วยคำเพียงคำเดียว!">
+  <title>คำเชื่อม | Word Link</title>
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/components/lobby.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== SCREEN: HOME ========== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-container">
+      <div class="home-icon">🔗</div>
+      <h1 class="home-title">คำเชื่อม</h1>
+      <p class="home-subtitle">ใบ้คำให้ทีม ด้วยคำเพียงคำเดียว!</p>
+
+      <div class="home-buttons">
+        <button class="btn btn-primary" id="btnCreate">สร้างห้อง</button>
+        <button class="btn btn-secondary" id="btnJoin">เข้าร่วมห้อง</button>
+      </div>
+
+      <a href="/" class="btn btn-ghost" style="margin-top: 16px;">← กลับหน้าหลัก</a>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: NICKNAME ========== -->
+  <div class="screen" id="screen-nickname">
+    <button class="home-back" id="btnBackHome">← กลับ</button>
+    <div class="nickname-container">
+      <h2 style="margin-bottom: 20px; font-size: 20px;">เลือกตัวละคร</h2>
+      <div class="avatar-picker" id="avatarPicker"></div>
+      <input type="text" class="nickname-input" id="nicknameInput" placeholder="ชื่อของคุณ" maxlength="15">
+
+      <div id="joinCodeGroup" style="display: none; margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">รหัสห้อง</p>
+        <input type="text" class="join-code-input" id="joinCodeInput" placeholder="ABCD" maxlength="4">
+      </div>
+
+      <button class="btn btn-primary" id="btnConnect" style="width: 100%; max-width: 280px;">เข้าร่วม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: LOBBY ========== -->
+  <div class="screen" id="screen-lobby">
+    <div class="lobby-container" id="lobbyContainer"></div>
+  </div>
+
+  <!-- ========== SCREEN: TEAM REVEAL ========== -->
+  <div class="screen" id="screen-teamReveal">
+    <div class="team-reveal-container">
+      <h2 class="team-reveal-title">ทีมของคุณ</h2>
+      <div class="team-reveal-role" id="teamRevealRole">🧠</div>
+      <div class="team-reveal-team red" id="teamRevealTeam">ทีมแดง</div>
+      <div class="team-reveal-desc" id="teamRevealDesc">หัวหน้าทีม (Spymaster)</div>
+      <p id="teamRevealLabel" style="font-size: 16px; font-weight: 700; margin-top: 12px;">หัวหน้าทีม</p>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME ========== -->
+  <div class="screen" id="screen-game">
+    <div class="game-container">
+      <!-- Top Bar -->
+      <div class="game-top-bar">
+        <div class="score-badge red" id="redScore">🔴 0/9</div>
+        <div class="turn-indicator" id="turnIndicator">ทีมแดง — กำลังใบ้คำ...</div>
+        <div class="score-badge blue" id="blueScore">🔵 0/8</div>
+      </div>
+
+      <div class="timer-badge" id="timerBadge" style="text-align: center; display: none;"></div>
+
+      <!-- Clue Display -->
+      <div class="clue-display" id="clueDisplay">
+        <span class="clue-status">รอหัวหน้าทีมใบ้คำ...</span>
+      </div>
+
+      <!-- Word Grid -->
+      <div class="word-grid" id="wordGrid"></div>
+
+      <!-- Clue Input (spymaster) -->
+      <div class="clue-input-section" id="clueInputSection">
+        <div style="font-size: 13px; color: var(--text-secondary); text-align: center;">ใบ้คำให้ทีม</div>
+        <div class="clue-input-row">
+          <input type="text" class="clue-word-input" id="clueWordInput" placeholder="คำใบ้ (1 คำ)">
+          <input type="number" class="clue-number-input" id="clueNumberInput" placeholder="0" min="0" max="25">
+        </div>
+        <button class="clue-submit-btn" id="clueSubmitBtn">ส่งคำใบ้</button>
+      </div>
+
+      <!-- Actions -->
+      <div class="game-actions">
+        <button class="end-turn-btn" id="endTurnBtn" disabled style="display: none;">จบตา</button>
+      </div>
+
+      <button class="btn btn-ghost" id="btnLeaveGame" style="font-size: 12px; margin-top: 4px;">← ออกจากเกม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME OVER ========== -->
+  <div class="screen" id="screen-gameover">
+    <div class="gameover-container">
+      <div class="gameover-icon" id="gameoverIcon">🎉</div>
+      <h2 class="gameover-title" id="gameoverTitle">ทีมแดง ชนะ!</h2>
+      <p class="gameover-reason" id="gameoverReason"></p>
+
+      <div class="gameover-grid" id="gameoverGrid"></div>
+
+      <div class="gameover-buttons">
+        <button class="btn btn-primary" id="btnPlayAgain">เล่นอีกครั้ง</button>
+        <button class="btn btn-secondary" id="btnBackToHome">กลับหน้าหลัก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../shared/components/lobby.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

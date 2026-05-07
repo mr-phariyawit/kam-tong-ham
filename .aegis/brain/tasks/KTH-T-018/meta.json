@@ -1,0 +1,31 @@
+{
+  "id": "KTH-T-018",
+  "type": "task",
+  "title": "Client UI (game page, grid, clue input)",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 3,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-014"],
+  "sub_tasks": [
+    "Create client/games/word-link/ directory (index.html, game.js, style.css)",
+    "5x5 word grid UI with tap-to-guess interaction",
+    "Spymaster view: colored cards + clue input form",
+    "Guesser view: neutral cards + current clue display",
+    "Team indicator, score tracker, turn indicator",
+    "Game over screen with full color reveal",
+    "Update home screen gamePaths to include word-link",
+    "Integrate with shared lobby component"
+  ],
+  "acceptance": [
+    "Grid renders correctly on mobile (2x3 -> 5x5 game grid)",
+    "Spymaster sees colors, guessers do not",
+    "Clue submission works",
+    "Card tap triggers guess",
+    "Game over shows full grid",
+    "Home screen navigates to word-link"
+  ],
+  "block0_mode": "standard"
+}

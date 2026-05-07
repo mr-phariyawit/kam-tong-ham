@@ -18,12 +18,11 @@
 | Sprint 7 | Draw & Guess (วาดทาย) | 13 | DONE |
 | Sprint 8 | Polish + Audit to 100% | 5 | DONE |
 | Sprint 9 | Post-Launch: Deploy + Tag + Smoke Tests | 13 | DONE |
+| Sprint 10 | Telemetry + Player Onboarding | 10 | DONE |
 
 ## Active
 
-| Sprint | Title | Points | Status |
-|--------|-------|--------|--------|
-| Sprint 10 | Telemetry + Player Onboarding | 10 | IN_PROGRESS |
+(none -- Sprint 10 complete, Sprint 11 next)
 
 ## Planned
 
@@ -33,12 +32,12 @@
 
 ## Progress
 
-- Completed: 122 pts (Sprint 0-9) -- v1.0 + deploy infra
-- Active: 10 pts (Sprint 10)
+- Completed: 132 pts (Sprint 0-10) -- v1.0 + deploy infra + telemetry/onboarding
+- Active: 0 pts
 - Planned: ~15 pts (Sprint 11)
 - Total: ~147 pts
 - v1.0 Progress: 100% SHIPPED
-- v1.1 Progress: 13/23 pts (Sprint 9 done, Sprint 10 active)
+- v1.1 Progress: 23/23 pts (Sprint 9 + Sprint 10 done)
 
 ## Key Milestones
 
@@ -57,7 +56,7 @@
 | M11 | Public URL accessible | Sprint 9 | DONE (HQ-001 pending deploy) |
 | M12 | v1.0.0 release tag | Sprint 9 | DONE |
 | M13 | Smoke playthroughs in CI | Sprint 9 | DONE |
-| M14 | Basic telemetry + onboarding | Sprint 10 | IN_PROGRESS |
+| M14 | Basic telemetry + onboarding | Sprint 10 | DONE |
 
 ## Sprint 8 Change Log
 

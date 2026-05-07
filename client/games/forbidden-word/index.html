@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/components/onboarding.css">
+  <link rel="stylesheet" href="../../shared/components/roomShare.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -118,6 +119,7 @@
       <div class="qr-container" id="qrContainer">
         <canvas id="qrCanvas" width="120" height="120"></canvas>
       </div>
+      <button class="btn-share-room" id="btnShareRoom">📱 แชร์ห้อง / Share</button>
     </div>
 
     <div class="player-list-header" id="playerCountLabel">ผู้เล่น 0/8</div>
@@ -338,6 +340,8 @@
 
   <script src="https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js"></script>
   <script src="../../shared/components/onboarding.js"></script>
+  <script src="../../shared/vendor/qrcode.min.js"></script>
+  <script src="../../shared/components/roomShare.js"></script>
   <script src="sounds.js"></script>
   <script src="app.js"></script>
 </body>

@@ -295,6 +295,23 @@
       });
     }
 
+    // Inject share button if not already present
+    if (!document.getElementById('btnShareRoom') && window.RoomShare && state.roomCode) {
+      var container = $('lobbyContainer');
+      if (container) {
+        var shareBtn = document.createElement('button');
+        shareBtn.id = 'btnShareRoom';
+        shareBtn.className = 'btn-share-room';
+        shareBtn.style.display = 'block';
+        shareBtn.style.margin = '8px auto 0';
+        shareBtn.textContent = '\u{1f4f1} แชร์ห้อง / Share'; // 📱 แชร์ห้อง / Share
+        shareBtn.addEventListener('click', function () {
+          window.RoomShare.showShareModal(state.roomCode);
+        });
+        container.appendChild(shareBtn);
+      }
+    }
+
     if (currentPhase === 'LOBBY') {
       showScreen('lobby');
     }

@@ -287,6 +287,7 @@
     html += '<h2 class="lobby-game-title">หมาป่า</h2>';
     html += '<div class="lobby-room-code">ห้อง: <strong>' + state.roomCode + '</strong></div>';
     html += '<div class="lobby-player-count">ผู้เล่น: ' + state.playerCount + '/15 (ขั้นต่ำ 5)</div>';
+    html += '<button class="btn-share-room" id="btnShareRoom" style="margin-top:8px;">\u{1f4f1} แชร์ห้อง / Share</button>';
     html += '</div>';
 
     html += '<div class="lobby-players">';
@@ -318,6 +319,14 @@
           room.send('START_GAME');
         });
       }
+    }
+
+    // Share room button
+    var btnShare = $('btnShareRoom');
+    if (btnShare && window.RoomShare) {
+      btnShare.addEventListener('click', function () {
+        window.RoomShare.showShareModal(state.roomCode);
+      });
     }
   }
 

@@ -285,6 +285,22 @@
 
     lobbyComponent.setRoomCode(state.roomCode);
 
+    // Inject share button if not already added
+    if (!$('btnShareRoom') && window.RoomShare) {
+      var roomCodeSection = $('lobbyContainer').querySelector('.shared-room-code');
+      if (roomCodeSection) {
+        var shareBtn = document.createElement('button');
+        shareBtn.id = 'btnShareRoom';
+        shareBtn.className = 'btn-share-room';
+        shareBtn.textContent = '\u{1f4f1} แชร์ห้อง / Share'; // 📱 แชร์ห้อง / Share
+        shareBtn.addEventListener('click', function () {
+          var code = state.roomCode || '';
+          if (code) window.RoomShare.showShareModal(code);
+        });
+        roomCodeSection.appendChild(shareBtn);
+      }
+    }
+
     var players = [];
     state.players.forEach(function (p) {
       players.push({

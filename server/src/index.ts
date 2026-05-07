@@ -4,6 +4,7 @@ import { WebSocketTransport } from "@colyseus/ws-transport";
 import { KhamTongHamRoom } from "./rooms/KhamTongHamRoom";
 import { WordLinkRoom } from "./rooms/WordLinkRoom";
 import { SpyRoom } from "./rooms/SpyRoom";
+import { WerewolfRoom } from "./rooms/WerewolfRoom";
 import { createApp } from "./app";
 import { registerDefaultGames } from "./utils/gameRegistry";
 
@@ -16,6 +17,7 @@ registerDefaultGames({
   "forbidden-word": KhamTongHamRoom,
   "word-link": WordLinkRoom,
   "spy": SpyRoom,
+  "werewolf": WerewolfRoom,
 });
 
 const app = createApp();
@@ -40,6 +42,10 @@ gameServer.define("word_link", WordLinkRoom)
   .enableRealtimeListing();
 
 gameServer.define("spy", SpyRoom)
+  .filterBy(["roomCode"])
+  .enableRealtimeListing();
+
+gameServer.define("werewolf", WerewolfRoom)
   .filterBy(["roomCode"])
   .enableRealtimeListing();
 

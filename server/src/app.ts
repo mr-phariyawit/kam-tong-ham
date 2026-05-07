@@ -100,7 +100,7 @@ export function createApp() {
 
     try {
       // Query all room types to find the room by code (codes are globally unique)
-      const roomTypes = ["kham_tong_ham", "word_link", "spy"];
+      const roomTypes = ["kham_tong_ham", "word_link", "spy", "werewolf"];
       let foundRoom: RoomListingData | undefined;
 
       for (const roomType of roomTypes) {

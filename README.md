@@ -1,49 +1,65 @@
-# คำต้องห้าม (Kham Tong Ham)
+# Party Games TH (เกมปาร์ตี้)
 
-> เกมปาร์ตี้ไทย — อย่าพูดคำต้องห้ามของคุณ!
+> Real-time multiplayer party games platform -- 6 games, Thai-first, mobile-friendly
 >
-> Thai party game — don't say your forbidden word!
+> แพลตฟอร์มเกมปาร์ตี้ออนไลน์ -- 6 เกม, รองรับภาษาไทย, เล่นได้ทุกอุปกรณ์
 
 ---
 
-## เกี่ยวกับโปรเจกต์ / About
+## Games / เกมทั้งหมด
 
-**คำต้องห้าม** เป็นเกมปาร์ตี้มือถือแบบ multiplayer ที่ดิจิไทซ์เกมกระดาษยอดนิยมของ เทพลีลา ผู้เล่นแต่ละคนได้รับคำลับที่ห้ามพูด แล้วพยายามหลอกล่อให้คนอื่นพลั้งปาก ใครอยู่รอดสุดท้ายและเดาคำของตัวเองถูกจะได้คะแนนสูงสุด
+| Game | Thai Name | Players | Type |
+|------|-----------|---------|------|
+| Forbidden Word | คำต้องห้าม | 2-8 | Word / Social |
+| Word Link | คำเชื่อม | 4-10 | Team Word (Codenames-style) |
+| Spy | สายลับ | 3-8 | Social Deduction (Spyfall-style) |
+| Werewolf | หมาป่า | 5-15 | Social Deduction (Mafia-style) |
+| Knights | อัศวิน | 5-10 | Team Mission (Avalon-style) |
+| Draw & Guess | วาดทาย | 2-8 | Drawing (Pictionary-style) |
 
-**คำต้องห้าม** is a real-time multiplayer mobile web party game digitizing the popular Thai board game by เทพลีลา. Each player receives a secret forbidden word they must not say while trying to bait others into saying theirs.
+### How Each Game Works / แต่ละเกมเล่นอย่างไร
+
+**Forbidden Word (คำต้องห้าม)**: Each player gets a secret word they must avoid saying. Trick others into saying their forbidden word. Survive and guess your own word to win.
+
+**Word Link (คำเชื่อม)**: Two teams. Spymasters give one-word clues to guide their team to the right words on a 5x5 grid. Avoid the assassin card.
+
+**Spy (สายลับ)**: Everyone is at a secret location except the spy. Ask questions, identify the spy. The spy tries to figure out the location.
+
+**Werewolf (หมาป่า)**: Village vs Werewolves. Night: wolves hunt, seer peeks, doctor saves. Day: discuss, nominate, defend, vote. Includes a defense timer for accused players.
+
+**Knights (อัศวิน)**: Good vs Evil on team missions. The leader proposes teams, everyone votes. Mission members secretly vote success/fail. Assassin gets a final guess.
+
+**Draw & Guess (วาดทาย)**: One player draws, others guess. Points for speed. Thai word pool with hint system.
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Frontend | HTML5 PWA (Vanilla JS) |
+|-------|------------|
+| Frontend | HTML5 PWA (Vanilla JS, mobile-first) |
 | Game Server | [Colyseus](https://colyseus.io/) 0.15 on Node.js |
 | HTTP API | Express 4 |
 | Language | TypeScript 5 |
 | Real-time | WebSocket (Colyseus transport) |
+| Tests | Vitest (514 tests) |
 
 ---
 
-## รันในเครื่อง / Running Locally
+## Running Locally / รันในเครื่อง
 
-### ข้อกำหนด / Prerequisites
+### Prerequisites
 
 - Node.js 18+
 - npm 9+
 
-### ติดตั้ง / Install
+### Install & Run
 
 ```bash
 git clone <repo-url>
 cd kam-tong-ham
 npm install
-```
 
-### เริ่มเซิร์ฟเวอร์ / Start Server
-
-```bash
 # Development (hot reload)
 npm run dev
 
@@ -52,48 +68,53 @@ npm run build
 npm start
 ```
 
-เซิร์ฟเวอร์จะรันที่ / The server runs at:
+Open `http://localhost:2567` in your browser.
 
-- HTTP API: `http://localhost:2567/api`
-- WebSocket: `ws://localhost:2567`
-- Game client: `http://localhost:2567`
+### Run Tests
 
-เปิด `http://localhost:2567` ในเบราว์เซอร์เพื่อเล่นเกม
-
-Open `http://localhost:2567` in your browser to play.
-
-### ตัวแปรสภาพแวดล้อม / Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `PORT` | `2567` | Server port |
+```bash
+npm test
+```
 
 ---
 
-## โครงสร้างโปรเจกต์ / Project Structure
+## Project Structure
 
 ```
 kam-tong-ham/
-├── client/               # PWA frontend (static files)
-│   ├── index.html
+├── client/                     # PWA frontend (static files)
+│   ├── index.html              # Platform home (game selection)
 │   ├── manifest.json
-│   ├── sw.js             # Service worker
-│   ├── css/style.css
-│   └── js/
-│       ├── app.js        # Main game client
-│       └── sounds.js     # Sound effects
+│   ├── sw.js                   # Service worker
+│   ├── shared/
+│   │   ├── common.css          # Shared styles (all games)
+│   │   └── components/
+│   │       ├── lobby.css       # Shared lobby styles
+│   │       └── lobby.js        # Shared lobby logic
+│   └── games/
+│       ├── forbidden-word/     # คำต้องห้าม
+│       ├── word-link/          # คำเชื่อม
+│       ├── spy/                # สายลับ
+│       ├── werewolf/           # หมาป่า
+│       ├── knights/            # อัศวิน
+│       └── draw-guess/         # วาดทาย
 ├── server/
 │   └── src/
-│       ├── index.ts      # Entry point, Express + Colyseus setup
+│       ├── index.ts            # Express + Colyseus entry point
 │       ├── rooms/
-│       │   └── KhamTongHamRoom.ts  # Core game room & state machine
-│       ├── schemas/
-│       │   └── GameState.ts        # Colyseus state schemas
+│       │   ├── BaseRoom.ts     # Shared room logic (lobby, reconnect, host)
+│       │   ├── KhamTongHamRoom.ts
+│       │   ├── WordLinkRoom.ts
+│       │   ├── SpyRoom.ts
+│       │   ├── WerewolfRoom.ts
+│       │   ├── KnightsRoom.ts
+│       │   └── DrawGuessRoom.ts
+│       ├── schemas/            # Colyseus state schemas per game
 │       ├── data/
-│       │   └── wordpacks/          # JSON word category files
-│       └── utils/
-│           ├── roomCode.ts         # Room code generation
-│           └── wordPicker.ts       # Word pack loading & selection
+│       │   ├── wordpacks/      # JSON word category files (19 categories)
+│       │   └── locations.json  # Spy game locations
+│       ├── utils/              # Shared utilities
+│       └── __tests__/          # 514 tests (Vitest)
 ├── package.json
 └── tsconfig.json
 ```
@@ -103,28 +124,36 @@ kam-tong-ham/
 ## REST API
 
 | Endpoint | Method | Description |
-|---|---|---|
-| `/api/rooms/create` | POST | สร้างห้องใหม่ / Create new room |
-| `/api/rooms/:roomCode` | GET | ตรวจสอบห้อง / Check room status |
-| `/api/categories` | GET | รายการหมวดคำ / List word categories |
+|----------|--------|-------------|
+| `/api/games` | GET | List all registered games |
+| `/api/rooms/create` | POST | Create new room (body: `{gameType}`) |
+| `/api/rooms/:roomCode` | GET | Check room status |
+| `/api/categories` | GET | List word categories |
 | `/api/health` | GET | Health check |
 
 ---
 
-## Deploy
+## Architecture
 
-### Self-hosted (VPS/cloud server)
+All 6 games extend a shared `BaseRoom` that handles:
+- Room lifecycle (create, join, leave, dispose)
+- Player management (nicknames, avatars, host transfer)
+- Reconnection (5-minute window with game state recovery)
+- Rejoin token anti-abuse system
+- Inactivity timeout (2 hours)
+
+Game-specific logic (roles, phases, scoring) lives in each game's Room class. Private data (secret words, roles, spy identity) is stored server-side and sent via private messages -- never synced to other clients.
+
+---
+
+## Deploy
 
 ```bash
 npm run build
 PORT=3000 npm start
 ```
 
-ให้แน่ใจว่า WebSocket port เปิดรับ traffic และ reverse proxy (nginx/caddy) ส่งต่อทั้ง HTTP และ WebSocket ไปยัง port เดียวกัน
-
-Ensure your WebSocket port is open and your reverse proxy (nginx/caddy) forwards both HTTP and WebSocket upgrades to the same port.
-
-**nginx example:**
+WebSocket and HTTP share the same port. Use a reverse proxy (nginx/caddy) that forwards WebSocket upgrades:
 
 ```nginx
 location / {
@@ -136,11 +165,7 @@ location / {
 }
 ```
 
-### Railway / Render / Fly.io
-
-1. เพิ่ม `PORT` environment variable ตามที่ platform กำหนด
-2. Build command: `npm run build`
-3. Start command: `npm start`
+Compatible with Railway, Render, Fly.io -- set `PORT` env var, build: `npm run build`, start: `npm start`.
 
 ---
 

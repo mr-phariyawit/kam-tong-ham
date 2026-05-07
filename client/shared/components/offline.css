@@ -1,0 +1,98 @@
+/**
+ * Offline Screen Styles -- Sprint 14 (KTH-T-090)
+ *
+ * Full-screen overlay shown when WebSocket connection fails.
+ * Matches the party-games visual language (dark theme, rounded corners).
+ */
+
+.offline-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: offlineFadeIn 0.3s ease;
+}
+
+.offline-overlay.hidden {
+  display: none;
+}
+
+.offline-modal {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.offline-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.offline-title {
+  color: #fff;
+  font-size: 1.25rem;
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.offline-subtitle {
+  color: #999;
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.offline-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.offline-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.offline-btn:active {
+  transform: scale(0.97);
+}
+
+.offline-btn-retry {
+  background: #6c5ce7;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+.offline-btn-retry:hover {
+  background: #7c6cf7;
+}
+
+.offline-btn-home {
+  background: #2d2d44;
+  color: #ccc;
+}
+
+.offline-btn-home:hover {
+  background: #3d3d54;
+  color: #fff;
+}
+
+@keyframes offlineFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

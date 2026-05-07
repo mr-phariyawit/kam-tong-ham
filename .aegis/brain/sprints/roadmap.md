@@ -22,12 +22,15 @@
 
 ## Active
 
-(none)
+| Sprint | Title | Points | Status |
+|--------|-------|--------|--------|
+| Sprint 14 | Pre-Deploy Hardening | 6 | ACTIVE |
 
 ## Completed (recent)
 
 | Sprint | Title | Points | Status |
 |--------|-------|--------|--------|
+| Sprint 13 | UI + Tests Cleanup | 3 | DONE |
 | Sprint 12 | Finish Share-by-URL (auto-join + QR) | 8 | DONE |
 | Sprint 11 | Fuzzy Thai Match + QR Room Sharing | 7 | DONE |
 
@@ -37,10 +40,10 @@
 
 ## Progress
 
-- Completed: 147 pts (Sprint 0-12) -- v1.0 + deploy infra + telemetry/onboarding + fuzzy match + share-by-URL
-- Active: 0 pts
+- Completed: 150 pts (Sprint 0-13) -- v1.0 + deploy infra + telemetry/onboarding + fuzzy match + share-by-URL + cleanup
+- Active: 6 pts (Sprint 14)
 - Planned: 0 pts
-- Total: 147 pts
+- Total: 156 pts
 - v1.0 Progress: 100% SHIPPED
 - v1.1 Progress: 38/38 pts (Sprint 9-12 all done)
 

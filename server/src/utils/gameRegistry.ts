@@ -168,7 +168,7 @@ export function registerDefaultGames(
     minPlayers: 5,
     maxPlayers: 15,
     roomClass: roomClasses["werewolf"] || null,
-    comingSoon: true,
+    comingSoon: false,
     mechanic: "social-deduction",
     description: "หาตัวหมาป่าให้เจอ ก่อนที่มันจะกินทุกคน!",
     icon: "🐺",

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2D1B69">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="หมาป่า">
+  <meta name="description" content="หมาป่า — หาตัวหมาป่าให้เจอ ก่อนที่มันจะกินทุกคน!">
+  <title>หมาป่า | Werewolf</title>
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/components/lobby.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== SCREEN: HOME ========== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-container">
+      <div class="home-icon">&#x1F43A;</div>
+      <h1 class="home-title">หมาป่า</h1>
+      <p class="home-subtitle">หาตัวหมาป่าให้เจอ ก่อนที่มันจะกินทุกคน!</p>
+
+      <div class="home-buttons">
+        <button class="btn btn-primary" id="btnCreate">สร้างห้อง</button>
+        <button class="btn btn-secondary" id="btnJoin">เข้าร่วมห้อง</button>
+      </div>
+
+      <a href="/" class="btn btn-ghost" style="margin-top: 16px;">&#8592; กลับหน้าหลัก</a>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: NICKNAME ========== -->
+  <div class="screen" id="screen-nickname">
+    <button class="home-back" id="btnBackHome">&#8592; กลับ</button>
+    <div class="nickname-container">
+      <h2 style="margin-bottom: 20px; font-size: 20px;">เลือกตัวละคร</h2>
+      <div class="avatar-picker" id="avatarPicker"></div>
+      <input type="text" class="nickname-input" id="nicknameInput" placeholder="ชื่อของคุณ" maxlength="15">
+
+      <div id="joinCodeGroup" style="display: none; margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--ww-text-secondary); margin-bottom: 8px;">รหัสห้อง</p>
+        <input type="text" class="join-code-input" id="joinCodeInput" placeholder="ABCD" maxlength="4">
+      </div>
+
+      <button class="btn btn-primary" id="btnConnect" style="width: 100%; max-width: 280px;">เข้าร่วม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: LOBBY ========== -->
+  <div class="screen" id="screen-lobby">
+    <div class="lobby-container" id="lobbyContainer"></div>
+  </div>
+
+  <!-- ========== SCREEN: ROLE REVEAL ========== -->
+  <div class="screen" id="screen-roleReveal">
+    <div class="role-reveal-container">
+      <div class="role-reveal-icon" id="roleRevealIcon">&#x1F43A;</div>
+      <h2 class="role-reveal-title" id="roleRevealTitle">บทบาทของคุณ</h2>
+      <div class="role-reveal-name" id="roleRevealName"></div>
+      <div class="role-reveal-info" id="roleRevealInfo"></div>
+      <div class="role-reveal-wolves" id="roleRevealWolves" style="display: none;"></div>
+      <div class="role-reveal-countdown" id="roleRevealCountdown">เริ่มเกมใน 5 วินาที...</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: NIGHT ========== -->
+  <div class="screen" id="screen-night">
+    <div class="night-container">
+      <div class="night-moon">&#x1F319;</div>
+      <h2 class="night-title">คืนที่ <span id="nightNumber">1</span></h2>
+      <div class="night-timer" id="nightTimer">30</div>
+
+      <!-- Wolf action panel (hidden for non-wolves) -->
+      <div class="night-action-panel" id="wolfPanel" style="display: none;">
+        <h3>เลือกเหยื่อ</h3>
+        <div class="player-select-list" id="wolfTargetList"></div>
+      </div>
+
+      <!-- Seer action panel -->
+      <div class="night-action-panel" id="seerPanel" style="display: none;">
+        <h3>เลือกผู้เล่นเพื่อดู</h3>
+        <div class="player-select-list" id="seerTargetList"></div>
+        <div class="seer-result" id="seerResult" style="display: none;"></div>
+      </div>
+
+      <!-- Doctor action panel -->
+      <div class="night-action-panel" id="doctorPanel" style="display: none;">
+        <h3>เลือกผู้เล่นเพื่อรักษา</h3>
+        <div class="player-select-list" id="doctorTargetList"></div>
+      </div>
+
+      <!-- Villager waiting -->
+      <div class="night-action-panel" id="villagerPanel" style="display: none;">
+        <p class="night-waiting">กรุณารอจนกว่าจะรุ่งเช้า...</p>
+      </div>
+
+      <!-- Dead player waiting -->
+      <div class="night-action-panel" id="deadPanel" style="display: none;">
+        <p class="night-waiting">คุณถูกจับได้แล้ว รอชมเกม...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: DAY ANNOUNCE ========== -->
+  <div class="screen" id="screen-dayAnnounce">
+    <div class="day-announce-container">
+      <div class="day-sun">&#x2600;&#xFE0F;</div>
+      <h2 class="day-announce-title">เช้าแล้ว!</h2>
+      <div class="day-announce-result" id="dayAnnounceResult"></div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: DAY DISCUSSION ========== -->
+  <div class="screen" id="screen-dayDiscussion">
+    <div class="day-container">
+      <div class="day-timer" id="dayTimer">90</div>
+      <h2 class="day-title">ช่วงอภิปราย</h2>
+
+      <div class="alive-players-grid" id="alivePlayers"></div>
+
+      <div id="nominateSection">
+        <p class="day-hint">เลือกผู้เล่นเพื่อเสนอชื่อให้โหวตออก</p>
+        <div class="player-select-list" id="nominateTargetList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: DAY VOTE ========== -->
+  <div class="screen" id="screen-dayVote">
+    <div class="vote-container">
+      <h2 class="vote-title">โหวตขับออก</h2>
+      <div class="vote-target" id="voteTarget"></div>
+      <div class="vote-buttons" id="voteButtons">
+        <button class="btn btn-danger" id="btnEliminate">ขับออก</button>
+        <button class="btn btn-secondary" id="btnSpare">ยกเว้น</button>
+      </div>
+      <div class="vote-status" id="voteStatus"></div>
+      <div class="vote-timer" id="voteTimer">30</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME OVER ========== -->
+  <div class="screen" id="screen-gameOver">
+    <div class="gameover-container">
+      <div class="gameover-icon" id="gameOverIcon">&#x1F43A;</div>
+      <h2 class="gameover-title" id="gameOverTitle">ชาวบ้านชนะ!</h2>
+      <p class="gameover-reason" id="gameOverReason"></p>
+
+      <div class="gameover-roles" id="gameOverRoles"></div>
+      <div class="gameover-history" id="gameOverHistory"></div>
+
+      <div class="gameover-buttons">
+        <button class="btn btn-primary" id="btnPlayAgain">เล่นอีกครั้ง</button>
+        <a href="/" class="btn btn-ghost">กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

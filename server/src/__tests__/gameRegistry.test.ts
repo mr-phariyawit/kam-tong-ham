@@ -179,15 +179,16 @@ describe("registerDefaultGames", () => {
     expect(gameRegistry.has("draw-guess")).toBe(true);
   });
 
-  it("REG-09: forbidden-word, word-link, and spy are the active (non-comingSoon) games", () => {
-    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any, "spy": FakeRoom as any });
+  it("REG-09: forbidden-word, word-link, spy, and werewolf are the active (non-comingSoon) games", () => {
+    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any, "spy": FakeRoom as any, "werewolf": FakeRoom as any });
 
     const playable = gameRegistry.getPlayable();
-    expect(playable).toHaveLength(3);
+    expect(playable).toHaveLength(4);
     const ids = playable.map((g) => g.id);
     expect(ids).toContain("forbidden-word");
     expect(ids).toContain("word-link");
     expect(ids).toContain("spy");
+    expect(ids).toContain("werewolf");
   });
 
   it("REG-10: forbidden-word gets the provided roomClass", () => {
@@ -200,9 +201,13 @@ describe("registerDefaultGames", () => {
   it("REG-11: coming-soon games have roomClass=null", () => {
     registerDefaultGames({ "forbidden-word": FakeRoom as any });
 
-    const ww = gameRegistry.get("werewolf");
-    expect(ww!.roomClass).toBeNull();
-    expect(ww!.comingSoon).toBe(true);
+    const kn = gameRegistry.get("knights");
+    expect(kn!.roomClass).toBeNull();
+    expect(kn!.comingSoon).toBe(true);
+
+    const dg = gameRegistry.get("draw-guess");
+    expect(dg!.roomClass).toBeNull();
+    expect(dg!.comingSoon).toBe(true);
   });
 
   it("REG-12: all games have Thai display names", () => {

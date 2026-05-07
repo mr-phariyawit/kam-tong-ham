@@ -24,3 +24,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: AEGIS_ADMIN_TOKEN
+        sync: false  # Must set manually in Render dashboard (secret)
+      - key: TRUST_PROXY
+        value: "1"  # Render injects X-Forwarded-For; trust it for rate limiting

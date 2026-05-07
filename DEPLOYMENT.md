@@ -56,9 +56,23 @@ curl http://localhost:10000/api/games
 |----------|----------|---------|-------------|
 | `PORT` | No | `10000` (Docker) / `2567` (dev) | Server port. Render sets this automatically. |
 | `NODE_ENV` | No | `production` | Environment mode. Set to `production` in deploy. |
+| `AEGIS_ADMIN_TOKEN` | **Recommended** | _(unset)_ | Bearer token for `/api/admin/*` endpoints (e.g. telemetry). **If unset, admin endpoints return 503 (fail closed).** Set a strong random string via Render dashboard > Environment. |
+| `TRUST_PROXY` | No | _(unset)_ | Set to `1` to trust `X-Forwarded-For` headers for rate limiting. **Enable this on Render** (Render injects X-Forwarded-For). Without it, rate limiting falls back to socket IP. |
 
-No secrets, API keys, or database connections are required.
-The app is fully stateless (in-memory Colyseus rooms).
+### Security notes (Sprint 14)
+
+- **Admin endpoints** (`/api/admin/telemetry`): Protected by `AEGIS_ADMIN_TOKEN`.
+  If the token is not set, the endpoint returns 503 -- it does not expose data.
+  Set the token in your Render dashboard under Environment > Secret Files or
+  Environment Variables (mark as "Secret" so it's not visible in logs).
+
+- **Rate limiting**: `POST /api/rooms/create` is rate-limited to 10 requests per
+  minute per IP. Exceeding the limit returns 429 with a `Retry-After` header.
+  The rate limiter is in-memory and resets on server restart.
+
+- **Telemetry log**: In-memory counters (rooms created, games started, peak players)
+  reset on each deploy since the app is stateless. The JSONL telemetry.log file in
+  `server/data/` also resets on container restart (see Sprint 10 notes).
 
 ## Health Check
 

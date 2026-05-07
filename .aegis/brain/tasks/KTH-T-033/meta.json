@@ -4,8 +4,10 @@
   "epic": "KTH-E-004",
   "sprint": "sprint-5",
   "points": 2,
-  "status": "TODO",
-  "tags": ["feature"],
+  "status": "DONE",
+  "tags": [
+    "feature"
+  ],
   "block0_mode": "standard",
   "assignee": "war-machine",
   "sub_tasks": [

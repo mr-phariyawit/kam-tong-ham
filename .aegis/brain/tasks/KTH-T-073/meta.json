@@ -1,0 +1,20 @@
+{
+  "id": "KTH-T-073",
+  "type": "task",
+  "title": "Configurable threshold via room settings",
+  "epic": "KTH-E-015",
+  "sprint": "sprint-11",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "server"],
+  "block0_mode": "lite",
+  "depends_on": ["KTH-T-072"],
+  "sub_tasks": [
+    "Add fuzzyThreshold to DrawGuessRoom settings: strict(1.0) | normal(0.85) | lenient(0.75)",
+    "Default to normal on room create",
+    "Host can change setting in lobby before game start",
+    "Persist threshold on room object",
+    "Tests: each threshold level correctly applied"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "KTH-E-016",
+  "type": "epic",
+  "title": "QR Code Room Sharing",
+  "sprint": "sprint-11",
+  "points": 3,
+  "status": "TODO",
+  "tasks": ["KTH-T-074", "KTH-T-075", "KTH-T-076"],
+  "tags": ["feature", "client"],
+  "block0_mode": "standard"
+}

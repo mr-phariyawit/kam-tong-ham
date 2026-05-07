@@ -2,7 +2,7 @@
 
 > Last updated: 2026-05-07
 > Total scope: ~109 story points across 8 sprints
-> Status: Sprint 4 active
+> Status: Sprint 5 complete
 
 ## Completed
 
@@ -13,27 +13,27 @@
 | Sprint 2 | Platform Foundation (BaseRoom, Home Screen, Refactor) | 18 | DONE |
 | Sprint 3 | Word Link (คำเชื่อม) | 17 | DONE |
 | Sprint 4 | Spy (สายลับ) | 11 | DONE |
+| Sprint 5 | Werewolf (หมาป่า) | 18 | DONE |
 
 ## Active
 
-| Sprint | Title | Points | Status | Epic |
-|--------|-------|--------|--------|------|
-| Sprint 5 | Werewolf (หมาป่า) | 18 | ACTIVE | KTH-E-004 |
+(none -- Sprint 6 next)
 
 ## Planned
 
-
+| Sprint | Title | Points | Status | Epic |
+|--------|-------|--------|--------|------|
 | Sprint 6 | Knights (อัศวิน) | 15 | PLANNED | KTH-E-006 |
 | Sprint 7 | Draw & Guess (วาดทาย) | 13 | PLANNED | KTH-E-008 |
 | Sprint 8 | Polish + Performance | 5 | PLANNED | KTH-E-009 |
 
 ## Progress
 
-- Completed: 58 pts (Sprint 0-4)
-- Active: 18 pts (Sprint 5)
+- Completed: 76 pts (Sprint 0-5)
+- Active: 0 pts
 - Remaining: 33 pts (Sprint 6-8)
 - Total: 109 pts
-- Progress: ~53% (58/109)
+- Progress: ~70% (76/109)
 
 ## Key Milestones
 
@@ -46,11 +46,15 @@
 | M5 | Multi-game platform architecture | Sprint 2 | DONE |
 | M6 | First new game (Word Link) | Sprint 3 | DONE |
 | M7 | Social deduction game (Spy) | Sprint 4 | DONE |
-| M8 | Social deduction duo (Spy + Werewolf) | Sprint 5 | PLANNED |
+| M8 | Social deduction duo (Spy + Werewolf) | Sprint 5 | DONE |
 | M9 | All 6 games playable | Sprint 7 | PLANNED |
 | M10 | Production-ready platform | Sprint 8 | PLANNED |
 
-## Sprint 4 Change Log
+## Sprint 5 Change Log
 
-- Sprint 3 completed: Word Link shipped (17 pts, 262 tests, PR #2 merged)
-- Sprint 4 started: Spy game (11 pts, 6 tasks, KTH-E-011)
+- Sprint 4 completed: Spy shipped (11 pts, 311 tests, PR #3 merged)
+- Sprint 5 completed: Werewolf shipped (18 pts, 371 tests)
+  - Most complex game on roadmap: night/day cycle, role secrecy, wolf vs village
+  - Loki pre-review (CONDITIONAL APPROVE, 0 blockers, 4 HIGH addressed)
+  - 60 new tests, zero regression
+  - 4 games now active (Forbidden Word, Word Link, Spy, Werewolf)

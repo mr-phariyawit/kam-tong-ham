@@ -2167,11 +2167,12 @@
       checkRejoinBanner();
     }
 
-    // Deep link support: ?room=XXXX
+    // Deep link support: ?join=XXXX (standardized across all games)
+    // Legacy ?room= param also supported for backward compatibility
     var params = new URLSearchParams(window.location.search);
-    var urlCode = params.get('room');
-    if (urlCode) {
-      joinCode = urlCode.toUpperCase();
+    var urlCode = (params.get('join') || params.get('room') || '').trim().toUpperCase();
+    if (urlCode && urlCode.length >= 4) {
+      joinCode = urlCode;
       showNicknameModal('join');
     }
   }

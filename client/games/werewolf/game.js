@@ -657,6 +657,19 @@
         showToast('รอเจ้าของห้องเริ่มเกมใหม่', 2000);
       }
     });
+
+    // Deep link support: ?join=XXXX
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var deepJoinCode = (urlParams.get('join') || '').trim().toUpperCase();
+      if (deepJoinCode && deepJoinCode.length >= 4) {
+        pendingAction = 'join';
+        joinCode = deepJoinCode;
+        $('joinCodeGroup').style.display = 'block';
+        $('joinCodeInput').value = deepJoinCode;
+        showScreen('nickname');
+      }
+    } catch (_) { /* URLSearchParams unsupported — fall through to normal home */ }
   }
 
   if (document.readyState === 'loading') {

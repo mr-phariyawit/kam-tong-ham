@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-032",
+  "title": "Client UI (role reveal, night/day, voting)",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 3,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Role reveal screen (private: role card with name + icon)",
+    "Night screen (moon animation, wolf/seer/doctor action panels)",
+    "Day announce screen (who died, role reveal)",
+    "Day discussion screen (timer, nomination button)",
+    "Day vote screen (eliminate/spare for nominated player)",
+    "Game over screen (all roles, kill history, play again)"
+  ]
+}

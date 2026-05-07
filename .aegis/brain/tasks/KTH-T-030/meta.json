@@ -1,0 +1,18 @@
+{
+  "id": "KTH-T-030",
+  "title": "Win condition resolver + game-over flow",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 2,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "full",
+  "assignee": "spider-man",
+  "sub_tasks": [
+    "Village wins: all werewolves eliminated",
+    "Werewolves win: wolves >= villagers (alive count)",
+    "Check win conditions after every elimination (night kill or day vote)",
+    "Game over screen: show all roles + kill history",
+    "Handle edge case: simultaneous last-wolf/last-villager"
+  ]
+}

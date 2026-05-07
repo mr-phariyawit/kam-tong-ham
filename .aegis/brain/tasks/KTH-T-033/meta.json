@@ -1,0 +1,20 @@
+{
+  "id": "KTH-T-033",
+  "title": "Werewolf test suite (target 50+ tests)",
+  "epic": "KTH-E-004",
+  "sprint": "sprint-5",
+  "points": 2,
+  "status": "TODO",
+  "tags": ["feature"],
+  "block0_mode": "standard",
+  "assignee": "war-machine",
+  "sub_tasks": [
+    "Lobby + config tests (min/max players, host config)",
+    "Role assignment tests (distribution table, all player counts)",
+    "Night phase tests (wolf vote, seer peek, doctor save, resolution)",
+    "Day phase tests (discussion, nomination, voting, elimination)",
+    "Win condition tests (village win, wolf win, parity edge cases)",
+    "Reconnect tests (if T-031 ships)",
+    "Full game playthrough tests (5p, 7p, 10p)"
+  ]
+}

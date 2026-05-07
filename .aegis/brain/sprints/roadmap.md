@@ -16,13 +16,13 @@
 
 ## Active
 
-(none -- Sprint 5 next)
+| Sprint | Title | Points | Status | Epic |
+|--------|-------|--------|--------|------|
+| Sprint 5 | Werewolf (หมาป่า) | 18 | ACTIVE | KTH-E-004 |
 
 ## Planned
 
-| Sprint | Title | Points | Status | Epic |
-|--------|-------|--------|--------|------|
-| Sprint 5 | Werewolf (หมาป่า) | 18 | PLANNED | KTH-E-004 |
+
 | Sprint 6 | Knights (อัศวิน) | 15 | PLANNED | KTH-E-006 |
 | Sprint 7 | Draw & Guess (วาดทาย) | 13 | PLANNED | KTH-E-008 |
 | Sprint 8 | Polish + Performance | 5 | PLANNED | KTH-E-009 |
@@ -30,8 +30,8 @@
 ## Progress
 
 - Completed: 58 pts (Sprint 0-4)
-- Active: 0 pts
-- Remaining: 51 pts (Sprint 5-8)
+- Active: 18 pts (Sprint 5)
+- Remaining: 33 pts (Sprint 6-8)
 - Total: 109 pts
 - Progress: ~53% (58/109)
 

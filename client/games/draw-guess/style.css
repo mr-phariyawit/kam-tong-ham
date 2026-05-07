@@ -100,6 +100,20 @@ body {
 }
 .config-value { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; }
 
+/* Sprint 13 — Issue #14: strictness selector */
+.config-strictness { display: flex; gap: 6px; }
+.config-btn-strict {
+  padding: 6px 10px; border-radius: 8px; border: 1px solid var(--dg-border);
+  background: var(--dg-bg); color: var(--dg-text-secondary);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.15s;
+}
+.config-btn-strict:hover { color: var(--dg-text); border-color: var(--dg-text-secondary); }
+.config-btn-strict.active {
+  background: var(--dg-accent, #4a90e2); color: #fff; border-color: var(--dg-accent, #4a90e2);
+}
+.config-btn-strict:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ─── Game Screen ─────────────────────────────────────────────── */
 #screen-game.active {
   display: flex; flex-direction: column; padding: 8px;

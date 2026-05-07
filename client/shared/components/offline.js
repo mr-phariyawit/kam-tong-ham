@@ -36,7 +36,7 @@
         '<h2 class="offline-title">' +
           'ไม่สามารถเชื่อมต่อได้' +
         '</h2>' +
-        '<p class="offline-subtitle">Connection failed</p>' +
+        '<p class="offline-subtitle">การเชื่อมต่อล้มเหลว</p>' +
         '<div class="offline-actions">' +
           '<button class="offline-btn offline-btn-retry" id="offlineRetryBtn">' +
             'ลองใหม่ / Retry' +

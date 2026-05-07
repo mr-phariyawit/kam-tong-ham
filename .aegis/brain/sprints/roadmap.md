@@ -1,8 +1,8 @@
 # Party Games Platform -- Roadmap
 
 > Last updated: 2026-05-07
-> Total scope: ~109 story points across 8 sprints
-> Status: Sprint 7 complete
+> Total scope: 109 story points across 8 sprints
+> Status: ALL SPRINTS CLOSED -- PROJECT SHIPPED
 
 ## Completed
 
@@ -16,24 +16,23 @@
 | Sprint 5 | Werewolf (หมาป่า) | 18 | DONE |
 | Sprint 6 | Knights (อัศวิน) | 15 | DONE |
 | Sprint 7 | Draw & Guess (วาดทาย) | 13 | DONE |
+| Sprint 8 | Polish + Audit to 100% | 5 | DONE |
 
 ## Active
 
-| Sprint | Title | Points | Status | Epic |
-|--------|-------|--------|--------|------|
-| Sprint 8 | Polish + Audit to 100% | 5 | ACTIVE | KTH-E-009 |
+(none -- all sprints closed)
 
 ## Planned
 
-(none -- Sprint 8 is the FINAL sprint)
+(none -- project complete)
 
 ## Progress
 
-- Completed: 104 pts (Sprint 0-7)
-- Active: 5 pts (Sprint 8)
+- Completed: 109 pts (Sprint 0-8)
+- Active: 0 pts
 - Remaining: 0 pts
 - Total: 109 pts
-- Progress: ~95% -> 100% in progress
+- Progress: 100% SHIPPED
 
 ## Key Milestones
 
@@ -48,7 +47,17 @@
 | M7 | Social deduction game (Spy) | Sprint 4 | DONE |
 | M8 | Social deduction duo (Spy + Werewolf) | Sprint 5 | DONE |
 | M9 | All 6 games playable | Sprint 7 | DONE |
-| M10 | Production-ready platform | Sprint 8 | PLANNED |
+| M10 | Production-ready platform | Sprint 8 | DONE |
+
+## Sprint 8 Change Log
+
+- Sprint 8 completed: Polish + Audit (5 pts, 514 tests, all green)
+  - Cross-game reconnect-leak audit: 1 finding fixed (SpyPlayer @type leak)
+  - 15 reconnect audit tests across all 6 games
+  - Werewolf defense timer (WW-003.4): DAY_DEFENSE phase added
+  - Shared common.css for cross-game UI consistency
+  - Full regression: 514/514 tests, typecheck clean, build clean
+  - Milestone M10 achieved: Production-ready platform (109/109 pts)
 
 ## Sprint 7 Change Log
 

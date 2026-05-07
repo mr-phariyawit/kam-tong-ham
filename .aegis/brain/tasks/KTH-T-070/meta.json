@@ -1,0 +1,19 @@
+{
+  "id": "KTH-T-070",
+  "type": "task",
+  "title": "Test suite for telemetry + onboarding triggers",
+  "epic": "KTH-E-012",
+  "sprint": "sprint-10",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "vision",
+  "tags": ["chore", "test"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Unit tests: telemetry counter increments on game start",
+    "Unit tests: telemetry counter increments on room create",
+    "Unit tests: crash log handler appends correctly",
+    "Unit tests: onboarding localStorage seen/unseen logic",
+    "Unit tests: onboarding dont-show-again persists"
+  ]
+}

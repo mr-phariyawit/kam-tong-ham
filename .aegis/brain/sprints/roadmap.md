@@ -1,8 +1,8 @@
 # Party Games Platform -- Roadmap
 
 > Last updated: 2026-05-07
-> Total scope: 122 story points across 9+ sprints
-> Status: v1.0 SHIPPED (109 pts) -- Post-launch in progress
+> Total scope: 132 story points across 10+ sprints
+> Status: v1.0 SHIPPED (109 pts) -- v1.1 post-launch active
 
 ## Completed
 
@@ -17,28 +17,28 @@
 | Sprint 6 | Knights (อัศวิน) | 15 | DONE |
 | Sprint 7 | Draw & Guess (วาดทาย) | 13 | DONE |
 | Sprint 8 | Polish + Audit to 100% | 5 | DONE |
+| Sprint 9 | Post-Launch: Deploy + Tag + Smoke Tests | 13 | DONE |
 
 ## Active
 
 | Sprint | Title | Points | Status |
 |--------|-------|--------|--------|
-| Sprint 9 | Post-Launch: Deploy + Tag + Smoke Tests | 13 | IN_PROGRESS |
+| Sprint 10 | Telemetry + Player Onboarding | 10 | IN_PROGRESS |
 
 ## Planned
 
 | Sprint | Title | Points (est.) | Status |
 |--------|-------|---------------|--------|
-| Sprint 10 | Telemetry + Player Onboarding | ~10 | PLANNED |
 | Sprint 11 | Polish: Fuzzy Match + Lazy Load + Advanced Roles | ~15 | PLANNED |
 
 ## Progress
 
-- Completed: 109 pts (Sprint 0-8) -- v1.0 scope
-- Active: 13 pts (Sprint 9)
-- Planned: ~25 pts (Sprint 10-11)
+- Completed: 122 pts (Sprint 0-9) -- v1.0 + deploy infra
+- Active: 10 pts (Sprint 10)
+- Planned: ~15 pts (Sprint 11)
 - Total: ~147 pts
 - v1.0 Progress: 100% SHIPPED
-- v1.1 Progress: 0/13 pts (Sprint 9 in progress)
+- v1.1 Progress: 13/23 pts (Sprint 9 done, Sprint 10 active)
 
 ## Key Milestones
 
@@ -54,9 +54,10 @@
 | M8 | Social deduction duo (Spy + Werewolf) | Sprint 5 | DONE |
 | M9 | All 6 games playable | Sprint 7 | DONE |
 | M10 | Production-ready platform | Sprint 8 | DONE |
-| M11 | Public URL accessible | Sprint 9 | IN_PROGRESS |
-| M12 | v1.0.0 release tag | Sprint 9 | IN_PROGRESS |
-| M13 | Smoke playthroughs in CI | Sprint 9 | IN_PROGRESS |
+| M11 | Public URL accessible | Sprint 9 | DONE (HQ-001 pending deploy) |
+| M12 | v1.0.0 release tag | Sprint 9 | DONE |
+| M13 | Smoke playthroughs in CI | Sprint 9 | DONE |
+| M14 | Basic telemetry + onboarding | Sprint 10 | IN_PROGRESS |
 
 ## Sprint 8 Change Log
 

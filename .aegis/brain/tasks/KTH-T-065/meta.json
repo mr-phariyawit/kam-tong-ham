@@ -1,0 +1,18 @@
+{
+  "id": "KTH-T-065",
+  "type": "task",
+  "title": "Crash log handler",
+  "epic": "KTH-E-012",
+  "sprint": "sprint-10",
+  "points": 1,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "server"],
+  "block0_mode": "lite",
+  "sub_tasks": [
+    "Add uncaughtException handler to server entry",
+    "Add unhandledRejection handler",
+    "Append crash entries to server/data/crash.log (JSONL)",
+    "Gitignore crash.log"
+  ]
+}

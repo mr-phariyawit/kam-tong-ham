@@ -1,0 +1,20 @@
+{
+  "id": "KTH-T-064",
+  "type": "task",
+  "title": "Telemetry collector + counter API",
+  "epic": "KTH-E-012",
+  "sprint": "sprint-10",
+  "points": 2,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "server"],
+  "block0_mode": "standard",
+  "sub_tasks": [
+    "Create telemetry module with JSONL append",
+    "Implement game-played counter increment on room start",
+    "Implement room-created counter increment on room create",
+    "Add server uptime + memory logging on interval",
+    "Create GET /api/admin/telemetry endpoint",
+    "Gitignore + dockerignore server/data/telemetry.log"
+  ]
+}

@@ -64,11 +64,12 @@ Repo ปัจจุบันเป็น PRIVATE ก่อนแชร์กั
 
 ---
 
-## HQ-003: Push v1.0.0 Tag to Remote (External Access)
+## HQ-003: Push v1.0.0 Tag to Remote (External Access) — ✅ RESOLVED 2026-05-07T10:23Z
 
 **Category:** External access (requires remote repo)
 **Priority:** P1 -- after HQ-001 is resolved
 **Created:** 2026-05-07
+**Resolved:** 2026-05-07T10:23Z by main session — `gh auth switch` to `mr-phariyawit`, `v1.0.0` tag pushed, GitHub Release created at https://github.com/mr-phariyawit/kam-tong-ham/releases/tag/v1.0.0
 
 ### EN
 After the GitHub repo is set up and code is pushed, run:

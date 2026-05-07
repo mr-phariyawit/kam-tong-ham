@@ -1,0 +1,21 @@
+{
+  "id": "KTH-T-066",
+  "type": "task",
+  "title": "Onboarding component (shared)",
+  "epic": "KTH-E-013",
+  "sprint": "sprint-10",
+  "points": 2,
+  "status": "TODO",
+  "assignee": "spider-man",
+  "tags": ["feature", "client"],
+  "block0_mode": "standard",
+  "sub_tasks": [
+    "Create client/shared/components/onboarding.js",
+    "Create client/shared/components/onboarding.css",
+    "Modal overlay with dismiss button",
+    "localStorage tracking per gameType (onboarding_seen_<gameType>)",
+    "Don't show again checkbox",
+    "Show rules button in lobby for re-display",
+    "Auto-trigger on first room join per game type"
+  ]
+}

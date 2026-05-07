@@ -521,8 +521,13 @@ describe("WerewolfRoom -- Day Phase", () => {
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
 
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
-    expect(getState(room).phase).toBe("DAY_VOTE");
+    // WW-003.4: nomination goes to defense phase first
+    expect(getState(room).phase).toBe("DAY_DEFENSE");
     expect(getState(room).nominatedPlayerId).toBe(target.id);
+
+    // Advance past defense timer (30s) to reach DAY_VOTE
+    advanceClock(room, 30000);
+    expect(getState(room).phase).toBe("DAY_VOTE");
   });
 
   it("WW-34: cannot nominate self", async () => {
@@ -558,6 +563,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
 
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
+
     // All voters vote eliminate (voters = alive minus nominated)
     const voters = alive.filter((p) => p.id !== target.id);
     for (const voter of voters) {
@@ -579,6 +587,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const target = alive[1];
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
 
     // Split votes: some eliminate, some spare
     const voters = alive.filter((p) => p.id !== target.id);
@@ -604,6 +615,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const targetClient = clients.find((c) => c.sessionId === target.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
 
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
+
     sendMessage(room, targetClient, "DAY_VOTE", { vote: "spare" });
     const err = targetClient.sends.find((s) => s.type === "ERROR" && s.msg?.code === "NOMINATED_CANNOT_VOTE");
     expect(err).toBeDefined();
@@ -617,6 +631,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const target = alive[1];
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
 
     sendMessage(room, nominatorClient, "DAY_VOTE", { vote: "eliminate" });
     sendMessage(room, nominatorClient, "DAY_VOTE", { vote: "spare" });
@@ -632,6 +649,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const nominator = alive[1];
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
 
     const voters = alive.filter((p) => p.id !== target.id);
     for (const voter of voters) {
@@ -653,6 +673,9 @@ describe("WerewolfRoom -- Day Phase", () => {
     const target = alive[1];
     const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
     sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Advance past defense timer (WW-003.4: 30s)
+    advanceClock(room, 30000);
 
     // Only one person votes, then timeout
     sendMessage(room, nominatorClient, "DAY_VOTE", { vote: "eliminate" });
@@ -679,6 +702,9 @@ describe("WerewolfRoom -- Win Conditions", () => {
 
     // Nominate the wolf
     sendMessage(room, nonWolfClient, "NOMINATE", { targetId: wolf.client.sessionId });
+
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
 
     // All vote to eliminate
     const voters = alive.filter((p) => p.id !== wolf.client.sessionId);
@@ -754,6 +780,9 @@ describe("WerewolfRoom -- Win Conditions", () => {
     const nonWolfClient = clients.find((c) => c.sessionId === nonWolf.id)!;
 
     sendMessage(room, nonWolfClient, "NOMINATE", { targetId: wolf.client.sessionId });
+
+    // Advance past defense timer (WW-003.4)
+    advanceClock(room, 30000);
 
     const voters = alive.filter((p) => p.id !== wolf.client.sessionId);
     for (const voter of voters) {
@@ -926,5 +955,87 @@ describe("WerewolfState -- Schema", () => {
     for (let n = 5; n <= 15; n++) {
       expect(ROLE_TABLE[n]).toBeDefined();
     }
+  });
+});
+
+describe("WerewolfRoom -- Defense Timer (WW-003.4)", () => {
+  it("WW-61: nomination enters DAY_DEFENSE phase before DAY_VOTE", async () => {
+    const { room, clients } = await setupGameInDay(5);
+    const alive = getPlayers(room).filter((p) => p.isAlive);
+
+    const nominator = alive[0];
+    const target = alive[1];
+    const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
+
+    sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Should be in DAY_DEFENSE, not DAY_VOTE
+    expect(getState(room).phase).toBe("DAY_DEFENSE");
+    expect(getState(room).nominatedPlayerId).toBe(target.id);
+    expect(getState(room).timer).toBe(30); // default defense timer
+  });
+
+  it("WW-62: defense timer expires and transitions to DAY_VOTE", async () => {
+    const { room, clients } = await setupGameInDay(5);
+    const alive = getPlayers(room).filter((p) => p.isAlive);
+
+    const nominator = alive[0];
+    const target = alive[1];
+    const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
+
+    sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+    expect(getState(room).phase).toBe("DAY_DEFENSE");
+
+    // Advance exactly 30 seconds (default defense timer)
+    advanceClock(room, 30000);
+
+    expect(getState(room).phase).toBe("DAY_VOTE");
+    expect(getState(room).nominatedPlayerId).toBe(target.id);
+  });
+
+  it("WW-63: cannot vote during DAY_DEFENSE phase", async () => {
+    const { room, clients } = await setupGameInDay(5);
+    const alive = getPlayers(room).filter((p) => p.isAlive);
+
+    const nominator = alive[0];
+    const target = alive[1];
+    const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
+
+    sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+    expect(getState(room).phase).toBe("DAY_DEFENSE");
+
+    // Try to vote during defense -- should be rejected
+    sendMessage(room, nominatorClient, "DAY_VOTE", { vote: "eliminate" });
+    const err = nominatorClient.sends.find((s) => s.type === "ERROR" && s.msg?.code === "INVALID_PHASE");
+    expect(err).toBeDefined();
+  });
+
+  it("WW-64: PHASE_CHANGE broadcast includes defense timer info", async () => {
+    const { room, clients } = await setupGameInDay(5);
+    const alive = getPlayers(room).filter((p) => p.isAlive);
+
+    const nominator = alive[0];
+    const target = alive[1];
+    const nominatorClient = clients.find((c) => c.sessionId === nominator.id)!;
+
+    // Clear all sends to isolate PHASE_CHANGE from nomination
+    clients.forEach((c) => { c.sends = []; });
+
+    sendMessage(room, nominatorClient, "NOMINATE", { targetId: target.id });
+
+    // Check that PHASE_CHANGE was broadcast with DAY_DEFENSE info
+    const phaseMsg = clients[0].sends.find(
+      (s) => s.type === "PHASE_CHANGE" && s.msg?.phase === "DAY_DEFENSE",
+    );
+    expect(phaseMsg).toBeDefined();
+    expect(phaseMsg!.msg.targetId).toBe(target.id);
+    expect(phaseMsg!.msg.timer).toBe(30);
+  });
+
+  it("WW-65: custom defense timer setting is respected", async () => {
+    const { room, clients } = await setupGameWithPlayers(5);
+    // Configure defense timer before game starts
+    sendMessage(room, clients[0], "UPDATE_CONFIG", { defenseTimer: 15 });
+    expect(getState(room).defenseTimerSetting).toBe(15);
   });
 });

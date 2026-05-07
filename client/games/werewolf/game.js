@@ -180,6 +180,8 @@
         showDayAnnounce(msg);
       } else if (msg.phase === 'DAY_DISCUSSION') {
         showDayDiscussion(msg);
+      } else if (msg.phase === 'DAY_DEFENSE') {
+        showDayDefense(msg);
       } else if (msg.phase === 'DAY_VOTE') {
         showDayVote(msg);
       } else if (msg.phase === 'SKIP_TO_NIGHT') {
@@ -258,8 +260,11 @@
       if (state.phase === 'DAY_DISCUSSION' && $('dayTimer')) {
         $('dayTimer').textContent = formatTime(state.timer);
       }
-      if (state.phase === 'DAY_VOTE' && $('voteTimer')) {
+      if ((state.phase === 'DAY_VOTE' || state.phase === 'DAY_DEFENSE') && $('voteTimer')) {
         $('voteTimer').textContent = state.timer;
+        if (state.phase === 'DAY_DEFENSE' && $('voteStatus')) {
+          $('voteStatus').textContent = 'รอผู้ถูกกล่าวหาแก้ตัว... ' + state.timer + ' วินาที';
+        }
       }
     });
 
@@ -513,6 +518,18 @@
       });
       list.appendChild(item);
     });
+  }
+
+  // ─── Day Defense (WW-003.4) ──────────────────────────────────
+  function showDayDefense(msg) {
+    showScreen('dayVote');
+    $('voteTarget').textContent = msg.targetNickname + ' ถูกเสนอชื่อโดย ' + msg.nominatorNickname;
+    $('voteStatus').textContent = 'รอผู้ถูกกล่าวหาแก้ตัว... ' + (msg.timer || 30) + ' วินาที';
+    $('voteTimer').textContent = msg.timer || 30;
+
+    // Hide vote buttons during defense phase
+    var buttons = $('voteButtons');
+    buttons.style.display = 'none';
   }
 
   // ─── Day Vote ────────────────────────────────────────────────

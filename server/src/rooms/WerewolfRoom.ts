@@ -17,6 +17,7 @@ const MAX_PLAYERS = 15;
 const ROLE_REVEAL_SECS = 5;
 const DEFAULT_NIGHT_TIMER_SECS = 30;
 const DEFAULT_DISCUSSION_TIMER_SECS = 90;
+const DEFAULT_DEFENSE_TIMER_SECS = 30;
 const DAY_ANNOUNCE_SECS = 5;
 const VOTE_TIMEOUT_SECS = 30;
 
@@ -43,6 +44,7 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
   private dayAnnounceTimer: Delayed | null = null;
   private discussionTimer: Delayed | null = null;
   private discussionInterval: Delayed | null = null;
+  private defenseInterval: Delayed | null = null;
   private voteTimer: Delayed | null = null;
   private roleRevealTimer: Delayed | null = null;
 
@@ -121,7 +123,7 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
     this.onMessage("DAY_VOTE", (client, data: { vote: "eliminate" | "spare" }) =>
       this.handleDayVote(client, data.vote),
     );
-    this.onMessage("UPDATE_CONFIG", (client, data: { discussionTimer?: number; nightTimer?: number }) =>
+    this.onMessage("UPDATE_CONFIG", (client, data: { discussionTimer?: number; nightTimer?: number; defenseTimer?: number }) =>
       this.handleUpdateConfig(client, data),
     );
   }
@@ -444,9 +446,13 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
     }, 2000);
   }
 
-  // ─── DAY VOTE ─────────────────────────────────────────────────
+  // ─── DAY DEFENSE (WW-003.4) ──────────────────────────────────
 
-  private startDayVote(nominatorId: string, targetId: string): void {
+  /**
+   * Start the defense phase. The accused player has N seconds to defend
+   * themselves before the elimination vote opens.
+   */
+  private startDayDefense(nominatorId: string, targetId: string): void {
     this.stopDiscussionTimer();
 
     const state = this.state;
@@ -454,10 +460,54 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
     const nominator = state.players.get(nominatorId) as WerewolfPlayer | undefined;
     if (!target || !nominator) return;
 
-    state.phase = "DAY_VOTE";
+    state.phase = "DAY_DEFENSE";
     state.nominatedPlayerId = targetId;
     state.nominatedPlayerNickname = target.nickname;
     state.nominatorId = nominatorId;
+
+    const defenseSecs = state.defenseTimerSetting || DEFAULT_DEFENSE_TIMER_SECS;
+    state.timer = defenseSecs;
+
+    this.broadcast("PHASE_CHANGE", {
+      phase: "DAY_DEFENSE",
+      nominatorId,
+      nominatorNickname: nominator.nickname,
+      targetId,
+      targetNickname: target.nickname,
+      timer: defenseSecs,
+    });
+
+    // Defense countdown -- after timer expires, proceed to vote
+    this.defenseInterval = this.clock.setInterval(() => {
+      state.timer--;
+      if (state.timer <= 0) {
+        this.stopDefenseTimer();
+        this.startDayVote();
+      }
+    }, 1000);
+  }
+
+  private stopDefenseTimer(): void {
+    if (this.defenseInterval) {
+      this.defenseInterval.clear();
+      this.defenseInterval = null;
+    }
+  }
+
+  // ─── DAY VOTE ─────────────────────────────────────────────────
+
+  /**
+   * Start the elimination vote. Called after defense timer expires.
+   * nomination target is already set in state from startDayDefense().
+   */
+  private startDayVote(): void {
+    const state = this.state;
+    const targetId = state.nominatedPlayerId;
+    const target = state.players.get(targetId) as WerewolfPlayer | undefined;
+    const nominator = state.players.get(state.nominatorId) as WerewolfPlayer | undefined;
+    if (!target) return;
+
+    state.phase = "DAY_VOTE";
     state.eliminateVotes = 0;
     state.spareVotes = 0;
     state.totalVotesCast = 0;
@@ -475,8 +525,8 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
 
     this.broadcast("PHASE_CHANGE", {
       phase: "DAY_VOTE",
-      nominatorId,
-      nominatorNickname: nominator.nickname,
+      nominatorId: state.nominatorId,
+      nominatorNickname: nominator?.nickname || "",
       targetId,
       targetNickname: target.nickname,
       timer: VOTE_TIMEOUT_SECS,
@@ -800,7 +850,8 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
     }
 
     // One nomination per day (Loki G1)
-    this.startDayVote(client.sessionId, targetId);
+    // WW-003.4: Defense phase before vote
+    this.startDayDefense(client.sessionId, targetId);
   }
 
   private handleDayVote(client: Client, vote: "eliminate" | "spare"): void {
@@ -848,7 +899,7 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
 
   private handleUpdateConfig(
     client: Client,
-    data: { discussionTimer?: number; nightTimer?: number },
+    data: { discussionTimer?: number; nightTimer?: number; defenseTimer?: number },
   ): void {
     const player = this.state.players.get(client.sessionId);
     if (!player || !player.isHost) {
@@ -874,6 +925,14 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
       const allowed = [20, 30, 45];
       if (allowed.includes(data.nightTimer)) {
         this.state.nightTimerSetting = data.nightTimer;
+      }
+    }
+
+    if (data.defenseTimer !== undefined) {
+      // WW-003.4: Allow 15, 30, 45 seconds for defense
+      const allowed = [15, 30, 45];
+      if (allowed.includes(data.defenseTimer)) {
+        this.state.defenseTimerSetting = data.defenseTimer;
       }
     }
   }
@@ -969,6 +1028,7 @@ export class WerewolfRoom extends BaseRoom<WerewolfState> {
   private clearAllTimers(): void {
     this.stopNightTimer();
     this.stopDiscussionTimer();
+    this.stopDefenseTimer();
     this.stopVoteTimer();
     if (this.dayAnnounceTimer) {
       this.dayAnnounceTimer.clear();

@@ -4,10 +4,19 @@ Items that require human action (credentials, access, decisions).
 
 ---
 
-## HQ-001: Deploy to Render.com (External Access)
+## HQ-001: Deploy to Render.com (External Access) — ✅ RESOLVED 2026-05-08
 
 **Category:** External access (human holds credentials)
 **Priority:** P0 -- blocking public URL
+**Resolved:** 2026-05-08 by user — Blueprint applied via Render dashboard, AEGIS_ADMIN_TOKEN set, deploy succeeded.
+**Live URL:** https://kam-tong-ham.onrender.com
+**Smoke verification (main session):**
+- `GET /api/games` → 200 with 6-game registry
+- `GET /api/admin/telemetry` → 401 (auth gate works)
+- `GET /` → 200, 15.3KB home page
+- `GET /api/health` → 200
+- Issue #21 rate-limiter smoke: 200×10 + 429×2 (exact threshold, TRUST_PROXY confirmed)
+**Sprint 14 production hardening verified live.**
 **Created:** 2026-05-07
 
 ### EN

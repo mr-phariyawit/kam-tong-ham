@@ -302,46 +302,6 @@ function SharedLobby(options) {
   };
 }
 
-// ─── renderLobby compatibility shim (Sprint 13 — Issue #13) ─────
-// Spy and any callers using the function-form `renderLobby(container, options)`
-// API expect a stateless render call. SharedLobby is constructor-based, so we
-// memoize one instance per container and translate field-by-field.
-//
-// Supported options: { roomCode, players, mySessionId, isHost, gameName,
-//   maxPlayers, onStart, onKick, onLeave, configHtml }
-// Silently ignored: onTransfer, gameType, gameIcon, minPlayers, onConfigChange.
-function renderLobby(container, options) {
-  options = options || {};
-  if (!container) return;
-
-  var instance = container.__sharedLobbyInstance;
-  if (!instance) {
-    instance = SharedLobby({
-      container: container,
-      gameName: options.gameName,
-      maxPlayers: options.maxPlayers,
-      onStart: options.onStart,
-      onKick: options.onKick,
-      onLeave: options.onLeave,
-    });
-    container.__sharedLobbyInstance = instance;
-  }
-
-  if (typeof options.roomCode !== 'undefined') instance.setRoomCode(options.roomCode);
-  if (options.players) instance.updatePlayers(options.players, options.mySessionId, !!options.isHost);
-  if (typeof options.isHost === 'boolean') instance.setHost(options.isHost);
-
-  // configHtml: game-specific configuration block injected once after the
-  // shared lobby renders. Caller owns the markup; we just place it.
-  if (options.configHtml && !container.__configHtmlInjected) {
-    var configWrap = document.createElement('div');
-    configWrap.className = 'shared-lobby-config';
-    configWrap.innerHTML = options.configHtml;
-    container.appendChild(configWrap);
-    container.__configHtmlInjected = true;
-  }
-}
-
 // ─── Export for use via script tag ──────────────────────────────
 if (typeof window !== 'undefined') {
   window.SharedLobby = SharedLobby;
@@ -349,5 +309,4 @@ if (typeof window !== 'undefined') {
   window.RoomCodeDisplay = RoomCodeDisplay;
   window.KickButton = KickButton;
   window.HostBadge = HostBadge;
-  window.renderLobby = renderLobby;
 }

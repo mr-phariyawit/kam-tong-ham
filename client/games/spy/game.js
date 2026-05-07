@@ -207,12 +207,14 @@
       showToast('คุณถูกเตะออกจากห้อง', 3000, true);
       showScreen('home');
       room = null;
+      lobbyComponent = null;
     });
 
     room.onMessage('ROOM_EXPIRED', function () {
       showToast('ห้องหมดเวลา', 3000, true);
       showScreen('home');
       room = null;
+      lobbyComponent = null;
     });
 
     room.onMessage('PLAYER_RECONNECTED', function (msg) {
@@ -225,6 +227,7 @@
         showScreen('home');
       }
       room = null;
+      lobbyComponent = null;
     });
 
     room.onError(function (code, message) {
@@ -267,48 +270,76 @@
   }
 
   // ─── Lobby ────────────────────────────────────────────────────
+  var lobbyComponent = null;
+
   function updateLobby() {
     if (!room || !room.state) return;
     var state = room.state;
 
-    // Use shared lobby component
-    if (typeof window.renderLobby === 'function') {
-      window.renderLobby($('lobbyContainer'), {
-        roomCode: state.roomCode,
-        players: state.players,
-        mySessionId: mySessionId,
-        isHost: isHost,
-        gameType: 'spy',
-        gameName: 'สายลับ',
-        gameIcon: '🕵️',
-        minPlayers: 3,
+    // Use SharedLobby constructor pattern (matching word-link)
+    if (!lobbyComponent) {
+      lobbyComponent = window.SharedLobby({
+        container: $('lobbyContainer'),
+        gameName: '\u{1f575}\u{fe0f} สายลับ',
         maxPlayers: 8,
-        onStart: function () { room.send('START_GAME'); },
-        onKick: function (playerId) { room.send('KICK_PLAYER', { targetPlayerId: playerId }); },
-        onTransfer: function (playerId) { room.send('TRANSFER_HOST', { targetPlayerId: playerId }); },
-        configHtml: renderConfigPanel(),
-        onConfigChange: function (key, value) {
-          if (key === 'timer') {
-            room.send('UPDATE_CONFIG', { timerSetting: parseInt(value) });
-          }
+        onKick: function (playerId) {
+          room.send('KICK_PLAYER', { targetPlayerId: playerId });
+        },
+        onStart: function () {
+          room.send('START_GAME');
+        },
+        onLeave: function () {
+          if (room) room.leave();
+          room = null;
+          lobbyComponent = null;
+          showScreen('home');
         },
       });
+
+      // Inject config panel once after lobby renders
+      var configHtml = renderConfigPanel();
+      if (configHtml) {
+        var configWrap = document.createElement('div');
+        configWrap.className = 'shared-lobby-config';
+        configWrap.innerHTML = configHtml;
+        $('lobbyContainer').appendChild(configWrap);
+      }
+    }
+
+    lobbyComponent.setRoomCode(state.roomCode);
+
+    // Build players array from state
+    var players = [];
+    state.players.forEach(function (p) {
+      players.push({
+        id: p.id,
+        nickname: p.nickname,
+        avatar: p.avatar,
+        isHost: p.isHost,
+        isConnected: p.isConnected,
+      });
+    });
+
+    lobbyComponent.updatePlayers(players, mySessionId, isHost);
+
+    if (isHost && players.length >= 3) {
+      lobbyComponent.enableStart();
+    } else {
+      lobbyComponent.disableStart();
     }
 
     // Inject share button if not already present
     if (!document.getElementById('btnShareRoom') && window.RoomShare && state.roomCode) {
-      var container = $('lobbyContainer');
-      if (container) {
+      var roomCodeSection = $('lobbyContainer').querySelector('.shared-room-code');
+      if (roomCodeSection) {
         var shareBtn = document.createElement('button');
         shareBtn.id = 'btnShareRoom';
         shareBtn.className = 'btn-share-room';
-        shareBtn.style.display = 'block';
-        shareBtn.style.margin = '8px auto 0';
         shareBtn.textContent = '\u{1f4f1} แชร์ห้อง / Share'; // 📱 แชร์ห้อง / Share
         shareBtn.addEventListener('click', function () {
           window.RoomShare.showShareModal(state.roomCode);
         });
-        container.appendChild(shareBtn);
+        roomCodeSection.appendChild(shareBtn);
       }
     }
 
@@ -589,6 +620,7 @@
     // Leave game
     $('btnLeaveGame').addEventListener('click', function () {
       if (room) room.leave();
+      lobbyComponent = null;
       showScreen('home');
     });
 
@@ -632,6 +664,7 @@
     // Back to home from game over
     $('btnBackToHome').addEventListener('click', function () {
       if (room) room.leave();
+      lobbyComponent = null;
       showScreen('home');
     });
 

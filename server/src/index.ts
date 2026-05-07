@@ -2,6 +2,7 @@ import http from "http";
 import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { KhamTongHamRoom } from "./rooms/KhamTongHamRoom";
+import { WordLinkRoom } from "./rooms/WordLinkRoom";
 import { createApp } from "./app";
 import { registerDefaultGames } from "./utils/gameRegistry";
 
@@ -12,6 +13,7 @@ const PORT = parseInt(process.env.PORT || "2567", 10);
 // The registry is the single source of truth for GET /api/games and room creation.
 registerDefaultGames({
   "forbidden-word": KhamTongHamRoom,
+  "word-link": WordLinkRoom,
 });
 
 const app = createApp();
@@ -24,10 +26,14 @@ const gameServer = new Server({
   transport: new WebSocketTransport({ server: httpServer }),
 });
 
-// Define the room
+// Define rooms
 // Note: "kham_tong_ham" is the Colyseus room name for backward compatibility.
 // The gameType field in room options determines which game logic runs.
 gameServer.define("kham_tong_ham", KhamTongHamRoom)
+  .filterBy(["roomCode"])
+  .enableRealtimeListing();
+
+gameServer.define("word_link", WordLinkRoom)
   .filterBy(["roomCode"])
   .enableRealtimeListing();
 

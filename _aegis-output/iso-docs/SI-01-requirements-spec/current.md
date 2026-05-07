@@ -1,8 +1,9 @@
 ---
 document: SI.01
 title: Requirements Specification — คำต้องห้าม (Kham Tong Ham)
-version: 1
+version: 2
 status: Approved
+updated: 2026-05-07
 created: 2026-05-05
 author: Coulson (AEGIS v11.0)
 project: คำต้องห้าม — Thai Party Game
@@ -147,11 +148,11 @@ This document specifies the functional and non-functional requirements for ค�
 ### FR-013: Word Pack System (expanded Sprint 3)
 | ID | Requirement | Priority | Status |
 |----|-------------|----------|--------|
-| FR-013.1 | 19 built-in categories (100+ words each) | Must | In Progress |
+| FR-013.1 | 19 built-in categories (100+ words each) | Must | Implemented |
 | FR-013.2 | 3-tier difficulty (easy/medium/hard) per pack | Must | Implemented (AEG-37) |
 | FR-013.3 | Custom wordpack upload via API | Should | Implemented |
 | FR-013.4 | Custom pack override built-in on ID match | Should | Implemented |
-| FR-013.5 | No duplicate words within pack | Must | In Progress |
+| FR-013.5 | No duplicate words within pack | Must | Implemented |
 
 ## 4. Non-Functional Requirements
 
@@ -166,13 +167,13 @@ This document specifies the functional and non-functional requirements for ค�
 | NFR-7 | Security | No PII, no persistent tokens | Must | Implemented |
 | NFR-8 | PWA | Installable, offline home screen | Should | Implemented |
 | NFR-9 | Availability | 99% uptime (platform SLA) | Must | Not deployed |
-| NFR-10 | Content | Family-friendly word packs | Must | In Review |
+| NFR-10 | Content | Family-friendly word packs | Must | Implemented |
 
 ## 5. Test Coverage Summary
 
 | Area | Tests | Status |
 |------|-------|--------|
-| Word Picker | 14 tests | 12 pass, 2 fail (count assertions) |
+| Word Picker | 14 tests | All pass |
 | Word Pool | 18 tests | All pass |
 | Room Code | 7 tests | All pass |
 | REST API | 16 tests | All pass |
@@ -183,5 +184,8 @@ This document specifies the functional and non-functional requirements for ค�
 | Integration: 8-Player | 4 tests | All pass |
 | Integration: Blind Voting | 6 tests | All pass |
 | Integration: Expiry | 4 tests | All pass |
-| Integration: Disconnect | 5 tests | 5 fail (off-by-1) |
-| **Total** | **172** | **165 pass / 7 fail** |
+| Integration: Disconnect | 5 tests | All pass |
+| **Total** | **172** | **172 pass / 0 fail** |
+
+> Updated 2026-05-07: All Sprint 1 fixes (KTH-T-001, KTH-T-002, KTH-T-003) verified complete.
+> Category count assertions updated (10->19), disconnect off-by-1 fixed, all 19 wordpacks validated.

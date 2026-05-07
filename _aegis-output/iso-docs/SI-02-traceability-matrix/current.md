@@ -1,8 +1,9 @@
 ---
 document: SI.02
 title: Traceability Matrix — คำต้องห้าม (Kham Tong Ham)
-version: 1
+version: 2
 status: Active
+updated: 2026-05-07
 created: 2026-05-05
 author: Coulson (AEGIS v11.0)
 project: คำต้องห้าม — Thai Party Game
@@ -25,20 +26,20 @@ project: คำต้องห้าม — Thai Party Game
 | FR-003.3 | Join validation | server/src/app.ts | API-05..09 | Implemented |
 | FR-004.1 | Real-time player list | KhamTongHamRoom.ts state | eightPlayer.test.ts | Implemented |
 | FR-004.4 | Start (host, >=2 players) | KhamTongHamRoom.ts | twoPlayer.test.ts | Implemented |
-| FR-004.5 | Host transfer on leave | KhamTongHamRoom.ts | disconnect.test.ts (FAILING) | Bug |
+| FR-004.5 | Host transfer on leave | KhamTongHamRoom.ts | disconnect.test.ts | Implemented |
 | FR-005.3 | Unique word per player | server/src/utils/wordPicker.ts | WP-01..10, WPD-* | Implemented |
 | FR-006.2 | 8 distinct colors | KhamTongHamRoom.ts | eightPlayer.test.ts | Implemented |
 | FR-007.5 | Majority vote | KhamTongHamRoom.ts | voteResolution.test.ts | Implemented |
 | FR-007.9 | Kill scoring (+2/-3) | KhamTongHamRoom.ts | scoring.test.ts | Implemented |
 | FR-007.10 | False accusation (-1) | KhamTongHamRoom.ts | scoring.test.ts, AEG-53 | Implemented |
 | FR-008.5 | Guess scoring (+3/0) | KhamTongHamRoom.ts | scoring.test.ts | Implemented |
-| FR-011.3 | Host disconnect transfer | KhamTongHamRoom.ts | disconnect.test.ts (FAILING) | Bug |
+| FR-011.3 | Host disconnect transfer | KhamTongHamRoom.ts | disconnect.test.ts | Implemented |
 | FR-012.1 | Nickname filter | KhamTongHamRoom.ts | anti-abuse.test.ts | Implemented |
 | FR-012.2 | Rejoin tokens | KhamTongHamRoom.ts | antiAbuse.test.ts (integration) | Implemented |
 | FR-012.4 | Room code isolation | server/src/app.ts | API-15..16 (AEG-66) | Implemented |
-| FR-013.1 | 19 categories (100+ words) | server/src/data/wordpacks/*.json | WPD-01..06 | In Progress |
+| FR-013.1 | 19 categories (100+ words) | server/src/data/wordpacks/*.json | WPD-01..06 | Implemented |
 | FR-013.2 | 3-tier difficulty | wordPicker.ts + pack JSON | WPD-04 | Implemented |
-| FR-013.3 | Custom wordpack API | wordPicker.ts (saveWordPack) | WP-07 (FAILING) | Bug |
+| FR-013.3 | Custom wordpack API | wordPicker.ts (saveWordPack) | WP-07 | Implemented |
 
 ## Business Rules -> Implementation
 
@@ -52,10 +53,16 @@ project: คำต้องห้าม — Thai Party Game
 | BR-9 (majority vote) | KhamTongHamRoom.ts vote resolution | voteResolution.test.ts |
 | BR-10 (tie = fail) | KhamTongHamRoom.ts vote resolution | voteResolution.test.ts |
 
-## Known Gaps (Sprint 1 backlog)
+## Known Gaps (resolved)
 
-| Gap | REQ | Fix Task |
-|-----|-----|----------|
-| Category count assertion (10 vs 19) | FR-013.1 | KTH-T-001 |
-| Disconnect playerCount off-by-1 | FR-004.5, FR-011.3 | KTH-T-002 |
-| New wordpack validation | FR-013.1, FR-013.5 | KTH-T-003 |
+All Sprint 1 gaps resolved as of 2026-05-05:
+- KTH-T-001: Category count assertions updated (10->19) -- DONE
+- KTH-T-002: Disconnect playerCount off-by-1 fixed -- DONE
+- KTH-T-003: All 19 wordpacks validated (structure + content) -- DONE
+
+## Platform Expansion (Sprint 2+)
+
+New games planned -- see PLATFORM_SPEC_v2.md for full requirements:
+- Werewolf (WW-001..004), Spy (SP-001..004), Knights (KN-001..004)
+- Word Link (WL-001..004), Draw & Guess (DG-001..006)
+- Platform shared requirements (PFR-001..003)

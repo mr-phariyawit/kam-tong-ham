@@ -1,0 +1,25 @@
+{
+  "id": "KTH-T-015",
+  "type": "task",
+  "title": "Grid generation + color assignment",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 2,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-013"],
+  "sub_tasks": [
+    "Pick 25 unique Thai words from wordpacks using pickUniqueWords()",
+    "Assign colors: 9 red, 8 blue, 7 neutral, 1 assassin (shuffled)",
+    "Create WordCard instances in WordLinkState grid",
+    "Expose grid to clients (spymasters see colors, guessers see words only)"
+  ],
+  "acceptance": [
+    "Grid always has exactly 25 unique words",
+    "Color distribution is always 9/8/7/1",
+    "No duplicate words in grid",
+    "Color visibility filtered by player role"
+  ],
+  "block0_mode": "standard"
+}

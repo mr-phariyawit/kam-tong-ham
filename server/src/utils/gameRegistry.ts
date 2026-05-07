@@ -207,7 +207,7 @@ export function registerDefaultGames(
     minPlayers: 4,
     maxPlayers: 10,
     roomClass: roomClasses["word-link"] || null,
-    comingSoon: true,
+    comingSoon: false,
     mechanic: "word-association",
     description: "ใบ้คำให้ทีม ด้วยคำเพียงคำเดียว!",
     icon: "🔗",

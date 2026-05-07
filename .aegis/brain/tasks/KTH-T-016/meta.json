@@ -1,0 +1,27 @@
+{
+  "id": "KTH-T-016",
+  "type": "task",
+  "title": "Spymaster clue + team guess flow",
+  "epic": "KTH-E-010",
+  "sprint": "sprint-3",
+  "status": "TODO",
+  "points": 3,
+  "priority": "Must",
+  "assignee": "spider-man",
+  "depends_on": ["KTH-T-014", "KTH-T-015"],
+  "sub_tasks": [
+    "GIVE_CLUE handler: spymaster sends word + number, validate single word + no grid match",
+    "GUESS_CARD handler: team member taps card, reveal color, check result",
+    "Turn logic: correct guess = continue (up to number+1), neutral/opponent = end turn",
+    "END_TURN handler: team voluntarily ends guessing phase",
+    "Turn timer (optional, host-configurable)"
+  ],
+  "acceptance": [
+    "Only spymaster can give clue",
+    "Only guessers on active team can guess",
+    "Correct guess allows continued guessing",
+    "Neutral/opponent word ends turn",
+    "Turn switches to other team after end"
+  ],
+  "block0_mode": "standard"
+}

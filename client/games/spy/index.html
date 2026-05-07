@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1B5E20">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="สายลับ">
+  <meta name="description" content="สายลับ — ถามคำถามหาสายลับ แต่ระวังอย่าเปิดเผยสถานที่!">
+  <title>สายลับ | Spy</title>
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/components/lobby.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== SCREEN: HOME ========== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-container">
+      <div class="home-icon">🕵️</div>
+      <h1 class="home-title">สายลับ</h1>
+      <p class="home-subtitle">ถามคำถามหาสายลับ แต่ระวังอย่าเปิดเผยสถานที่!</p>
+
+      <div class="home-buttons">
+        <button class="btn btn-primary" id="btnCreate">สร้างห้อง</button>
+        <button class="btn btn-secondary" id="btnJoin">เข้าร่วมห้อง</button>
+      </div>
+
+      <a href="/" class="btn btn-ghost" style="margin-top: 16px;">← กลับหน้าหลัก</a>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: NICKNAME ========== -->
+  <div class="screen" id="screen-nickname">
+    <button class="home-back" id="btnBackHome">← กลับ</button>
+    <div class="nickname-container">
+      <h2 style="margin-bottom: 20px; font-size: 20px;">เลือกตัวละคร</h2>
+      <div class="avatar-picker" id="avatarPicker"></div>
+      <input type="text" class="nickname-input" id="nicknameInput" placeholder="ชื่อของคุณ" maxlength="15">
+
+      <div id="joinCodeGroup" style="display: none; margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--spy-text-secondary); margin-bottom: 8px;">รหัสห้อง</p>
+        <input type="text" class="join-code-input" id="joinCodeInput" placeholder="ABCD" maxlength="4">
+      </div>
+
+      <button class="btn btn-primary" id="btnConnect" style="width: 100%; max-width: 280px;">เข้าร่วม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: LOBBY ========== -->
+  <div class="screen" id="screen-lobby">
+    <div class="lobby-container" id="lobbyContainer"></div>
+  </div>
+
+  <!-- ========== SCREEN: ROLE REVEAL ========== -->
+  <div class="screen" id="screen-roleReveal">
+    <div class="role-reveal-container">
+      <div class="role-reveal-icon" id="roleRevealIcon">🕵️</div>
+      <h2 class="role-reveal-title" id="roleRevealTitle">บทบาทของคุณ</h2>
+      <div class="role-reveal-subtitle" id="roleRevealSubtitle">เตรียมตัวให้พร้อม!</div>
+      <div class="role-reveal-location" id="roleRevealLocation"></div>
+      <div class="role-reveal-role" id="roleRevealRole"></div>
+      <div class="role-reveal-countdown" id="roleRevealCountdown">เริ่มเกมใน 5 วินาที...</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME ========== -->
+  <div class="screen" id="screen-game">
+    <div class="game-container">
+      <!-- Timer -->
+      <div class="timer-badge" id="timerBadge">8:00</div>
+
+      <!-- Your Role -->
+      <div class="your-role-badge" id="yourRoleBadge">
+        <div class="role-label">บทบาทของคุณ</div>
+        <div class="role-name" id="yourRoleName">หมอ</div>
+      </div>
+
+      <!-- Location List -->
+      <div class="location-grid" id="locationGrid"></div>
+
+      <!-- Player List (for accusation) -->
+      <div class="player-list" id="playerList"></div>
+
+      <!-- Game Actions -->
+      <div class="game-actions" id="gameActions">
+        <button class="btn btn-danger" id="btnSpyGuess" style="display: none;">🎯 เดาสถานที่</button>
+      </div>
+
+      <button class="btn btn-ghost" id="btnLeaveGame" style="font-size: 12px; margin-top: 4px;">← ออกจากเกม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: VOTING ========== -->
+  <div class="screen" id="screen-voting">
+    <div class="game-container">
+      <div class="vote-panel">
+        <div class="vote-title" id="voteTitle">กล่าวหาสายลับ!</div>
+        <div class="vote-target" id="voteTarget">Player1</div>
+        <div class="vote-buttons" id="voteButtons">
+          <button class="vote-btn guilty" id="btnVoteGuilty">ใช่สายลับ</button>
+          <button class="vote-btn innocent" id="btnVoteInnocent">ไม่ใช่</button>
+        </div>
+        <div class="vote-tally" id="voteTally">โหวตแล้ว 0/3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: SPY GUESS ========== -->
+  <div class="screen" id="screen-spyGuess">
+    <div class="game-container">
+      <div class="spy-guess-panel">
+        <div class="spy-guess-title">เวลาหมด! สายลับเดาสถานที่</div>
+        <div class="spy-guess-subtitle" id="spyGuessSubtitle">เลือกสถานที่ที่คุณคิดว่าถูก</div>
+      </div>
+      <div class="location-grid selectable" id="spyGuessGrid"></div>
+      <div class="game-actions" style="margin-top: 12px;">
+        <button class="btn btn-primary" id="btnConfirmGuess" disabled>ยืนยันคำตอบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME OVER ========== -->
+  <div class="screen" id="screen-gameover">
+    <div class="gameover-container">
+      <div class="gameover-icon" id="gameoverIcon">🎉</div>
+      <h2 class="gameover-title" id="gameoverTitle">จบเกม!</h2>
+      <p class="gameover-reason" id="gameoverReason"></p>
+
+      <div class="gameover-reveal">
+        <div class="gameover-reveal-title">สถานที่ลับ</div>
+        <div class="gameover-reveal-location" id="gameoverLocation">โรงพยาบาล</div>
+        <div class="gameover-reveal-spy" id="gameoverSpy">สายลับ: Player1</div>
+      </div>
+
+      <div class="gameover-roles" id="gameoverRoles"></div>
+
+      <div class="gameover-buttons">
+        <button class="btn btn-primary" id="btnPlayAgain">เล่นอีกครั้ง</button>
+        <button class="btn btn-secondary" id="btnBackToHome">กลับหน้าหลัก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../shared/components/lobby.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

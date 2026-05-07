@@ -399,7 +399,7 @@ export abstract class BaseRoom<S extends BaseState = BaseState> extends Room<S> 
       return;
     }
 
-    if (this.state.phase !== "LOBBY" && this.state.phase !== "SCOREBOARD") {
+    if (this.state.phase !== "LOBBY" && this.state.phase !== "SCOREBOARD" && this.state.phase !== "GAME_OVER") {
       this.sendError(
         client,
         "INVALID_PHASE",

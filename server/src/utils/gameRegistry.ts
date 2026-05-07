@@ -181,7 +181,7 @@ export function registerDefaultGames(
     minPlayers: 3,
     maxPlayers: 8,
     roomClass: roomClasses["spy"] || null,
-    comingSoon: true,
+    comingSoon: false,
     mechanic: "location-deduction",
     description: "ถามคำถามหาสายลับ แต่ระวังอย่าเปิดเผยสถานที่!",
     icon: "🕵️",

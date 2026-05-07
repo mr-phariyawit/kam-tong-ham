@@ -179,14 +179,15 @@ describe("registerDefaultGames", () => {
     expect(gameRegistry.has("draw-guess")).toBe(true);
   });
 
-  it("REG-09: forbidden-word and word-link are the active (non-comingSoon) games", () => {
-    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any });
+  it("REG-09: forbidden-word, word-link, and spy are the active (non-comingSoon) games", () => {
+    registerDefaultGames({ "forbidden-word": FakeRoom as any, "word-link": FakeRoom as any, "spy": FakeRoom as any });
 
     const playable = gameRegistry.getPlayable();
-    expect(playable).toHaveLength(2);
+    expect(playable).toHaveLength(3);
     const ids = playable.map((g) => g.id);
     expect(ids).toContain("forbidden-word");
     expect(ids).toContain("word-link");
+    expect(ids).toContain("spy");
   });
 
   it("REG-10: forbidden-word gets the provided roomClass", () => {

@@ -3,6 +3,7 @@ import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { KhamTongHamRoom } from "./rooms/KhamTongHamRoom";
 import { WordLinkRoom } from "./rooms/WordLinkRoom";
+import { SpyRoom } from "./rooms/SpyRoom";
 import { createApp } from "./app";
 import { registerDefaultGames } from "./utils/gameRegistry";
 
@@ -14,6 +15,7 @@ const PORT = parseInt(process.env.PORT || "2567", 10);
 registerDefaultGames({
   "forbidden-word": KhamTongHamRoom,
   "word-link": WordLinkRoom,
+  "spy": SpyRoom,
 });
 
 const app = createApp();
@@ -34,6 +36,10 @@ gameServer.define("kham_tong_ham", KhamTongHamRoom)
   .enableRealtimeListing();
 
 gameServer.define("word_link", WordLinkRoom)
+  .filterBy(["roomCode"])
+  .enableRealtimeListing();
+
+gameServer.define("spy", SpyRoom)
   .filterBy(["roomCode"])
   .enableRealtimeListing();
 

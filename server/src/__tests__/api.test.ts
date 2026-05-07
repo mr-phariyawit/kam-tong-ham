@@ -340,3 +340,39 @@ describe("GET /api/health", () => {
     expect(typeof res.body.rooms).toBe("number");
   });
 });
+
+// ─── GET /api/admin/telemetry (KTH-T-064) ──────────────────────────────────
+
+describe("GET /api/admin/telemetry", () => {
+  it("TEL-01: returns success=true with telemetry object", async () => {
+    const res = await request(app).get("/api/admin/telemetry");
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.telemetry).toBeDefined();
+  });
+
+  it("TEL-02: telemetry contains uptime, memory, and counters", async () => {
+    const res = await request(app).get("/api/admin/telemetry");
+    const t = res.body.telemetry;
+
+    expect(typeof t.uptime_seconds).toBe("number");
+    expect(typeof t.uptime_human).toBe("string");
+    expect(t.memory).toBeDefined();
+    expect(typeof t.memory.rss_mb).toBe("number");
+    expect(typeof t.memory.heap_used_mb).toBe("number");
+    expect(t.counters).toBeDefined();
+    expect(t.counters.rooms_created).toBeDefined();
+    expect(t.counters.games_started).toBeDefined();
+    expect(t.counters.peak_players).toBeDefined();
+    expect(t.counters.current_players).toBeDefined();
+  });
+
+  it("TEL-03: telemetry contains ISO date strings", async () => {
+    const res = await request(app).get("/api/admin/telemetry");
+    const t = res.body.telemetry;
+
+    expect(() => new Date(t.server_start)).not.toThrow();
+    expect(() => new Date(t.snapshot_at)).not.toThrow();
+  });
+});

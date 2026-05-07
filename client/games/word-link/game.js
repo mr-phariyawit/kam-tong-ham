@@ -138,6 +138,7 @@
       mySessionId = r.sessionId;
       setupRoomListeners();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('word-link');
       updateLobby();
     }).catch(function (err) {
       showToast('ไม่สามารถเข้าร่วมห้องได้: ' + (err.message || ''));

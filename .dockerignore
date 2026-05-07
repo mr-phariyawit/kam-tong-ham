@@ -4,6 +4,7 @@ node_modules
 _aegis-output
 _aegis-backup*
 server/dist
+server/data
 server/src/__tests__
 *.md
 !DEPLOYMENT.md

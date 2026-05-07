@@ -8,6 +8,7 @@ import { getAvailableCategories, loadWordPack, saveWordPack, deleteWordPack, isC
 import type { WordPack } from "./utils/wordPicker";
 import { activeRoomCodes } from "./utils/roomRegistry";
 import { gameRegistry } from "./utils/gameRegistry";
+import { recordRoomCreated, getTelemetrySnapshot } from "./utils/telemetry";
 
 export function createApp() {
   const app = express();
@@ -77,6 +78,9 @@ export function createApp() {
       // Generate globally unique room code (shared across all game types)
       const roomCode = generateRoomCode(activeRoomCodes);
       activeRoomCodes.add(roomCode);
+
+      // Telemetry: record room creation
+      recordRoomCreated(gameType);
 
       res.json({
         success: true,
@@ -314,6 +318,25 @@ export function createApp() {
       res.status(400).json({
         success: false,
         error: "ไม่สามารถลบหมวดนี้ (อาจเป็นหมวดเริ่มต้นของระบบ)",
+      });
+    }
+  });
+
+  // ─── TELEMETRY ──────────────────────────────────────────────
+
+  /**
+   * GET /api/admin/telemetry
+   * Return current telemetry snapshot (counters, uptime, memory).
+   * No auth required for now (single-instance, not public-facing admin).
+   */
+  app.get("/api/admin/telemetry", (_req, res) => {
+    try {
+      const snapshot = getTelemetrySnapshot();
+      res.json({ success: true, telemetry: snapshot });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        error: "ไม่สามารถโหลดข้อมูล telemetry ได้",
       });
     }
   });

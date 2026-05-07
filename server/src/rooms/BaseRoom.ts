@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import { BaseState, BasePlayer, PLAYER_COLORS } from "../schemas/BaseState";
 import { activeRoomCodes } from "../utils/roomRegistry";
 import { isBlockedNickname } from "../utils/nicknameFilter";
+import { recordGameStarted, updatePlayerCount } from "../utils/telemetry";
 
 const INACTIVITY_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
 const RECONNECT_TIMEOUT_SECS = 300; // 5 minutes -- generous for mobile party games
@@ -229,6 +230,9 @@ export abstract class BaseRoom<S extends BaseState = BaseState> extends Room<S> 
     this.state.players.set(client.sessionId, player);
     this.state.playerCount = this.state.players.size;
 
+    // Telemetry: update player count for peak tracking
+    updatePlayerCount(this.state.gameType || "unknown", this.getConnectedPlayers().length);
+
     // Issue rejoin token and send to client
     const token = crypto.randomBytes(16).toString("hex");
     this.rejoinTokens.set(token, {
@@ -407,6 +411,10 @@ export abstract class BaseRoom<S extends BaseState = BaseState> extends Room<S> 
       );
       return;
     }
+
+    // Telemetry: record game start
+    const gameType = this.state.gameType || "unknown";
+    recordGameStarted(gameType, connectedCount);
 
     this.onGameStart(client);
   }

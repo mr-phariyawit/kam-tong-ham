@@ -137,6 +137,7 @@
       mySessionId = room.sessionId;
       setupRoomListeners();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('werewolf');
     }).catch(function (err) {
       showToast('เข้าห้องไม่ได้: ' + (err.message || err), 3000, true);
     });

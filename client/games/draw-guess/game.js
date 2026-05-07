@@ -114,6 +114,7 @@
       mySessionId = r.sessionId;
       setupRoomHandlers();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('draw-guess');
     }).catch(function (err) {
       showToast('เชื่อมต่อไม่สำเร็จ: ' + (err.message || err), 3000, true);
     });

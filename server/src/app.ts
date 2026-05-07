@@ -9,6 +9,7 @@ import type { WordPack } from "./utils/wordPicker";
 import { activeRoomCodes } from "./utils/roomRegistry";
 import { gameRegistry } from "./utils/gameRegistry";
 import { recordRoomCreated, getTelemetrySnapshot } from "./utils/telemetry";
+import { adminAuth } from "./middleware/adminAuth";
 
 export function createApp() {
   const app = express();
@@ -322,12 +323,17 @@ export function createApp() {
     }
   });
 
+  // ─── ADMIN AUTH GATE (Sprint 14 -- KTH-T-088) ───────────────
+  // All /api/admin/* routes require AEGIS_ADMIN_TOKEN Bearer token.
+  // If env var unset: 503 (fail closed). Wrong/missing token: 401.
+  app.use("/api/admin", adminAuth);
+
   // ─── TELEMETRY ──────────────────────────────────────────────
 
   /**
    * GET /api/admin/telemetry
    * Return current telemetry snapshot (counters, uptime, memory).
-   * No auth required for now (single-instance, not public-facing admin).
+   * Requires AEGIS_ADMIN_TOKEN (Sprint 14).
    */
   app.get("/api/admin/telemetry", (_req, res) => {
     try {

@@ -12,12 +12,11 @@
 | Sprint 1 | Test Stabilization + Wordpack Integration | 7 | DONE |
 | Sprint 2 | Platform Foundation (BaseRoom, Home Screen, Refactor) | 18 | DONE |
 | Sprint 3 | Word Link (คำเชื่อม) | 17 | DONE |
+| Sprint 4 | Spy (สายลับ) | 11 | DONE |
 
 ## Active
 
-| Sprint | Title | Points | Status |
-|--------|-------|--------|--------|
-| Sprint 4 | Spy (สายลับ) | 11 | ACTIVE |
+(none -- Sprint 5 next)
 
 ## Planned
 
@@ -30,11 +29,11 @@
 
 ## Progress
 
-- Completed: 47 pts (Sprint 0-3)
-- Active: 11 pts (Sprint 4)
+- Completed: 58 pts (Sprint 0-4)
+- Active: 0 pts
 - Remaining: 51 pts (Sprint 5-8)
 - Total: 109 pts
-- Progress: ~43% (47/109)
+- Progress: ~53% (58/109)
 
 ## Key Milestones
 
@@ -46,7 +45,7 @@
 | M4 | All tests green (172/172) | Sprint 1 | DONE |
 | M5 | Multi-game platform architecture | Sprint 2 | DONE |
 | M6 | First new game (Word Link) | Sprint 3 | DONE |
-| M7 | Social deduction game (Spy) | Sprint 4 | IN PROGRESS |
+| M7 | Social deduction game (Spy) | Sprint 4 | DONE |
 | M8 | Social deduction duo (Spy + Werewolf) | Sprint 5 | PLANNED |
 | M9 | All 6 games playable | Sprint 7 | PLANNED |
 | M10 | Production-ready platform | Sprint 8 | PLANNED |

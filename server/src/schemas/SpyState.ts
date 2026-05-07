@@ -16,10 +16,22 @@ export type SpyPhase =
  * Spy player -- extends BasePlayer with spy-specific fields.
  */
 export class SpyPlayer extends BasePlayer {
-  /** Whether this player is the spy. Only synced to the player themselves. */
-  @type("boolean") isSpy: boolean = false;
-  /** The player's assigned role at the location (empty for spy). */
-  @type("string") role: string = "";
+  /**
+   * Whether this player is the spy.
+   * NOT synced to clients -- kept server-side only.
+   * Player's own spy status is sent via private ROLE_DATA message.
+   * (Fixed in Sprint 8 reconnect-leak audit: was @type("boolean") which
+   *  synced to ALL clients, leaking spy identity.)
+   */
+  isSpy: boolean = false;
+  /**
+   * The player's assigned role at the location (empty for spy).
+   * NOT synced to clients -- kept server-side only.
+   * Player's own role is sent via private ROLE_DATA message.
+   * (Fixed in Sprint 8 reconnect-leak audit: was @type("string") which
+   *  synced to ALL clients, leaking role assignments.)
+   */
+  role: string = "";
   /** Whether this player has voted in the current accusation. */
   @type("boolean") hasVoted: boolean = false;
   /** The player's vote: "guilty" or "innocent" (cleared between votes). */

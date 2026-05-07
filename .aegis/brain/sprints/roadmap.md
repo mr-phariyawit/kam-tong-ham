@@ -24,7 +24,13 @@
 
 | Sprint | Title | Points | Status |
 |--------|-------|--------|--------|
-| Sprint 11 | Fuzzy Thai Match + QR Room Sharing | 7 | ACTIVE |
+| Sprint 12 | Finish Share-by-URL (auto-join + QR) | 8 | ACTIVE |
+
+## Completed (recent)
+
+| Sprint | Title | Points | Status |
+|--------|-------|--------|--------|
+| Sprint 11 | Fuzzy Thai Match + QR Room Sharing | 7 | DONE |
 
 ## Planned
 
@@ -32,12 +38,12 @@
 
 ## Progress
 
-- Completed: 132 pts (Sprint 0-10) -- v1.0 + deploy infra + telemetry/onboarding
-- Active: 7 pts (Sprint 11)
+- Completed: 139 pts (Sprint 0-11) -- v1.0 + deploy infra + telemetry/onboarding + fuzzy match
+- Active: 8 pts (Sprint 12)
 - Planned: 0 pts
-- Total: ~139 pts
+- Total: ~147 pts
 - v1.0 Progress: 100% SHIPPED
-- v1.1 Progress: 23/30 pts (Sprint 9 + Sprint 10 done, Sprint 11 active)
+- v1.1 Progress: 30/38 pts (Sprint 9-11 done, Sprint 12 active)
 
 ## Key Milestones
 

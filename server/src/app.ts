@@ -10,6 +10,7 @@ import { activeRoomCodes } from "./utils/roomRegistry";
 import { gameRegistry } from "./utils/gameRegistry";
 import { recordRoomCreated, getTelemetrySnapshot } from "./utils/telemetry";
 import { adminAuth } from "./middleware/adminAuth";
+import { rateLimit } from "./middleware/rateLimit";
 
 export function createApp() {
   const app = express();
@@ -50,8 +51,10 @@ export function createApp() {
    *
    * Room codes are globally unique across all game types (Loki F6a):
    * the shared activeRoomCodes set prevents collisions between different games.
+   *
+   * Rate-limited: 10 creates/minute per IP (Sprint 14 -- KTH-T-089).
    */
-  app.post("/api/rooms/create", async (req, res) => {
+  app.post("/api/rooms/create", rateLimit({ limit: 10, windowMs: 60_000 }), async (req, res) => {
     try {
       const gameType = req.body?.gameType || "forbidden-word";
 

@@ -1,0 +1,229 @@
+/* ─── Knights (อัศวิน) -- Theme ─── */
+
+:root {
+  --kn-bg: #1B2A4A;
+  --kn-bg-dark: #0F1B33;
+  --kn-card: #243658;
+  --kn-card-hover: #2D4470;
+  --kn-accent: #D4A853;
+  --kn-accent-hover: #E5BD6A;
+  --kn-good: #4CAF50;
+  --kn-good-light: #81C784;
+  --kn-evil: #E53935;
+  --kn-evil-light: #EF5350;
+  --kn-text: #FFFFFF;
+  --kn-text-secondary: #A0B0C8;
+  --kn-border: rgba(212, 168, 83, 0.3);
+  --kn-shadow: rgba(0, 0, 0, 0.3);
+  --kn-success: #4CAF50;
+  --kn-fail: #E53935;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--kn-bg);
+  color: var(--kn-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { display: none; min-height: 100vh; padding: 20px; }
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ─── Buttons ─── */
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary { background: var(--kn-accent); color: var(--kn-bg-dark); }
+.btn-primary:hover { background: var(--kn-accent-hover); transform: translateY(-1px); }
+.btn-secondary { background: var(--kn-card); color: var(--kn-text); border: 1px solid var(--kn-border); }
+.btn-secondary:hover { background: var(--kn-card-hover); }
+.btn-success { background: var(--kn-good); color: white; }
+.btn-success:hover { background: var(--kn-good-light); }
+.btn-danger { background: var(--kn-evil); color: white; }
+.btn-danger:hover { background: var(--kn-evil-light); }
+.btn-ghost { background: transparent; color: var(--kn-text-secondary); }
+.btn-ghost:hover { color: var(--kn-text); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ─── Home Screen ─── */
+
+.home-container { text-align: center; max-width: 360px; }
+.home-icon { font-size: 72px; margin-bottom: 16px; }
+.home-title { font-size: 36px; font-weight: 800; color: var(--kn-accent); margin-bottom: 8px; }
+.home-subtitle { font-size: 16px; color: var(--kn-text-secondary); margin-bottom: 32px; }
+.home-buttons { display: flex; flex-direction: column; gap: 12px; }
+.home-buttons .btn { width: 100%; }
+.home-back { position: absolute; top: 16px; left: 16px; background: none; border: none; color: var(--kn-text-secondary); font-size: 16px; cursor: pointer; font-family: inherit; }
+
+/* ─── Nickname Screen ─── */
+
+.nickname-container { text-align: center; max-width: 360px; width: 100%; }
+.avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.avatar-picker .avatar-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 2px solid transparent;
+  background: var(--kn-card); font-size: 24px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.avatar-picker .avatar-btn.selected { border-color: var(--kn-accent); background: var(--kn-card-hover); }
+.nickname-input, .join-code-input {
+  width: 100%; max-width: 280px; padding: 12px 16px; border: 1px solid var(--kn-border);
+  border-radius: 12px; background: var(--kn-card); color: var(--kn-text);
+  font-family: inherit; font-size: 16px; text-align: center; margin-bottom: 16px;
+}
+.join-code-input { text-transform: uppercase; letter-spacing: 4px; font-size: 20px; font-weight: 700; }
+
+/* ─── Toast ─── */
+
+.toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--kn-card); padding: 12px 20px; border-radius: 12px; font-size: 14px;
+  box-shadow: 0 4px 12px var(--kn-shadow); border-left: 3px solid var(--kn-accent);
+  animation: slideDown 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+  max-width: 320px; text-align: center;
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* ─── Role Reveal ─── */
+
+.role-reveal-container { text-align: center; max-width: 360px; }
+.role-reveal-icon { font-size: 80px; margin-bottom: 16px; animation: pulse 1.5s ease infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+.role-reveal-name { font-size: 28px; font-weight: 800; color: var(--kn-accent); margin: 12px 0; }
+.role-reveal-info { font-size: 14px; color: var(--kn-text-secondary); line-height: 1.6; margin-bottom: 16px; }
+.role-reveal-team { font-size: 14px; padding: 12px; background: var(--kn-card); border-radius: 8px; margin-bottom: 16px; }
+.role-reveal-countdown { font-size: 13px; color: var(--kn-text-secondary); }
+
+/* ─── Mission Tracker ─── */
+
+.mission-tracker {
+  display: flex; gap: 8px; margin-bottom: 20px; justify-content: center;
+}
+.mission-dot {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; border: 2px solid var(--kn-border);
+  background: var(--kn-card); color: var(--kn-text-secondary); transition: all 0.3s;
+}
+.mission-dot.success { background: var(--kn-good); border-color: var(--kn-good); color: white; }
+.mission-dot.fail { background: var(--kn-evil); border-color: var(--kn-evil); color: white; }
+.mission-dot.current { border-color: var(--kn-accent); color: var(--kn-accent); animation: pulse 1.5s ease infinite; }
+
+/* ─── Team Proposal ─── */
+
+.proposal-container { text-align: center; max-width: 400px; width: 100%; }
+.proposal-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.proposal-subtitle { font-size: 14px; color: var(--kn-text-secondary); margin-bottom: 12px; }
+.rejection-counter { font-size: 13px; color: var(--kn-evil-light); margin-bottom: 8px; }
+.proposal-timer { font-size: 24px; font-weight: 700; color: var(--kn-accent); margin-bottom: 16px; }
+.proposal-waiting { font-size: 16px; color: var(--kn-text-secondary); margin-top: 16px; }
+
+.player-select-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px; margin-bottom: 16px;
+}
+.player-select-card {
+  padding: 10px 8px; border-radius: 8px; border: 2px solid var(--kn-border);
+  background: var(--kn-card); cursor: pointer; transition: all 0.2s;
+  text-align: center; font-size: 13px;
+}
+.player-select-card:hover { background: var(--kn-card-hover); }
+.player-select-card.selected { border-color: var(--kn-accent); background: rgba(212, 168, 83, 0.15); }
+.player-select-card .avatar { font-size: 24px; }
+.player-select-card .name { margin-top: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ─── Team Vote ─── */
+
+.vote-container { text-align: center; max-width: 360px; width: 100%; }
+.vote-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.proposed-team { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.proposed-team .team-member {
+  padding: 8px 12px; background: var(--kn-card); border-radius: 8px;
+  border: 1px solid var(--kn-accent); font-size: 14px;
+}
+.vote-buttons { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.vote-buttons .btn { min-width: 120px; }
+.vote-status { font-size: 14px; color: var(--kn-text-secondary); margin-bottom: 8px; }
+.vote-timer { font-size: 20px; font-weight: 700; color: var(--kn-accent); }
+
+/* ─── Mission ─── */
+
+.mission-container { text-align: center; max-width: 360px; width: 100%; }
+.mission-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.mission-timer { font-size: 24px; font-weight: 700; color: var(--kn-accent); margin-bottom: 16px; }
+.mission-instruction { font-size: 16px; margin-bottom: 16px; color: var(--kn-text-secondary); }
+.mission-vote-buttons { display: flex; gap: 12px; justify-content: center; }
+.mission-btn { min-width: 140px; padding: 16px 24px; font-size: 18px; }
+.mission-waiting { font-size: 16px; color: var(--kn-text-secondary); }
+.mission-progress { font-size: 14px; color: var(--kn-text-secondary); margin-top: 16px; }
+
+/* ─── Mission Reveal ─── */
+
+.reveal-container { text-align: center; max-width: 360px; }
+.reveal-icon { font-size: 60px; margin-bottom: 12px; }
+.reveal-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.reveal-result { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+.reveal-result.success { color: var(--kn-good); }
+.reveal-result.fail { color: var(--kn-evil); }
+.reveal-votes { font-size: 14px; color: var(--kn-text-secondary); }
+
+/* ─── Assassin Guess ─── */
+
+.assassin-container { text-align: center; max-width: 400px; width: 100%; }
+.assassin-icon { font-size: 60px; margin-bottom: 12px; }
+.assassin-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.assassin-subtitle { font-size: 14px; color: var(--kn-text-secondary); margin-bottom: 12px; }
+.assassin-timer { font-size: 24px; font-weight: 700; color: var(--kn-evil); margin-bottom: 16px; }
+.assassin-waiting { font-size: 16px; color: var(--kn-text-secondary); margin-top: 16px; }
+
+/* ─── Game Over ─── */
+
+.gameover-container { text-align: center; max-width: 400px; width: 100%; padding: 20px 0; }
+.gameover-icon { font-size: 60px; margin-bottom: 12px; }
+.gameover-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.gameover-title.good-wins { color: var(--kn-good); }
+.gameover-title.evil-wins { color: var(--kn-evil); }
+.gameover-reason { font-size: 14px; color: var(--kn-text-secondary); margin-bottom: 16px; }
+.gameover-assassin { padding: 12px; background: var(--kn-card); border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.gameover-roles { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.gameover-role-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--kn-card); border-radius: 8px; font-size: 14px;
+}
+.gameover-role-row .role-icon { font-size: 20px; }
+.gameover-role-row .player-name { flex: 1; text-align: left; }
+.gameover-role-row .role-name { color: var(--kn-text-secondary); }
+.gameover-role-row.good { border-left: 3px solid var(--kn-good); }
+.gameover-role-row.evil { border-left: 3px solid var(--kn-evil); }
+.gameover-missions { margin-bottom: 20px; }
+.gameover-mission-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 4px; font-size: 13px; color: var(--kn-text-secondary); }
+.gameover-buttons { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.gameover-buttons .btn { min-width: 200px; }
+
+/* ─── Vote result overlay ─── */
+.vote-result-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+}
+.vote-result-card {
+  background: var(--kn-card); padding: 24px 32px; border-radius: 16px;
+  text-align: center; max-width: 320px;
+}
+.vote-result-card h3 { font-size: 20px; margin-bottom: 12px; }
+.vote-result-card .vote-list { font-size: 14px; color: var(--kn-text-secondary); }

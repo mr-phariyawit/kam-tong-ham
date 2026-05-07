@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1B2A4A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="อัศวิน">
+  <meta name="description" content="อัศวิน — ภารกิจลับ ใครเป็นพวกเดียวกัน ใครเป็นทรยศ?">
+  <title>อัศวิน | Knights</title>
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/components/lobby.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== SCREEN: HOME ========== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-container">
+      <div class="home-icon">&#x2694;</div>
+      <h1 class="home-title">อัศวิน</h1>
+      <p class="home-subtitle">ภารกิจลับ ใครเป็นพวกเดียวกัน ใครเป็นทรยศ?</p>
+
+      <div class="home-buttons">
+        <button class="btn btn-primary" id="btnCreate">สร้างห้อง</button>
+        <button class="btn btn-secondary" id="btnJoin">เข้าร่วมห้อง</button>
+      </div>
+
+      <a href="/" class="btn btn-ghost" style="margin-top: 16px;">&#8592; กลับหน้าหลัก</a>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: NICKNAME ========== -->
+  <div class="screen" id="screen-nickname">
+    <button class="home-back" id="btnBackHome">&#8592; กลับ</button>
+    <div class="nickname-container">
+      <h2 style="margin-bottom: 20px; font-size: 20px;">เลือกตัวละคร</h2>
+      <div class="avatar-picker" id="avatarPicker"></div>
+      <input type="text" class="nickname-input" id="nicknameInput" placeholder="ชื่อของคุณ" maxlength="15">
+
+      <div id="joinCodeGroup" style="display: none; margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--kn-text-secondary); margin-bottom: 8px;">รหัสห้อง</p>
+        <input type="text" class="join-code-input" id="joinCodeInput" placeholder="ABCD" maxlength="4">
+      </div>
+
+      <button class="btn btn-primary" id="btnConnect" style="width: 100%; max-width: 280px;">เข้าร่วม</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: LOBBY ========== -->
+  <div class="screen" id="screen-lobby">
+    <div class="lobby-container" id="lobbyContainer"></div>
+  </div>
+
+  <!-- ========== SCREEN: ROLE REVEAL ========== -->
+  <div class="screen" id="screen-roleReveal">
+    <div class="role-reveal-container">
+      <div class="role-reveal-icon" id="roleRevealIcon">&#x2694;</div>
+      <h2 class="role-reveal-title">บทบาทของคุณ</h2>
+      <div class="role-reveal-name" id="roleRevealName"></div>
+      <div class="role-reveal-info" id="roleRevealInfo"></div>
+      <div class="role-reveal-team" id="roleRevealTeam" style="display: none;"></div>
+      <div class="role-reveal-countdown" id="roleRevealCountdown">เริ่มเกมใน 8 วินาที...</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: TEAM PROPOSAL ========== -->
+  <div class="screen" id="screen-teamProposal">
+    <div class="proposal-container">
+      <div class="mission-tracker" id="missionTracker"></div>
+      <h2 class="proposal-title">เสนอทีมภารกิจ</h2>
+      <p class="proposal-subtitle" id="proposalSubtitle"></p>
+      <div class="rejection-counter" id="rejectionCounter"></div>
+      <div class="proposal-timer" id="proposalTimer">60</div>
+      <div class="player-select-grid" id="teamSelectGrid"></div>
+      <button class="btn btn-primary" id="btnSubmitTeam" style="display: none;">ส่งทีม</button>
+      <p class="proposal-waiting" id="proposalWaiting" style="display: none;">รอผู้นำเสนอทีม...</p>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: TEAM VOTE ========== -->
+  <div class="screen" id="screen-teamVote">
+    <div class="vote-container">
+      <div class="mission-tracker" id="missionTrackerVote"></div>
+      <h2 class="vote-title">โหวตอนุมัติทีม</h2>
+      <div class="proposed-team" id="proposedTeamDisplay"></div>
+      <div class="vote-buttons" id="teamVoteButtons">
+        <button class="btn btn-success" id="btnApprove">อนุมัติ</button>
+        <button class="btn btn-danger" id="btnReject">ปฏิเสธ</button>
+      </div>
+      <div class="vote-status" id="teamVoteStatus"></div>
+      <div class="vote-timer" id="teamVoteTimer">30</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: MISSION ========== -->
+  <div class="screen" id="screen-mission">
+    <div class="mission-container">
+      <div class="mission-tracker" id="missionTrackerMission"></div>
+      <h2 class="mission-title">ภารกิจที่ <span id="missionNumber">1</span></h2>
+      <div class="mission-timer" id="missionTimer">30</div>
+
+      <!-- Team member panel -->
+      <div class="mission-action-panel" id="teamMemberPanel" style="display: none;">
+        <p class="mission-instruction">เลือกผลลัพธ์ภารกิจ</p>
+        <div class="mission-vote-buttons">
+          <button class="btn btn-success mission-btn" id="btnMissionSuccess">สำเร็จ</button>
+          <button class="btn btn-danger mission-btn" id="btnMissionFail" style="display: none;">ล้มเหลว</button>
+        </div>
+      </div>
+
+      <!-- Non-team waiting -->
+      <div class="mission-action-panel" id="missionWaitPanel" style="display: none;">
+        <p class="mission-waiting">รอผลภารกิจ...</p>
+      </div>
+
+      <div class="mission-progress" id="missionProgress"></div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: MISSION REVEAL ========== -->
+  <div class="screen" id="screen-missionReveal">
+    <div class="reveal-container">
+      <div class="reveal-icon" id="missionRevealIcon">&#x2694;</div>
+      <h2 class="reveal-title" id="missionRevealTitle">ผลภารกิจ</h2>
+      <div class="reveal-result" id="missionRevealResult"></div>
+      <div class="reveal-votes" id="missionRevealVotes"></div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: ASSASSIN GUESS ========== -->
+  <div class="screen" id="screen-assassinGuess">
+    <div class="assassin-container">
+      <div class="assassin-icon">&#x2694;</div>
+      <h2 class="assassin-title" id="assassinTitle">มือสังหารเลือกเป้าหมาย</h2>
+      <p class="assassin-subtitle" id="assassinSubtitle"></p>
+      <div class="assassin-timer" id="assassinTimer">30</div>
+
+      <div class="player-select-grid" id="assassinTargetGrid" style="display: none;"></div>
+      <button class="btn btn-danger" id="btnAssassinGuess" style="display: none;">ยืนยันเป้าหมาย</button>
+
+      <p class="assassin-waiting" id="assassinWaiting" style="display: none;">รอมือสังหารเลือก...</p>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN: GAME OVER ========== -->
+  <div class="screen" id="screen-gameOver">
+    <div class="gameover-container">
+      <div class="gameover-icon" id="gameOverIcon">&#x2694;</div>
+      <h2 class="gameover-title" id="gameOverTitle">ฝ่ายดีชนะ!</h2>
+      <p class="gameover-reason" id="gameOverReason"></p>
+
+      <div class="gameover-assassin" id="gameOverAssassin" style="display: none;"></div>
+      <div class="gameover-roles" id="gameOverRoles"></div>
+      <div class="gameover-missions" id="gameOverMissions"></div>
+
+      <div class="gameover-buttons">
+        <button class="btn btn-primary" id="btnPlayAgain">เล่นอีกครั้ง</button>
+        <a href="/" class="btn btn-ghost">กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

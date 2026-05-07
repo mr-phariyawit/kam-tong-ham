@@ -194,7 +194,7 @@ export function registerDefaultGames(
     minPlayers: 5,
     maxPlayers: 10,
     roomClass: roomClasses["knights"] || null,
-    comingSoon: true,
+    comingSoon: false,
     mechanic: "hidden-role",
     description: "ภารกิจลับ ใครเป็นพวกเดียวกัน ใครเป็นทรยศ?",
     icon: "⚔️",

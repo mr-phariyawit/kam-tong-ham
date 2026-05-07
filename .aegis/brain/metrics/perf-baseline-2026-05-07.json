@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-05-07T15:06:06.933Z",
+  "sprint": 15,
+  "bundleSize": {
+    "serverDist": {
+      "bytes": 299537,
+      "files": 25,
+      "humanSize": "292.5KB"
+    },
+    "clientJS": {
+      "bytes": 275950,
+      "files": 13,
+      "humanSize": "269.5KB"
+    },
+    "clientCSS": {
+      "bytes": 114832,
+      "files": 11,
+      "humanSize": "112.1KB"
+    },
+    "clientHTML": {
+      "bytes": 71662,
+      "files": 7,
+      "humanSize": "70.0KB"
+    },
+    "clientTotal": {
+      "bytes": 462444,
+      "files": 31,
+      "humanSize": "451.6KB"
+    }
+  },
+  "coldStart": {
+    "coldStartMs": 311
+  },
+  "benchmarkProcessMemory": {
+    "rss": "49.33MB",
+    "heapUsed": "5.06MB",
+    "heapTotal": "7.89MB"
+  },
+  "notes": "Pre-deploy baseline. No real users yet -- synthetic measurements only.",
+  "loadSmoke": {
+    "timestamp": "2026-05-07T15:07:09.571Z",
+    "sprint": 15,
+    "roomCount": 10,
+    "totalPlayers": 40,
+    "totalMessagesSent": 500,
+    "totalErrors": 0,
+    "elapsedMs": 52,
+    "memory": {
+      "heapBefore": "16.73MB",
+      "heapAfter": "28.97MB",
+      "heapDelta": "12.24MB",
+      "peakRSS": "94.41MB",
+      "peakHeapUsed": "28.97MB",
+      "peakHeapTotal": "41.39MB"
+    },
+    "rooms": [
+      {
+        "room": "kham_tong_ham/LD01",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 8,
+        "phase": "PLAYING",
+        "error": null
+      },
+      {
+        "room": "kham_tong_ham/LD02",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 8,
+        "phase": "PLAYING",
+        "error": null
+      },
+      {
+        "room": "word_link/LD03",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 56,
+        "phase": "CLUE_GIVING",
+        "error": null
+      },
+      {
+        "room": "word_link/LD04",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 55,
+        "phase": "GUESSING",
+        "error": null
+      },
+      {
+        "room": "spy/LD05",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 8,
+        "phase": "DISCUSSION",
+        "error": null
+      },
+      {
+        "room": "spy/LD06",
+        "players": 4,
+        "messagesSent": 50,
+        "clientReceived": 8,
+        "phase": "DISCUSSION",
+        "error": null
+      },
+      {
+        "room": "werewolf/LD07",
+        "players": 5,
+        "messagesSent": 50,
+        "clientReceived": 10,
+        "phase": "NIGHT",
+        "error": null
+      },
+      {
+        "room": "knights/LD08",
+        "players": 5,
+        "messagesSent": 50,
+        "clientReceived": 10,
+        "phase": "ROLE_REVEAL",
+        "error": null
+      },
+      {
+        "room": "draw_guess/LD09",
+        "players": 3,
+        "messagesSent": 50,
+        "clientReceived": 4,
+        "phase": "DRAWING",
+        "error": null
+      },
+      {
+        "room": "draw_guess/LD10",
+        "players": 3,
+        "messagesSent": 50,
+        "clientReceived": 4,
+        "phase": "DRAWING",
+        "error": null
+      }
+    ],
+    "verdict": "PASS",
+    "notes": "In-process load smoke. No real WebSocket overhead. Measures server-side room/state handling capacity."
+  }
+}

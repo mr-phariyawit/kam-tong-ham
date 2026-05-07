@@ -24,28 +24,30 @@
 
 | Sprint | Title | Points | Status |
 |--------|-------|--------|--------|
-| Sprint 14 | Pre-Deploy Hardening | 6 | ACTIVE |
+| Sprint 15 | Final Pre-Deploy Polish | 5 | ACTIVE |
 
 ## Completed (recent)
 
 | Sprint | Title | Points | Status |
 |--------|-------|--------|--------|
+| Sprint 14 | Pre-Deploy Hardening | 6 | DONE |
 | Sprint 13 | UI + Tests Cleanup | 3 | DONE |
 | Sprint 12 | Finish Share-by-URL (auto-join + QR) | 8 | DONE |
 | Sprint 11 | Fuzzy Thai Match + QR Room Sharing | 7 | DONE |
 
 ## Planned
 
-(none -- backlog items deferred pending user feedback)
+(none -- autonomous ceiling reached; only deploy unblocks further value-add work)
 
 ## Progress
 
-- Completed: 150 pts (Sprint 0-13) -- v1.0 + deploy infra + telemetry/onboarding + fuzzy match + share-by-URL + cleanup
-- Active: 6 pts (Sprint 14)
+- Completed: 156 pts (Sprint 0-14) -- v1.0 + deploy infra + telemetry/onboarding + fuzzy match + share-by-URL + cleanup + hardening
+- Active: 5 pts (Sprint 15)
 - Planned: 0 pts
-- Total: 156 pts
+- Total: 161 pts
 - v1.0 Progress: 100% SHIPPED
 - v1.1 Progress: 38/38 pts (Sprint 9-12 all done)
+- v1.2 Progress: 11/11 pts (Sprint 13-14 done, Sprint 15 active)
 
 ## Key Milestones
 

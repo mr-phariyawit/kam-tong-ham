@@ -342,10 +342,24 @@ describe("GET /api/health", () => {
 });
 
 // ─── GET /api/admin/telemetry (KTH-T-064) ──────────────────────────────────
+// Sprint 14: admin endpoints now require AEGIS_ADMIN_TOKEN
 
 describe("GET /api/admin/telemetry", () => {
+  const TEST_TOKEN = "test-admin-token-api";
+
+  beforeEach(() => {
+    process.env.AEGIS_ADMIN_TOKEN = TEST_TOKEN;
+  });
+
+  afterEach(() => {
+    delete process.env.AEGIS_ADMIN_TOKEN;
+  });
+
   it("TEL-01: returns success=true with telemetry object", async () => {
-    const res = await request(app).get("/api/admin/telemetry");
+    const authedApp = createApp();
+    const res = await request(authedApp)
+      .get("/api/admin/telemetry")
+      .set("Authorization", `Bearer ${TEST_TOKEN}`);
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -353,7 +367,10 @@ describe("GET /api/admin/telemetry", () => {
   });
 
   it("TEL-02: telemetry contains uptime, memory, and counters", async () => {
-    const res = await request(app).get("/api/admin/telemetry");
+    const authedApp = createApp();
+    const res = await request(authedApp)
+      .get("/api/admin/telemetry")
+      .set("Authorization", `Bearer ${TEST_TOKEN}`);
     const t = res.body.telemetry;
 
     expect(typeof t.uptime_seconds).toBe("number");
@@ -369,7 +386,10 @@ describe("GET /api/admin/telemetry", () => {
   });
 
   it("TEL-03: telemetry contains ISO date strings", async () => {
-    const res = await request(app).get("/api/admin/telemetry");
+    const authedApp = createApp();
+    const res = await request(authedApp)
+      .get("/api/admin/telemetry")
+      .set("Authorization", `Bearer ${TEST_TOKEN}`);
     const t = res.body.telemetry;
 
     expect(() => new Date(t.server_start)).not.toThrow();

@@ -134,6 +134,7 @@
       mySessionId = r.sessionId;
       setupRoomListeners();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('spy');
       updateLobby();
     }).catch(function (err) {
       showToast('ไม่สามารถเข้าร่วมห้องได้: ' + (err.message || ''), 3000, true);

@@ -1,0 +1,83 @@
+name: "Bug Report / แจ้งปัญหา"
+description: "Report a bug or issue with the game / แจ้งปัญหาที่พบในเกม"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report / แจ้งปัญหา
+        Thanks for reporting! Please fill in the details below.
+        ขอบคุณที่แจ้งปัญหา! กรุณากรอกข้อมูลด้านล่าง
+
+  - type: dropdown
+    id: game
+    attributes:
+      label: "Game / เกม"
+      description: "Which game did this happen in? / ปัญหาเกิดในเกมไหน?"
+      options:
+        - "Forbidden Word / คำต้องห้าม"
+        - "Word Link / คำเชื่อม"
+        - "Spy / สายลับ"
+        - "Werewolf / หมาป่า"
+        - "Knights / อัศวิน"
+        - "Draw & Guess / วาดทาย"
+        - "Home Screen / หน้าหลัก"
+        - "Other / อื่นๆ"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "What happened? / เกิดอะไรขึ้น?"
+      description: "Describe the bug clearly. / อธิบายปัญหาที่พบ"
+      placeholder: "I was playing Werewolf and... / ตอนเล่นหมาป่าแล้ว..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce / วิธีทำซ้ำปัญหา"
+      description: "How can we reproduce this? / ทำยังไงถึงเจอปัญหานี้?"
+      placeholder: |
+        1. Create a room / สร้างห้อง
+        2. Join with 3 players / เข้าร่วม 3 คน
+        3. Start the game / เริ่มเกม
+        4. See error / เจอปัญหา
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behavior / ควรจะเป็นยังไง"
+      description: "What should have happened instead? / ควรจะเกิดอะไรขึ้นแทน?"
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: "Device / อุปกรณ์"
+      options:
+        - "iPhone"
+        - "Android Phone"
+        - "iPad / Tablet"
+        - "Desktop / PC"
+        - "Other / อื่นๆ"
+
+  - type: input
+    id: browser
+    attributes:
+      label: "Browser / เบราว์เซอร์"
+      placeholder: "Chrome, Safari, Line Browser, etc."
+
+  - type: input
+    id: players
+    attributes:
+      label: "Number of players / จำนวนผู้เล่น"
+      placeholder: "e.g. 4"
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots / ภาพหน้าจอ"
+      description: "If applicable, add screenshots. / ถ้ามีภาพหน้าจอ แนบมาด้วย"

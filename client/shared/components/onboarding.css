@@ -1,0 +1,140 @@
+/* ─── Onboarding Overlay ──────────────────────────────────── */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: onboarding-fade-in 0.25s ease-out;
+  padding: 16px;
+}
+
+@keyframes onboarding-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.onboarding-modal {
+  background: var(--bg-card, #16213e);
+  border-radius: var(--radius, 16px);
+  padding: 28px 24px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  color: var(--text-primary, #fff);
+  font-family: 'Sarabun', sans-serif;
+}
+
+.onboarding-modal h2 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.onboarding-subtitle {
+  color: var(--text-secondary, #b0b0c8);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.onboarding-rules {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.onboarding-rules li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.onboarding-rules li:last-child {
+  border-bottom: none;
+}
+
+.onboarding-example {
+  background: rgba(108, 92, 231, 0.15);
+  border-left: 3px solid var(--accent, #6C5CE7);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.onboarding-example-label {
+  font-weight: 700;
+  color: var(--accent-light, #a29bfe);
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+
+.onboarding-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.onboarding-dismiss-btn {
+  background: var(--accent, #6C5CE7);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+  font-family: 'Sarabun', sans-serif;
+}
+
+.onboarding-dismiss-btn:active {
+  background: #5a4bd4;
+}
+
+.onboarding-dont-show {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #b0b0c8);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.onboarding-dont-show input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #6C5CE7);
+}
+
+/* ─── "Show Rules" button for lobby re-display ────────────── */
+
+.show-rules-btn {
+  background: transparent;
+  border: 1px solid var(--accent, #6C5CE7);
+  color: var(--accent-light, #a29bfe);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Sarabun', sans-serif;
+  transition: background 0.15s;
+}
+
+.show-rules-btn:active {
+  background: rgba(108, 92, 231, 0.2);
+}

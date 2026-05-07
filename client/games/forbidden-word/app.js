@@ -745,6 +745,7 @@
       saveReconnectSession();
       requestWakeLock();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('forbidden-word');
       showToast('สร้างห้องสำเร็จ! รหัส: ' + roomCode);
     } catch (err) {
       console.error('Create room error:', err);
@@ -775,6 +776,7 @@
       saveReconnectSession();
       requestWakeLock();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('forbidden-word');
       showToast('เข้าร่วมห้องสำเร็จ!');
     } catch (err) {
       console.error('Join room error:', err);
@@ -791,6 +793,7 @@
         saveReconnectSession();
         requestWakeLock();
         showScreen('lobby');
+        if (typeof Onboarding !== 'undefined') Onboarding.tryShow('forbidden-word');
         showToast('เข้าร่วมห้องสำเร็จ!');
       } catch (err2) {
         console.error('Join room error:', err, err2);

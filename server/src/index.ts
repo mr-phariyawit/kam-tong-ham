@@ -9,8 +9,13 @@ import { KnightsRoom } from "./rooms/KnightsRoom";
 import { DrawGuessRoom } from "./rooms/DrawGuessRoom";
 import { createApp } from "./app";
 import { registerDefaultGames } from "./utils/gameRegistry";
+import { installCrashHandlers, startHeartbeat, stopHeartbeat } from "./utils/telemetry";
 
 const PORT = parseInt(process.env.PORT || "2567", 10);
+
+// ─── Install crash handlers + telemetry heartbeat ─────────────────────────────
+installCrashHandlers();
+startHeartbeat();
 
 // ─── Register all games in the registry ───────────────────────────────────────
 // Active games get their Room class; coming-soon games get null.
@@ -73,6 +78,7 @@ gameServer.listen(PORT).then(() => {
 // Graceful shutdown
 process.on("SIGINT", () => {
   console.log("\nShutting down gracefully...");
+  stopHeartbeat();
   gameServer.gracefullyShutdown().then(() => {
     process.exit(0);
   });
@@ -80,6 +86,7 @@ process.on("SIGINT", () => {
 
 process.on("SIGTERM", () => {
   console.log("\nShutting down gracefully...");
+  stopHeartbeat();
   gameServer.gracefullyShutdown().then(() => {
     process.exit(0);
   });

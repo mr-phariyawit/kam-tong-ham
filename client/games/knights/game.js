@@ -130,6 +130,7 @@
       mySessionId = r.sessionId;
       setupRoom();
       showScreen('lobby');
+      if (typeof Onboarding !== 'undefined') Onboarding.tryShow('knights');
     }).catch(function (e) {
       showToast('เข้าร่วมไม่สำเร็จ: ' + (e.message || e), 3000, true);
     });

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Discussions / พูดคุยทั่วไป"
+    url: https://github.com/mr-phariyawit/kam-tong-ham/discussions
+    about: "Use discussions for questions and general chat / ใช้ Discussions สำหรับคำถามทั่วไป"

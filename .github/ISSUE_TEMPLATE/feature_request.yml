@@ -1,0 +1,53 @@
+name: "Feature Request / ขอฟีเจอร์ใหม่"
+description: "Suggest a feature or improvement / เสนอไอเดียหรือสิ่งที่อยากให้เพิ่ม"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request / ขอฟีเจอร์ใหม่
+        Have an idea? We'd love to hear it!
+        มีไอเดีย? บอกเราได้เลย!
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Category / หมวดหมู่"
+      options:
+        - "New Game / เกมใหม่"
+        - "Existing Game Improvement / ปรับปรุงเกมที่มี"
+        - "UI/UX / หน้าตาแอป"
+        - "Performance / ความเร็ว"
+        - "Other / อื่นๆ"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: game
+    attributes:
+      label: "Related Game / เกมที่เกี่ยวข้อง"
+      options:
+        - "All Games / ทุกเกม"
+        - "Forbidden Word / คำต้องห้าม"
+        - "Word Link / คำเชื่อม"
+        - "Spy / สายลับ"
+        - "Werewolf / หมาป่า"
+        - "Knights / อัศวิน"
+        - "Draw & Guess / วาดทาย"
+        - "Home Screen / หน้าหลัก"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the feature / อธิบายฟีเจอร์ที่อยากได้"
+      description: "A clear description of what you want. / อธิบายสิ่งที่อยากให้เพิ่มให้ชัดเจน"
+      placeholder: "I wish the game had... / อยากให้เกมมี..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: "Why is this useful? / ทำไมถึงต้องการ?"
+      description: "How would this improve the game? / จะทำให้เกมดีขึ้นยังไง?"

@@ -150,5 +150,14 @@ See [.claude/references/context-rules.md](../references/context-rules.md) §Mast
 - @references/output-format.md — Output formatting standards
 - @references/context-rules.md — Context budget rules
 
+## Tools You Can Reach For
+Beast scans the brain and surfaces patterns. These tools are first-class for the role:
+- `tools/aegis-brain-search.sh` — query the FTS5 brain index with snippets + provenance
+- `tools/aegis-brain-index.sh` — build/refresh the FTS5 index (`--full` / `--incremental` / `--stats`)
+- `tools/aegis-brain-benchmark.sh` — measure index size + query latency p95
+- `tools/aegis-token-profile.sh` — measure token cost of a doc/agent/skill before reporting
+
+Use these instead of ad-hoc `grep` over `.aegis/brain/` — the FTS5 path is faster and provides ranking.
+
 ## Output Location
 _aegis-output/research/

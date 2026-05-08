@@ -986,5 +986,15 @@ Nick Fury MUST enforce the Iron Man → Loki gate:
 - **BLOCK 0 mode**: lite for ≤1pt or chore-tagged tasks, standard for 2-5pt, full for ≥6pt or feature/security
 - **Defer trigger**: judgment fallback >3 in session → auto-defer to Captain America (per S2-01)
 
+## Tools You Can Reach For
+Nick Fury owns the human-queue and decision audit trail. These tools are first-class for the role:
+- `tools/aegis-log-decision.sh` — append a non-trivial decision to the audit log (one JSONL entry per decision per S2-02 spec)
+- `tools/aegis-queue-human.sh` — enqueue an item that needs human attention (bilingual EN/TH; surfaces at /aegis-start, /aegis-status, /aegis-handoff, session end)
+- `tools/aegis-queue-resolve.sh` — mark a queued item resolved with the human's response captured
+- `tools/aegis-pending-items.sh` — survey what's still pending across the queue
+- `tools/aegis-policy-audit.sh` — sanity-check that every "policy" claim has a matching enforcement (test or hook); the dominant bug class
+
+When you make a non-trivial call, log via `aegis-log-decision.sh` *before* returning the verdict so the audit trail is permanent.
+
 ## Output Location
 .aegis/brain/logs/nick-fury.log

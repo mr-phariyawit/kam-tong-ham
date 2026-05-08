@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Block floating CDN dependency references in client code.
+#
+# Floating tags (e.g. @0.15) auto-resolve to latest patch — a single bad
+# upstream patch can take down prod (this is exactly what happened with the
+# 0.15.28 Buffer regression, fixed in PR #28 and hardened in PR #29).
+#
+# Rules:
+#   - All CDN URLs in client JS/HTML/TS must pin a full version (x.y.z — 3 segments).
+#   - Vendored local paths (client/shared/vendor/) are exempt.
+#   - The vendored filename itself (colyseus.js@0.15.17.js) is also exempt.
+
+set -euo pipefail
+
+# Files staged for commit, limited to client JS/HTML/TS (excludes vendor dir itself)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -E '^client/.*\.(js|html|ts)$' \
+  | grep -v '^client/shared/vendor/' \
+  || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# Find any unpkg.com URL that does NOT pin a full x.y.z version.
+# A fully-pinned URL looks like: unpkg.com/package@1.2.3/...
+# A floating URL looks like:     unpkg.com/package@1.2/...  or  unpkg.com/package@1/...
+REAL_VIOLATIONS=$(echo "$STAGED_FILES" \
+  | xargs grep -nE 'unpkg\.com/[^"'"'"' ]*@[0-9]+(\.[0-9]+)?(/|"|'"'"')' 2>/dev/null \
+  | grep -vE '@[0-9]+\.[0-9]+\.[0-9]+' \
+  || true)
+
+if [ -n "$REAL_VIOLATIONS" ]; then
+  echo ""
+  echo "pre-commit: floating CDN dependency detected."
+  echo "All unpkg.com references must pin a full x.y.z version, or be vendored locally."
+  echo ""
+  echo "$REAL_VIOLATIONS"
+  echo ""
+  echo "Fix: pin to a full version (e.g. @0.15.17) or copy the file to client/shared/vendor/."
+  echo ""
+  exit 1
+fi
+
+exit 0

@@ -140,6 +140,21 @@ After adding a new field, update the client to read it.
 
 ---
 
+## First-time Setup: Git Hooks
+
+After cloning, run once:
+
+```bash
+npm run setup-hooks
+```
+
+This sets `core.hooksPath` to `.githooks/`, activating the pre-commit hook that
+blocks floating CDN dependency references (e.g. `unpkg.com/pkg@1.2` without a
+patch version). All CDN deps must pin a full `x.y.z` version or be vendored
+locally under `client/shared/vendor/`.
+
+---
+
 ## TypeScript Build
 
 ```bash

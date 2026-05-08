@@ -84,10 +84,11 @@
       return;
     }
 
-    // Dynamic import of Colyseus
+    // Dynamic import of Colyseus (vendored locally)
     var script = document.createElement('script');
-    script.src = 'https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js';
+    script.src = '/shared/vendor/colyseus.js@0.15.17.js';
     script.onload = function () {
+      if (!ColyseusGuard.verify('word-link')) return;
       client = new Colyseus.Client(SERVER_URL);
       joinOrCreate(action, code);
     };

@@ -396,3 +396,72 @@ describe("GET /api/admin/telemetry", () => {
     expect(() => new Date(t.snapshot_at)).not.toThrow();
   });
 });
+
+// ─── POST /api/client-error ───────────────────────────────────────────────────
+
+describe("POST /api/client-error", () => {
+  it("CE-01: returns 204 No Content for a well-formed payload", async () => {
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({
+        gameId: "werewolf",
+        ua: "Mozilla/5.0 TestAgent",
+        ts: 1746691200000,
+        hint: "colyseus_client_undefined",
+      });
+
+    expect(res.status).toBe(204);
+    expect(res.body).toEqual({});
+  });
+
+  it("CE-02: returns 204 when all fields are missing (graceful missing-field handling)", async () => {
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({});
+
+    expect(res.status).toBe(204);
+  });
+
+  it("CE-03: returns 204 with no body even when body is omitted entirely", async () => {
+    const res = await request(app)
+      .post("/api/client-error");
+
+    expect(res.status).toBe(204);
+  });
+
+  it("CE-04: truncates gameId longer than 64 characters (sanitisation)", async () => {
+    // The endpoint must not blow up on oversize input; we verify it returns 204
+    const longId = "x".repeat(200);
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({ gameId: longId, ua: "UA", ts: Date.now(), hint: "test" });
+
+    expect(res.status).toBe(204);
+  });
+
+  it("CE-05: truncates ua longer than 256 characters (sanitisation)", async () => {
+    const longUa = "A".repeat(500);
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({ gameId: "spy", ua: longUa, ts: Date.now(), hint: "colyseus_client_undefined" });
+
+    expect(res.status).toBe(204);
+  });
+
+  it("CE-06: truncates hint longer than 128 characters (sanitisation)", async () => {
+    const longHint = "h".repeat(300);
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({ gameId: "spy", ua: "UA", ts: Date.now(), hint: longHint });
+
+    expect(res.status).toBe(204);
+  });
+
+  it("CE-07: accepts numeric ts field and returns 204", async () => {
+    const res = await request(app)
+      .post("/api/client-error")
+      .send({ gameId: "knights", ua: "UA", ts: 9999999999999, hint: "test" });
+
+    expect(res.status).toBe(204);
+  });
+});

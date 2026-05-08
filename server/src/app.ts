@@ -350,6 +350,25 @@ export function createApp() {
     }
   });
 
+  // ─── CLIENT ERROR TELEMETRY ─────────────────────────────────
+
+  /**
+   * POST /api/client-error
+   * Receives boot-time client error reports (e.g. Colyseus.Client missing).
+   * Fields are sanitised and logged server-side for debugging.
+   * Returns 204 No Content — no response body so the client doesn't need to parse anything.
+   */
+  app.post("/api/client-error", express.json(), (req, res) => {
+    const { gameId, ua, ts, hint } = req.body || {};
+    console.error("[CLIENT_ERROR]", JSON.stringify({
+      gameId: String(gameId || "").slice(0, 64),
+      ua: String(ua || "").slice(0, 256),
+      ts: Number(ts) || Date.now(),
+      hint: String(hint || "").slice(0, 128),
+    }));
+    res.status(204).end();
+  });
+
   // ─── SYSTEM ─────────────────────────────────────────────────
 
   /**

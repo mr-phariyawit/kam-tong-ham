@@ -91,6 +91,7 @@
 
   // ─── Connection ───────────────────────────────────────────────
   function connectToRoom(action, code) {
+    if (!ColyseusGuard.verify('draw-guess')) return;
     if (client) {
       try { if (room) room.leave(); } catch (_) {}
     }

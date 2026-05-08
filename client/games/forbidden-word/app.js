@@ -716,6 +716,7 @@
 
   // ─── Colyseus Connection ──────────────────────────────────────
   function initClient() {
+    if (!ColyseusGuard.verify('forbidden-word')) return;
     client = new Colyseus.Client(SERVER_URL);
   }
 

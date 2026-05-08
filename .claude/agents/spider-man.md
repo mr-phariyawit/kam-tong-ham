@@ -101,5 +101,12 @@ Spider-Man works directly on the current branch.
 - @references/context-rules.md — Context budget rules
 - @references/worktree-isolation.md — Worktree isolation spec (v9-05)
 
+## Tools You Can Reach For
+Spider-Man writes production code. These tools are first-class for the role:
+- `tools/aegis-fix-task-list-id.sh` — repair task IDs in `_aegis-output/specs/` after a renumber/reorg
+- `tools/aegis-fix-hook-paths.sh` — repair stale hook references after a project move/rename
+
+Beyond these, prefer the dedicated tools (Read/Edit/Write/Bash) — they're already in your tool list.
+
 ## Output Location
 _aegis-output/implementation/

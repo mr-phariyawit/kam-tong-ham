@@ -3,7 +3,7 @@
 
 Last reviewed: 2026-05-06
 
-# AEGIS v11.0 -- Safety Rules
+# AEGIS v12.0 -- Safety Rules
 
 > Trigger: "safety rules" | Thai trigger: "กฎความปลอดภัย"
 

@@ -3,7 +3,7 @@
 
 Last reviewed: 2026-05-06
 
-# AEGIS Skills Catalog v11.0
+# AEGIS Skills Catalog v12.0
 
 ## Changelog
 

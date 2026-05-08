@@ -24,6 +24,22 @@ Full scrum lifecycle management: planning ceremonies, daily standups, reviews, r
 - **Sprint data**: `.aegis/brain/sprints/sprint-<N>/`
 - **Agent**: Captain America (opus) — ceremony facilitator and orchestrator
 
+## Table of Contents (sprint-v13-01-phase-e)
+
+This skill covers six interrelated ceremonies. Jump to the section you need:
+
+- [Sprint Directory Structure](#sprint-directory-structure)
+- [Ceremony 1: Sprint Planning (Day 1)](#ceremony-1-sprint-planning-day-1) — capacity, story selection, kanban init
+- [Ceremony 2: Daily Standup (Every Day)](#ceremony-2-daily-standup-every-day) — auto-gen from agent logs
+- [Ceremony 3: Sprint Review (Last Day, Before Retro)](#ceremony-3-sprint-review-last-day-before-retro) — completed work + carry-over candidates
+- [Ceremony 4: Sprint Retrospective (Last Day, After Review)](#ceremony-4-sprint-retrospective-last-day-after-review) — went well / improve / action items
+- [Sprint Close](#sprint-close) — velocity, carry-over to next sprint
+- [Story Point Scale](#story-point-scale) — point→hours mapping
+- [Velocity Tracking](#velocity-tracking) — rolling average maintenance
+- [Kanban Transition Rules](#kanban-transition-rules) — task state transitions
+
+The ceremonies share state (kanban, sprint dir, velocity history) so they live in one skill body intentionally — splitting into separate skills would duplicate context. If you only need a quick answer, search this file with `/` for the section name.
+
 ---
 
 ## Full Instructions

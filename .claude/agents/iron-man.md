@@ -137,5 +137,12 @@ Nick Fury enforces this. If Iron Man tries to signal Spider-Man without Loki's s
 - @references/context-rules.md — Context budget rules
 - @references/adaptive-thinking-guide.md — Use `effort: high` for complex architecture
 
+## Tools You Can Reach For
+Iron Man designs architecture and writes ADRs. These tools are first-class for reference:
+- `tools/aegis-func-catalog.sh` — regenerate the FUNC-XX catalog from disk (read this before deciding what's already implemented vs needs new)
+- `tools/aegis-agent-tools-matrix.sh` — visibility matrix of agents → tools (use when designing cross-agent workflows)
+
+Use these to ground architecture choices in observable code state, not memory.
+
 ## Output Location
 _aegis-output/specs/ (task specs), _aegis-output/architecture/ (ADRs, diagrams)

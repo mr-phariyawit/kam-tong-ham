@@ -155,13 +155,14 @@ git push origin v1.0.0
 - **Raised**: 2026-05-08T10:03:35Z
 - **Resolved**: _(pending)_
 
-### [2026-05-08] EXTERNAL — Shut down Render service after GCP cutover validated / ปิด Render หลังตรวจ GCP เรียบร้อย
+### [2026-05-08] EXTERNAL — Abandon Render service / ยกเลิก Render — ⚠️ USER-DIRECTED ABANDONMENT, REPO CLEANED, MANUAL DELETION REQUIRED
 
-- **EN**: Render service at https://kam-tong-ham.onrender.com still active and serving the colyseus@0.15.17-pinned build (commit 6fb2cab). Recommended: keep warm 24h as fallback, then suspend (cheap reversible), then delete. Done via Render dashboard — destructive external action, cannot do via gcloud. Reason for shutdown: GCP Cloud Run is canonical, Singapore region gives 2-3x better Thailand RTT, single-instance config is cleaner for Colyseus state.
-- **TH**: Service Render ที่ https://kam-tong-ham.onrender.com ยังทำงาน รัน build colyseus@0.15.17 (commit 6fb2cab) แนะนำ: เก็บไว้ 24 ชม. เป็น fallback แล้ว suspend (ย้อนได้) แล้วค่อยลบ ทำผ่าน Render dashboard — ทำ via gcloud ไม่ได้ เหตุผล: Cloud Run เป็นหลัก สิงคโปร์ latency ดีกว่า Render Oregon 2-3 เท่า
+- **EN**: User directed abandonment 2026-05-08. Repo cleaned: render.yaml removed, Render section stripped from DEPLOYMENT.md, smoke-rate-limit.sh default URL switched to Cloud Run, Dockerfile comments updated. **Manual step still required** — Render API/CLI is not reachable from this environment. Log into https://dashboard.render.com → kam-tong-ham service → Settings → "Suspend" (cheap, reversible) or "Delete" (irreversible). Cloud Run canonical URL: https://kam-tong-ham-45962093401.asia-southeast1.run.app
+- **TH**: ผู้ใช้สั่งยกเลิก 2026-05-08 ลบ render.yaml, ตัด section Render ออกจาก DEPLOYMENT.md, เปลี่ยน default URL ใน smoke-rate-limit.sh เป็น Cloud Run, แก้ comment ใน Dockerfile เรียบร้อย **ยังต้อง manual** — เข้า https://dashboard.render.com → kam-tong-ham → Settings → "Suspend" หรือ "Delete" เพราะเรียก Render API จากที่นี่ไม่ได้
 - **Category**: External access
 - **Raised by**: captain-america
-- **Blocks**: cost cleanup; cutover finalized
+- **Repo-side abandonment**: complete (PR #30)
+- **Render-side deletion**: pending human action via Render dashboard
 - **Raised**: 2026-05-08T10:03:43Z
-- **Resolved**: _(pending)_
+- **Updated**: 2026-05-08 — user said "abandon onrender.com"; repo refs purged
 <!-- PENDING_END -->

@@ -30,11 +30,12 @@ COPY client/ ./client/
 
 ENV NODE_ENV=production
 
-# Render.com sets PORT automatically; fallback to 10000 (Render's default)
+# PORT is injected by Cloud Run (8080 by default) and respected via process.env.PORT.
+# 10000 is the local dev fallback when no PORT env is set.
 ENV PORT=10000
 EXPOSE 10000
 
-# Health check for Render
+# Health check (works on Cloud Run, Docker, and any orchestrator)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "const http = require('http'); const req = http.get('http://localhost:' + (process.env.PORT || 10000) + '/api/games', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.setTimeout(3000, () => process.exit(1));"
 

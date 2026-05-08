@@ -61,35 +61,7 @@ gcloud run domain-mappings create \
 # Then add the CNAME record shown in the command output to your DNS.
 ```
 
----
-
-## Legacy: Render.com (fallback during cutover)
-
-### Option A: Blueprint (automatic)
-
-1. Push this repo to a GitHub repository you own
-2. Go to [render.com/select-repo?type=blueprint](https://dashboard.render.com/select-repo?type=blueprint)
-3. Select your repo -- Render detects `render.yaml` automatically
-4. Click **Apply** to create the service
-5. Wait ~2 minutes for Docker build + deploy
-6. Your app is live at `https://kam-tong-ham.onrender.com` (or custom name)
-
-### Option B: Manual Web Service
-
-1. Go to [dashboard.render.com](https://dashboard.render.com)
-2. Click **New** > **Web Service**
-3. Connect your GitHub repo
-4. Configure:
-   - **Name:** `kam-tong-ham` (or your choice)
-   - **Region:** Oregon (free) or Singapore (paid, lower latency for Thai users)
-   - **Runtime:** Docker
-   - **Dockerfile Path:** `./Dockerfile`
-   - **Plan:** Free
-   - **Health Check Path:** `/api/games`
-5. Click **Create Web Service**
-6. Wait for build + deploy
-
-### Option C: Manual Docker (any host)
+### Manual Docker (any host or local smoke)
 
 ```bash
 # Build
@@ -106,17 +78,16 @@ curl http://localhost:10000/api/games
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `PORT` | No | `10000` (Docker) / `2567` (dev) | Server port. Render sets this automatically. |
+| `PORT` | No | `10000` (Docker) / `2567` (dev) | Server port. Cloud Run injects this automatically. |
 | `NODE_ENV` | No | `production` | Environment mode. Set to `production` in deploy. |
-| `AEGIS_ADMIN_TOKEN` | **Recommended** | _(unset)_ | Bearer token for `/api/admin/*` endpoints (e.g. telemetry). **If unset, admin endpoints return 503 (fail closed).** Set a strong random string via Render dashboard > Environment. |
-| `TRUST_PROXY` | No | _(unset)_ | Set to `1` to trust `X-Forwarded-For` headers for rate limiting. **Enable this on Render** (Render injects X-Forwarded-For). Without it, rate limiting falls back to socket IP. |
+| `AEGIS_ADMIN_TOKEN` | **Recommended** | _(unset)_ | Bearer token for `/api/admin/*` endpoints (e.g. telemetry). **If unset, admin endpoints return 503 (fail closed).** Set via Cloud Run + Secret Manager (see Cloud Run section above). |
+| `TRUST_PROXY` | No | _(unset)_ | Set to `1` to trust `X-Forwarded-For` headers for rate limiting. **Enable on Cloud Run** (Google front-end injects X-Forwarded-For). Without it, rate limiting falls back to socket IP. |
 
 ### Security notes (Sprint 14)
 
 - **Admin endpoints** (`/api/admin/telemetry`): Protected by `AEGIS_ADMIN_TOKEN`.
   If the token is not set, the endpoint returns 503 -- it does not expose data.
-  Set the token in your Render dashboard under Environment > Secret Files or
-  Environment Variables (mark as "Secret" so it's not visible in logs).
+  Store the token in Secret Manager and bind it via `--update-secrets` (see Cloud Run section).
 
 - **Rate limiting**: `POST /api/rooms/create` is rate-limited to 10 requests per
   minute per IP. Exceeding the limit returns 429 with a `Retry-After` header.
@@ -132,33 +103,31 @@ curl http://localhost:10000/api/games
 GET /api/games
 ```
 
-Returns 200 with the list of 6 registered games. Used by Render for health monitoring.
+Returns 200 with the list of 6 registered games. Used by Cloud Run for health monitoring.
 
-## Known Limitations (Free Tier)
+## Operational Notes (Cloud Run, single-instance config)
 
-1. **Cold start:** Render free tier spins down after 15 minutes of inactivity.
-   First request after spin-down takes ~30 seconds. Active rooms keep the server awake.
+1. **No cold start in normal operation.** `--min-instances=1` keeps one instance
+   warm at all times. CPU is request-allocated, so idle compute is free; only
+   memory is held continuously.
 
-2. **Memory:** 512MB RAM on free tier. Sufficient for ~50 concurrent rooms
-   (each room is lightweight, ~1KB state).
+2. **Memory:** 512Mi allocated. Sufficient for ~50 concurrent rooms (each room
+   is lightweight, ~1KB state).
 
-3. **Region:** Free tier is US West (Oregon). Thai users experience ~200ms RTT.
-   Upgrade to Paid tier ($7/mo) for Singapore region (~30ms RTT for Thai users).
-   This addresses Loki review S2 F4a (APAC <100ms RTT target).
+3. **Region:** `asia-southeast1` (Singapore). Thai users see ~100ms RTT.
 
-4. **No persistence:** Colyseus rooms are in-memory. Server restart = all active
-   rooms lost. Acceptable for party games (sessions are 5-15 minutes).
+4. **No persistence.** Colyseus rooms are in-memory. Deploying a new revision
+   replaces the running instance and drops all active rooms. Acceptable for party
+   games (sessions are 5-15 minutes); avoid mid-evening deploys when possible.
 
-5. **WebSocket:** Render free tier supports WebSocket natively. No special config needed.
+5. **WebSocket** is GA on Cloud Run. The `--session-affinity` flag pins each
+   client connection to the same revision for the cookie TTL.
 
-## Upgrading to Singapore Region
-
-When user base justifies the cost ($7/mo Starter plan):
-
-1. Go to Render dashboard > your service > Settings
-2. Change Region to `Singapore`
-3. Redeploy
-4. RTT for Thai users drops from ~200ms to ~30ms
+6. **Single-instance ceiling.** `--max-instances=1` is intentional: Colyseus
+   state lives in process memory, so multi-instance would split rooms.
+   Concurrency=250 is more than enough for the friend-group scale this product
+   targets. If you ever need horizontal scale, add Redis pub/sub via
+   `@colyseus/redis-driver` and `@colyseus/redis-presence` first.
 
 ## Local Development
 

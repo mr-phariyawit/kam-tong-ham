@@ -3,13 +3,14 @@
 #
 # Per Issue #21: send 12 POSTs in rapid succession, expect 200×10 then 429×2,
 # proving the rate limiter (Sprint 14, KTH-T-089) actually fires at the right
-# threshold against Render's X-Forwarded-For proxy chain.
+# threshold against the production X-Forwarded-For proxy chain (Google front-end
+# on Cloud Run, etc.).
 #
 # Usage:
-#   tools/smoke-rate-limit.sh https://kam-tong-ham.onrender.com
+#   tools/smoke-rate-limit.sh https://kam-tong-ham-45962093401.asia-southeast1.run.app
 set -euo pipefail
 
-URL="${1:-https://kam-tong-ham.onrender.com}"
+URL="${1:-https://kam-tong-ham-45962093401.asia-southeast1.run.app}"
 
 echo "=== Rate limiter smoke against $URL ==="
 echo "Expected: 200×10, then 429×2 (default limit is 10 creates/min/IP)"

@@ -102,7 +102,23 @@
 
     var promise;
     if (action === 'create') {
-      promise = client.create(ROOM_NAME, options);
+      // Reserve a globally-unique room code via REST first, then create the
+      // Colyseus room with that code in metadata. This matches the pattern used
+      // by every other game (filterBy(['roomCode']) in BaseRoom requires the
+      // create options to include roomCode so the second player joining by code
+      // can match this room and not spawn a new one).
+      promise = fetch('/api/rooms/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameType: 'draw-guess' }),
+      }).then(function (resp) {
+        if (!resp.ok) throw new Error('reserve-failed-' + resp.status);
+        return resp.json();
+      }).then(function (data) {
+        if (!data.success || !data.roomCode) throw new Error(data.error || 'reserve-no-code');
+        options.roomCode = data.roomCode;
+        return client.create(ROOM_NAME, options);
+      });
     } else {
       options.roomCode = code.toUpperCase();
       promise = client.joinById(code, options).catch(function () {
@@ -124,7 +140,6 @@
   function setupRoomHandlers() {
     room.onStateChange(function (state) {
       updateLobby(state);
-      updateGameUI(state);
     });
 
     room.onMessage('ROOM_TOKEN', function (data) {

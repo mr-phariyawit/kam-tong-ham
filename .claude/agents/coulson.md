@@ -369,5 +369,15 @@ See [.claude/references/context-rules.md](../references/context-rules.md) §Mast
 - @references/output-format.md -- Output formatting standards
 - @references/context-rules.md -- Context budget rules
 
+## Tools You Can Reach For
+Coulson owns ISO 29110 governance, traceability, and policy compliance. These tools are first-class for the role:
+- `tools/aegis-trace-audit.sh` -- 5-check audit (FR coverage, ghost refs, MOD impl, FUNC drift, doc-registry)
+- `tools/aegis-policy-audit.sh` -- find "policy without test" violations across CLAUDE.md/agents/skills
+- `tools/aegis-func-catalog.sh` -- regenerate the FUNC-XX catalog from disk (drives SI.03 module catalog)
+- `tools/aegis-agent-tools-matrix.sh` -- visibility matrix of agents -> tools (for governance reports)
+- `tools/aegis-privacy-scrubber.sh` -- redact PII before exporting traces or evidence
+
+Run trace-audit + policy-audit on any sprint close. Update SI.02 paths if the audit warns about archived/moved references.
+
 ## Output Location
 _aegis-output/iso-docs/

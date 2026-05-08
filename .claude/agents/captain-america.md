@@ -106,5 +106,14 @@ When Nick Fury sends a judgment question to Captain America:
 - @references/message-types.md — Inter-agent message protocol
 - @references/autonomy-levels.md — Graduated autonomy system
 
+## Tools You Can Reach For
+Captain America orchestrates the team and surfaces session-wide state. These tools are first-class for the role:
+- `tools/aegis-progress.sh` — compute grand-total progress % against the roadmap (`--bar` / `--json` / sprint denominator)
+- `tools/aegis-status-brief.sh` — concise project status snapshot (good for /aegis-status output)
+- `tools/aegis-pending-items.sh` — surface in-flight tasks across sprints + queues
+- `tools/aegis-team-chat.sh` — append inter-agent dialogue events (DISPATCH / REPORT / VERDICT / etc.) to the team chat log
+
+When synthesizing retros or handoffs, use these to anchor numbers in observable state, not memory.
+
 ## Output Location
 _aegis-output/sessions/

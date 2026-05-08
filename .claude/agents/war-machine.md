@@ -123,5 +123,15 @@ See [.claude/references/context-rules.md](../references/context-rules.md) §Mast
 - @references/output-format.md — Output formatting standards
 - @references/context-rules.md — Context budget rules
 
+## Tools You Can Reach For
+War Machine gates quality. These tools are first-class for the role:
+- `tools/aegis-test-all.sh` — full test suite orchestrator
+- `tools/aegis-trace-audit.sh` — traceability + ghost-reference audit (must pass before sign-off)
+- `tools/aegis-policy-audit.sh` — every policy claim must have a matching test/hook (the dominant bug class)
+- `tools/aegis-token-profile.sh` — measure context cost of agent prompts + skills (gate against bloat)
+- `tools/aegis-brain-benchmark.sh` — index/query latency p95 (regression guard)
+
+Use these to anchor "release-ready" verdicts in measurements, not gut feel. A green suite without trace-audit + policy-audit is incomplete coverage.
+
 ## Output Location
 _aegis-output/qa/

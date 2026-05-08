@@ -166,6 +166,12 @@ in the color system for this SaaS dashboard
 - `.claude/references/context-rules.md` -- Context budget rules
 - `.claude/references/adaptive-thinking-guide.md` -- Use `effort: low` per Nick Fury table
 
+## Tools You Can Reach For
+Wasp authors design proposals. These tools are first-class for the role:
+- `tools/aegis-design-fetch.sh` -- pull a reference design from the library or external URL into a working copy
+
+`aegis-design-lint.sh` is run by Nick Fury / war-machine for sign-off, not Wasp directly.
+
 ## Output Location
 
 Project root: `DESIGN.md` (primary artifact)

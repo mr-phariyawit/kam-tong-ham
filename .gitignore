@@ -34,17 +34,43 @@ blob-report/
 _aegis-output/
 .aegis/brain/logs/
 
+
 # >>> AEGIS Framework (managed by install.sh — do not edit between markers) >>>
 _aegis-output/*.tmp
 _aegis-output/.cache/
 _aegis-backup/
 _aegis-backup-*/
-.aegis/brain/logs/*.log
-# disabled-by-bootstrap: !.aegis/brain/logs/activity.log
+
+# Brain runtime — regenerable hooks output, not knowledge
+# (Note: do NOT re-include activity.log via `!` — it races with merges.
+#  See kam-tong-ham F3 followthrough 2026-05-07 + PR #133 for the postmortem.)
+.aegis/brain/logs/
 .aegis/brain/state/
+.aegis/brain/activity/
+.aegis/brain/runs/
+.aegis/brain/exports/
+.aegis/brain/conversations/
+.aegis/brain/live/current.fifo
+.aegis/brain/live/*.sock
+
+# Brain metrics — runtime counters + per-day token profiles
+.aegis/brain/metrics/raw/
+.aegis/brain/metrics/judgment-fallback-counter.json
+.aegis/brain/metrics/judgment-fallback-counter.json.lock
+.aegis/brain/metrics/token-profile-*.jsonl
+
+# Brain caches — rebuildable from sources
+.aegis/brain/skill-cache/
+.aegis/brain/index.db
+.aegis/brain/index.db-shm
+.aegis/brain/index.db-wal
+.aegis/brain/index-backups/
+.aegis/brain/graph/
+.aegis/brain/learnings/raw/
+
 .claude/worktrees/
 .claude/settings.json.v8-backup
-.claude/settings.json.pre-task-id-fix-*
+.claude/settings.json.pre-*
 .claude/hooks/*.log
 
 # Environment & Secrets

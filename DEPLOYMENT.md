@@ -11,7 +11,59 @@ Browser (client/) ──WebSocket──> Colyseus Server (server/dist/index.js)
 Single container serves both the WebSocket game server and static client files.
 No separate CDN or reverse proxy needed for beta.
 
-## Quick Start (Render.com -- recommended)
+## Canonical: GCP Cloud Run (asia-southeast1 / Singapore)
+
+**Live URL:** https://kam-tong-ham-45962093401.asia-southeast1.run.app
+**Project:** `game-board-online-th`
+**Service:** `kam-tong-ham`
+**Region:** `asia-southeast1` (Singapore — ~100ms RTT to Thailand vs ~280ms Render Oregon)
+
+### Why Cloud Run for this stack
+- Single container, autoscale-to-1 (Colyseus rooms are in-memory; multi-instance would split state).
+- WebSocket support is GA, session-affinity flag pins long-lived connections to the same revision.
+- Free tier covers a friend-group party platform; cost remains effectively zero at this scale.
+
+### Deploy a new image
+
+```bash
+# Build + push to Artifact Registry (uses repo Dockerfile)
+gcloud builds submit \
+  --tag asia-southeast1-docker.pkg.dev/game-board-online-th/kam-tong-ham/server:<TAG>
+
+# Deploy / update Cloud Run service
+gcloud run deploy kam-tong-ham \
+  --image=asia-southeast1-docker.pkg.dev/game-board-online-th/kam-tong-ham/server:<TAG> \
+  --region=asia-southeast1 \
+  --port=10000 \
+  --memory=512Mi --cpu=1 \
+  --min-instances=1 --max-instances=1 \
+  --timeout=3600 --concurrency=250 \
+  --session-affinity --allow-unauthenticated \
+  --set-env-vars=NODE_ENV=production,TRUST_PROXY=1
+```
+
+### Add `AEGIS_ADMIN_TOKEN` (for /api/admin/telemetry)
+
+```bash
+echo -n "$TOKEN_VALUE" | gcloud secrets create aegis-admin-token --data-file=-
+gcloud run services update kam-tong-ham \
+  --update-secrets=AEGIS_ADMIN_TOKEN=aegis-admin-token:latest \
+  --region=asia-southeast1
+```
+
+### Custom domain (optional)
+
+```bash
+gcloud run domain-mappings create \
+  --service=kam-tong-ham \
+  --domain=YOUR_DOMAIN \
+  --region=asia-southeast1
+# Then add the CNAME record shown in the command output to your DNS.
+```
+
+---
+
+## Legacy: Render.com (fallback during cutover)
 
 ### Option A: Blueprint (automatic)
 

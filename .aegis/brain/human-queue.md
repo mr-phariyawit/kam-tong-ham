@@ -51,25 +51,12 @@ docker run -p 10000:10000 kam-tong-ham
 
 ---
 
-## HQ-002: Repository Visibility Decision (Identity)
+## HQ-002: Repository Visibility Decision (Identity) — ✅ RESOLVED 2026-05-08
 
 **Category:** Identity / external access
 **Priority:** P3 -- not blocking, but relevant before sharing
 **Created:** 2026-05-07
-
-### EN
-The repo is currently PRIVATE. Before sharing with beta testers or accepting contributions:
-- **Public**: allows bug reports, pull requests, easier sharing with friends
-- **Private**: keeps code private, requires explicit collaborator invites
-
-Do you want to make the repo public?
-
-### TH
-Repo ปัจจุบันเป็น PRIVATE ก่อนแชร์กับเพื่อนหรือรับ contribution:
-- **Public**: รับ bug reports, pull requests, แชร์ง่าย
-- **Private**: โค้ดเป็นส่วนตัว ต้องเชิญ collaborator เอง
-
-ต้องการทำ repo เป็น public ไหม?
+**Resolved:** 2026-05-08 — user said "do it"; flipped via `gh repo edit --visibility public`. Repo now PUBLIC at https://github.com/mr-phariyawit/kam-tong-ham. Side benefit: public repos get unlimited free GitHub Actions minutes (independent of the Pro upgrade).
 
 ---
 
@@ -125,7 +112,7 @@ git push origin v1.0.0
 - **Raised**: 2026-05-08
 - **Resolved**: _(pending)_
 
-### [2026-05-08] EXTERNAL -- iOS Safari + Android Chrome real-device testing (Issue #19) / ทดสอบ iOS Safari + Android Chrome บนเครื่องจริง
+### [2026-05-08] EXTERNAL -- iOS Safari + Android Chrome real-device testing (Issue #19) / ทดสอบ iOS Safari + Android Chrome บนเครื่องจริง — 🟡 DEFERRED 2026-05-08
 
 - **EN**: Issue #19 requires testing all 6 games on real iOS Safari and Android Chrome. No simulator/emulator substitute -- PWA behavior differs on real devices (SW registration, add-to-homescreen, safe-area insets). Need human with actual devices to test and post screenshots.
 - **TH**: Issue #19 ต้องทดสอบ 6 เกมบน iOS Safari และ Android Chrome จริง Simulator ทดแทนไม่ได้ (พฤติกรรม PWA ต่างกัน) ต้องการคนที่มีเครื่องจริงทดสอบและถ่ายภาพหน้าจอ
@@ -133,7 +120,7 @@ git push origin v1.0.0
 - **Raised by**: captain-america
 - **Blocks**: Phase 5.2; Issue #19 closure; "production-ready" SHOULD criterion #12
 - **Raised**: 2026-05-08
-- **Resolved**: _(pending)_
+- **Deferred**: 2026-05-08 — user said "ignore" for this session. Issue #19 stays open on GitHub for future revisit.
 
 ### [2026-05-08] EXPLICIT — Merge PR #29 (vendor colyseus + load guard) — same one-time CI-bypass exception as #28 — ✅ RESOLVED 2026-05-08T11:10:38Z
 
@@ -145,7 +132,7 @@ git push origin v1.0.0
 - **Raised**: 2026-05-08T10:03:26Z
 - **Resolved**: 2026-05-08T11:10:38Z
 
-### [2026-05-08] IDENTITY — Cloud Run custom domain decision / ตัดสินใจเรื่อง custom domain ของ Cloud Run
+### [2026-05-08] IDENTITY — Cloud Run custom domain decision / ตัดสินใจเรื่อง custom domain ของ Cloud Run — 🟡 DEFERRED 2026-05-08
 
 - **EN**: GCP auto URL is https://kam-tong-ham-45962093401.asia-southeast1.run.app — works but ugly. Options: (a) keep auto URL, (b) buy/use domain + map via 'gcloud run domain-mappings create --service=kam-tong-ham --domain=YOUR_DOMAIN --region=asia-southeast1' + DNS CNAME. Affects: branding, shareability, what to put in README/social. No technical urgency — auto URL works fine for friends-and-family beta.
 - **TH**: URL อัตโนมัติ GCP คือ https://kam-tong-ham-45962093401.asia-southeast1.run.app ใช้ได้แต่ไม่สวย ทางเลือก: (a) ใช้ URL อัตโนมัติ, (b) ซื้อ/ใช้ domain ของตัวเองแล้ว map ด้วย gcloud run domain-mappings ไม่เร่ง — URL อัตโนมัติเล่นได้ปกติ
@@ -153,7 +140,7 @@ git push origin v1.0.0
 - **Raised by**: captain-america
 - **Blocks**: polished URL for sharing; nothing else technical
 - **Raised**: 2026-05-08T10:03:35Z
-- **Resolved**: _(pending)_
+- **Deferred**: 2026-05-08 — user said "ignore" for this session. Auto URL is the canonical for now.
 
 ### [2026-05-08] EXTERNAL — Abandon Render service / ยกเลิก Render — ✅ FULLY RESOLVED
 

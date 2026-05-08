@@ -84,7 +84,7 @@
     }
 
     var script = document.createElement('script');
-    script.src = 'https://unpkg.com/colyseus.js@0.15/dist/colyseus.js';
+    script.src = 'https://unpkg.com/colyseus.js@0.15.17/dist/colyseus.js';
     script.onload = function () {
       client = new Colyseus.Client(SERVER_URL);
       joinOrCreate(action, code);

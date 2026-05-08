@@ -135,15 +135,15 @@ git push origin v1.0.0
 - **Raised**: 2026-05-08
 - **Resolved**: _(pending)_
 
-### [2026-05-08] EXPLICIT — Merge PR #29 (vendor colyseus + load guard) — same one-time CI-bypass exception as #28 / Merge PR #29 (vendor colyseus + load guard) — ข้อยกเว้น CI เหมือน #28
+### [2026-05-08] EXPLICIT — Merge PR #29 (vendor colyseus + load guard) — same one-time CI-bypass exception as #28 — ✅ RESOLVED 2026-05-08T11:10:38Z
 
-- **EN**: PR #29 verified locally: 621/621 vitest green, all 6 games on local vendored colyseus, SW cache v1->v2, ColyseusGuard active, /api/client-error endpoint + 7 tests, pre-commit hook blocks floating CDN tags. CI billing-blocked (same as #27, #28). GCP Cloud Run is ALREADY running this code (built from PR #29 HEAD). Merging keeps main in sync. Command: gh pr merge 29 --rebase --delete-branch
-- **TH**: PR #29 ตรวจ local เรียบร้อย: 621/621 test ผ่าน, 6 เกมใช้ colyseus local, SW cache v2, ColyseusGuard ทำงาน, มี /api/client-error + test 7 ตัว, pre-commit hook กัน floating CDN. CI หมด credit (เหมือน #27, #28). GCP Cloud Run รันโค้ดนี้อยู่แล้ว merge เพื่อ sync main
+- **EN**: APPROVED by user "go". Merged via rebase 2026-05-08T11:10:38Z. Main now contains vendored colyseus@0.15.17 + ColyseusGuard + SW cache v2 + /api/client-error + pre-commit hook. PR #30 (Cloud Run migration + Render abandonment) merged 44s later at 11:11:22Z.
+- **TH**: ผู้ใช้อนุมัติด้วย "go" Merge เรียบร้อยตอน 11:10:38Z PR #30 ตามมาที่ 11:11:22Z
 - **Category**: Explicit approval gate
 - **Raised by**: captain-america
-- **Blocks**: main hygiene; future deploys built from main without vendoring
+- **Resolved by**: user "go"
 - **Raised**: 2026-05-08T10:03:26Z
-- **Resolved**: _(pending)_
+- **Resolved**: 2026-05-08T11:10:38Z
 
 ### [2026-05-08] IDENTITY — Cloud Run custom domain decision / ตัดสินใจเรื่อง custom domain ของ Cloud Run
 
@@ -155,14 +155,14 @@ git push origin v1.0.0
 - **Raised**: 2026-05-08T10:03:35Z
 - **Resolved**: _(pending)_
 
-### [2026-05-08] EXTERNAL — Abandon Render service / ยกเลิก Render — ⚠️ USER-DIRECTED ABANDONMENT, REPO CLEANED, MANUAL DELETION REQUIRED
+### [2026-05-08] EXTERNAL — Abandon Render service / ยกเลิก Render — ✅ FULLY RESOLVED
 
-- **EN**: User directed abandonment 2026-05-08. Repo cleaned: render.yaml removed, Render section stripped from DEPLOYMENT.md, smoke-rate-limit.sh default URL switched to Cloud Run, Dockerfile comments updated. **Manual step still required** — Render API/CLI is not reachable from this environment. Log into https://dashboard.render.com → kam-tong-ham service → Settings → "Suspend" (cheap, reversible) or "Delete" (irreversible). Cloud Run canonical URL: https://kam-tong-ham-45962093401.asia-southeast1.run.app
-- **TH**: ผู้ใช้สั่งยกเลิก 2026-05-08 ลบ render.yaml, ตัด section Render ออกจาก DEPLOYMENT.md, เปลี่ยน default URL ใน smoke-rate-limit.sh เป็น Cloud Run, แก้ comment ใน Dockerfile เรียบร้อย **ยังต้อง manual** — เข้า https://dashboard.render.com → kam-tong-ham → Settings → "Suspend" หรือ "Delete" เพราะเรียก Render API จากที่นี่ไม่ได้
+- **EN**: Repo cleanup landed via PR #30. Service deleted from Render dashboard by user 2026-05-08. Verified: `https://kam-tong-ham.onrender.com/api/games` → 404; Cloud Run canonical URL → 200. Cutover complete.
+- **TH**: ลบ Render service สำเร็จ — เช็คแล้ว URL เก่าตอบ 404, Cloud Run ตอบ 200 เหมือนเดิม การ cutover เสร็จสมบูรณ์
 - **Category**: External access
 - **Raised by**: captain-america
 - **Repo-side abandonment**: complete (PR #30)
-- **Render-side deletion**: pending human action via Render dashboard
+- **Render-side deletion**: complete via Render dashboard
 - **Raised**: 2026-05-08T10:03:43Z
-- **Updated**: 2026-05-08 — user said "abandon onrender.com"; repo refs purged
+- **Resolved**: 2026-05-08 — user "Render dashboard service deletion ---> done"; verified curl 404
 <!-- PENDING_END -->

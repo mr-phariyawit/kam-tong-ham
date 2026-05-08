@@ -1,7 +1,12 @@
 # Render.com Blueprint — kam-tong-ham Party Games Platform
+#
+# DEPRECATED 2026-05-08 — canonical deploy migrated to GCP Cloud Run
+# (asia-southeast1 / Singapore). See DEPLOYMENT.md "Canonical: GCP Cloud Run".
+# This file is retained for fallback during the cutover window only.
+#
 # https://render.com/docs/blueprint-spec
 #
-# Usage:
+# Usage (legacy):
 #   1. Push this repo to a GitHub/GitLab repo accessible from Render
 #   2. Go to https://dashboard.render.com/select-repo?type=blueprint
 #   3. Select the repo and Render will auto-detect this file

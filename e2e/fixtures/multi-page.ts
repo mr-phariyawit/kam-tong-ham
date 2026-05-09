@@ -116,33 +116,108 @@ export async function closeAllPlayers(players: PlayerPage[]): Promise<void> {
 }
 
 /**
+ * Options for createRoom / joinRoom to handle per-game UX differences.
+ *
+ * UX patterns:
+ *  - screen-nickname (default): #btnCreate → #screen-nickname → fill nick +
+ *    pick avatar → click confirm → #screen-lobby.
+ *    confirmText defaults to 'เข้าร่วม' (button #btnConnect).
+ *    draw-guess uses confirmText: 'เข้าสู่เกม' (button #btnGo).
+ *
+ *  - modal-based (forbidden-word): #btnCreateRoom → #nicknameModal opens →
+ *    fill nick + pick emoji → #btnConfirmNickname → #screen-lobby.
+ *    Join flow: #btnJoinRoom → #nicknameModal → confirm → #joinModal →
+ *    fill code → #btnConfirmJoin → #screen-lobby.
+ *    Set modalBased: true for this game.
+ */
+export interface RoomOpts {
+  /**
+   * Text on the confirm button (used to locate it).
+   * Default: 'เข้าร่วม' (maps to #btnConnect on screen-nickname games).
+   * Use 'เข้าสู่เกม' for draw-guess (#btnGo).
+   * Ignored when modalBased: true (forbidden-word uses #btnConfirmNickname directly).
+   */
+  confirmText?: string;
+  /**
+   * When true, use the modal-based flow (forbidden-word).
+   * Default: false (screen-nickname flow).
+   */
+  modalBased?: boolean;
+}
+
+const DEFAULT_OPTS: Required<RoomOpts> = {
+  confirmText: "เข้าร่วม",
+  modalBased: false,
+};
+
+/**
  * Navigate a page to a game, enter nickname, and create a room.
  * Returns the room code displayed in the lobby.
  *
- * Handles two lobby implementations:
- * - SharedLobby (Spy, etc.): `.room-code-value` element
- * - Custom lobby (Werewolf): `.lobby-room-code` element with "ห้อง: CODE"
+ * Handles three UX patterns:
+ * - screen-nickname (default): werewolf, spy, knights, word-link
+ *   #btnCreate → #screen-nickname → fill nick + pick avatar → #btnConnect → lobby
+ * - screen-nickname with custom confirm (draw-guess):
+ *   same but confirm is #btnGo ("เข้าสู่เกม") — pass confirmText: 'เข้าสู่เกม'
+ * - modal-based (forbidden-word): pass modalBased: true
+ *   #btnCreateRoom → #nicknameModal → fill nick + pick .emoji-option →
+ *   #btnConfirmNickname ("ยืนยัน") → lobby
+ *
+ * Lobby code selectors (auto-detected):
+ * - SharedLobby: .room-code-value
+ * - Werewolf: .lobby-room-code strong
+ * - forbidden-word / draw-guess: #roomCodeDisplay
+ * - knights: lobby-rendered sentinel (no 4-letter code)
  */
 export async function createRoom(
   player: PlayerPage,
-  gamePath: string // e.g. "/games/spy/index.html"
+  gamePath: string,
+  opts?: RoomOpts
 ): Promise<string> {
+  const { confirmText, modalBased } = { ...DEFAULT_OPTS, ...opts };
   const baseURL = getBaseURL();
   await player.page.goto(`${baseURL}${gamePath}`);
 
-  // Click "Create Room" button
-  await player.page.click("#btnCreate");
+  if (modalBased) {
+    // ── forbidden-word modal flow ───────────────────────────────────────────
+    await player.page.click("#btnCreateRoom");
+    await player.page.waitForSelector(
+      "#nicknameModal:not(.hidden), .modal-overlay:not(.hidden)",
+      { timeout: 5_000 }
+    );
+    await player.page.fill("#nicknameInput", player.nickname);
+    // Pick first available emoji/avatar option
+    const emojiOption = player.page.locator(".emoji-option, .avatar-option").first();
+    await emojiOption.click();
+    await player.page.waitForTimeout(150);
+    await player.page.click("#btnConfirmNickname");
+  } else {
+    // ── screen-nickname flow (spy, werewolf, knights, word-link, draw-guess) ─
+    await player.page.click("#btnCreate");
+    await player.page.waitForSelector("#screen-nickname.active", { timeout: 5_000 });
+    await player.page.fill("#nicknameInput", player.nickname);
+    // Pick first avatar — use evaluate to avoid an extra Playwright round-trip
+    await player.page.evaluate(() => {
+      const btn = document.querySelector<HTMLElement>(
+        ".avatar-option, #avatarPicker .avatar-option"
+      );
+      if (btn) btn.click();
+    });
+    // Locate confirm button by its text content
+    if (confirmText === "เข้าสู่เกม") {
+      await player.page.click("#btnGo");
+    } else {
+      await player.page.click("#btnConnect");
+    }
+  }
 
-  // Enter nickname
-  await player.page.fill("#nicknameInput", player.nickname);
+  // Wait for lobby screen to become active.
+  // 30s timeout — sequential 20-test suites accumulate server load; spy-8p
+  // (8 WebSocket connections) before werewolf tests can leave Colyseus briefly
+  // busy with room disposal, slowing the next WebSocket handshake.
+  await player.page.waitForSelector("#screen-lobby.active", { timeout: 30_000 });
 
-  // Click connect/join button
-  await player.page.click("#btnConnect");
-
-  // Wait for lobby screen to become active
-  await player.page.waitForSelector("#screen-lobby.active", { timeout: 15_000 });
-
-  // Extract room code using evaluate (works for both lobby implementations)
+  // Extract room code using evaluate (works for all lobby implementations)
   const roomCode = await player.page.evaluate(() => {
     // SharedLobby: .room-code-value element
     const rv = document.querySelector(".room-code-value");
@@ -153,6 +228,16 @@ export async function createRoom(
     const strong = document.querySelector(".lobby-room-code strong");
     if (strong && strong.textContent) {
       return strong.textContent.trim();
+    }
+    // forbidden-word / draw-guess: #roomCodeDisplay
+    const rcd = document.getElementById("roomCodeDisplay");
+    if (rcd && rcd.textContent && rcd.textContent.trim() !== "----") {
+      return rcd.textContent.trim();
+    }
+    // Knights: .lobby-code contains the Colyseus room ID used for joinById
+    const lc = document.querySelector(".lobby-code");
+    if (lc && lc.textContent && lc.textContent.trim()) {
+      return lc.textContent.trim();
     }
     // Last resort: find any 4-char uppercase string in the lobby
     const lobby = document.querySelector("#screen-lobby");
@@ -173,27 +258,66 @@ export async function createRoom(
 
 /**
  * Navigate a page to a game and join an existing room by code.
- * Handles both SharedLobby and custom lobby implementations.
+ *
+ * Handles three UX patterns (same opts as createRoom):
+ * - screen-nickname (default): #btnJoin → #screen-nickname (with joinCodeInput shown) →
+ *   fill nick + pick avatar + fill code → #btnConnect → lobby
+ * - screen-nickname with custom confirm (draw-guess): same but confirm is #btnGo
+ * - modal-based (forbidden-word): #btnJoinRoom → #nicknameModal → fill nick + pick emoji →
+ *   #btnConfirmNickname → #joinModal opens → fill code → #btnConfirmJoin → lobby
  */
 export async function joinRoom(
   player: PlayerPage,
   gamePath: string,
-  roomCode: string
+  roomCode: string,
+  opts?: RoomOpts
 ): Promise<void> {
+  const { confirmText, modalBased } = { ...DEFAULT_OPTS, ...opts };
   const baseURL = getBaseURL();
   await player.page.goto(`${baseURL}${gamePath}`);
 
-  // Click "Join Room" button
-  await player.page.click("#btnJoin");
-
-  // Enter nickname
-  await player.page.fill("#nicknameInput", player.nickname);
-
-  // Enter room code
-  await player.page.fill("#joinCodeInput", roomCode);
-
-  // Click connect
-  await player.page.click("#btnConnect");
+  if (modalBased) {
+    // ── forbidden-word modal flow ───────────────────────────────────────────
+    // Step 1: open nickname modal via "Join Room" button
+    await player.page.click("#btnJoinRoom");
+    await player.page.waitForSelector(
+      "#nicknameModal:not(.hidden), .modal-overlay:not(.hidden)",
+      { timeout: 5_000 }
+    );
+    await player.page.fill("#nicknameInput", player.nickname);
+    const emojiOption = player.page.locator(".emoji-option, .avatar-option").first();
+    await emojiOption.click();
+    await player.page.waitForTimeout(150);
+    // Step 2: confirm nick → join modal opens
+    await player.page.click("#btnConfirmNickname");
+    // Step 3: fill room code in join modal
+    await player.page.waitForSelector(
+      "#joinModal:not(.hidden), #joinCodeInput",
+      { timeout: 5_000 }
+    );
+    await player.page.fill("#joinCodeInput", roomCode);
+    await player.page.click("#btnConfirmJoin");
+  } else {
+    // ── screen-nickname flow ───────────────────────────────────────────────
+    await player.page.click("#btnJoin");
+    await player.page.waitForSelector("#screen-nickname.active", { timeout: 5_000 });
+    await player.page.fill("#nicknameInput", player.nickname);
+    // Pick first avatar — use evaluate to avoid an extra Playwright round-trip
+    await player.page.evaluate(() => {
+      const btn = document.querySelector<HTMLElement>(
+        ".avatar-option, #avatarPicker .avatar-option"
+      );
+      if (btn) btn.click();
+    });
+    // Fill room code (shown in join flow via joinCodeGroup)
+    await player.page.fill("#joinCodeInput", roomCode);
+    // Confirm
+    if (confirmText === "เข้าสู่เกม") {
+      await player.page.click("#btnGo");
+    } else {
+      await player.page.click("#btnConnect");
+    }
+  }
 
   // Wait for lobby to appear (either SharedLobby or custom lobby)
   await player.page.waitForSelector(

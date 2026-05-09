@@ -42,6 +42,31 @@ gcloud run deploy kam-tong-ham \
   --set-env-vars=NODE_ENV=production,TRUST_PROXY=1
 ```
 
+### Post-deploy smoke check
+
+After every deploy run the prod-smoke script to verify the live URL is healthy:
+
+```bash
+# Uses the default Cloud Run URL
+tools/prod-smoke.sh
+
+# Override URL (e.g. staging, or a PR preview)
+tools/prod-smoke.sh https://custom-url.run.app
+```
+
+The script exits 0 if all checks pass, non-zero (equal to the failure count) otherwise.
+
+What it checks:
+
+| Check | Why |
+|-------|-----|
+| `/api/health` returns 200 | Basic server health |
+| `/api/games` returns 200 | Game registry alive |
+| 6 games registered | All 6 games loaded correctly |
+| `/shared/vendor/colyseus.js@0.15.17.js` returns 200 | Vendored SDK served (PR #28 regression guard — missing file causes Buffer ReferenceError in browsers) |
+| `/api/admin/telemetry` returns 401 or 503 (not 200) | Auth gate intact — 503 when token unset (fail-closed), 401 when wrong token |
+| Each game's `index.html` returns 200 | Static files deployed correctly (PR #33 regression guard — broken static tree would serve 404/500) |
+
 ### Add `AEGIS_ADMIN_TOKEN` (for /api/admin/telemetry)
 
 ```bash

@@ -145,7 +145,7 @@ Thor owns CI/CD, deployment, and routine repo maintenance. These tools are first
 - `tools/aegis-trace-audit.sh` — verify project-wide traceability + ghost references (gating before deploys)
 - `tools/aegis-fix-hook-paths.sh` — repair stale hook paths after a project move/rename
 - `tools/aegis-distill-reset.sh` — reset distill state when judgment-counter quotas need clearing
-- `tools/aegis-worktree-gc.sh` — garbage-collect stale per-agent git worktrees
+- `tools/_archived/aegis-worktree-gc.sh` — garbage-collect stale per-agent git worktrees
 - `tools/aegis-upgrade.sh` — ladder a target project to the current AEGIS version
 
 Run these before declaring a deploy/release done — silent CI is not the same as green CI.

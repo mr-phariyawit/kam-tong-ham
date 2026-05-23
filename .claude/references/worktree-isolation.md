@@ -1,7 +1,14 @@
 # Worktree Isolation + Background Agents (Sprint v9-05)
 
-> **Purpose**: Real blast radius enforcement via git worktree isolation per agent.
-> Replace markdown-only "blast radius" rules with actual git boundaries.
+> **2026-05-23 NOTE**: This pattern is now **first-class in native Claude Code**.
+> Pass `isolation: "worktree"` directly to the `Agent` tool — no AEGIS-specific
+> setup needed. AEGIS-Team no longer ships extra infrastructure for this.
+> This doc is kept as historical context. See [docs/AEGIS_VS_NATIVE_CC.md](../../docs/AEGIS_VS_NATIVE_CC.md)
+> for the full native-vs-AEGIS positioning.
+
+> **Purpose** (historical): Real blast radius enforcement via git worktree
+> isolation per agent. Replace markdown-only "blast radius" rules with actual
+> git boundaries.
 
 ## Problem (from Loki Critical #2)
 

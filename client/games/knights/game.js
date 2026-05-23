@@ -119,7 +119,25 @@
 
     var promise;
     if (action === 'create') {
-      promise = client.create(ROOM_NAME, opts);
+      // Reserve a globally-unique room code via REST first, then create the
+      // Colyseus room with that code in metadata. BaseRoom uses
+      // .filterBy(['roomCode']) so a second player typing the displayed code
+      // can only match this room if metadata.roomCode is set. Without this
+      // step the joiner would spawn a NEW room and end up isolated from the
+      // host. Same pattern as forbidden-word, werewolf, spy, word-link, and
+      // (post-PR #33) draw-guess.
+      promise = fetch('/api/rooms/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameType: 'knights' }),
+      }).then(function (resp) {
+        if (!resp.ok) throw new Error('reserve-failed-' + resp.status);
+        return resp.json();
+      }).then(function (data) {
+        if (!data.success || !data.roomCode) throw new Error(data.error || 'reserve-no-code');
+        opts.roomCode = data.roomCode;
+        return client.create(ROOM_NAME, opts);
+      });
     } else {
       opts.roomCode = code.toUpperCase();
       promise = client.joinById(code, opts).catch(function () {

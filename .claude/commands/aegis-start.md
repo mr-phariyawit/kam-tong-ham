@@ -121,6 +121,73 @@ fi
 - Read `.aegis/brain/logs/activity.log` for pending tasks.
 - Read `.aegis/brain/handoffs/` for last session's handoff.
 
+### Step 2.3: Coverage-Screen Re-Surface (NEW v15-19)
+
+Tool-boundary warning — see [`skills/aegis-coverage-screen.md`](../../skills/aegis-coverage-screen.md) for the full rule.
+
+```bash
+# If coverage.json exists with unack'd gaps under 100% — re-print the warning
+COVERAGE_JSON=".aegis/brain/state/coverage.json"
+if [[ -f "$COVERAGE_JSON" ]]; then
+    cov=$(jq -r '.coverage' "$COVERAGE_JSON" 2>/dev/null || echo "1.0")
+    ack=$(jq -r '.ack' "$COVERAGE_JSON" 2>/dev/null || echo "true")
+    if [[ "$ack" != "true" ]] && [[ $(awk "BEGIN { print ($cov < 1.0) }") == "1" ]]; then
+        bash tools/aegis-coverage-screen.sh show .
+    fi
+elif [[ ! -f "$COVERAGE_JSON" ]]; then
+    # Project never went through Phase 0 super-spec — auto-screen now
+    bash tools/aegis-coverage-screen.sh screen . 2>/dev/null || true
+fi
+```
+
+Soft gate: this never blocks. User can type `ack gaps` at any time to silence the re-surface.
+
+### Step 2.7: Cross-Session Awareness (NEW v15-22)
+
+Bring AEGIS up to speed with Claude Code 2.1.148's `claude agents` CLI — surface
+*other* live CC sessions on the machine so the user knows they exist and can
+intentionally manage them.
+
+```bash
+WRAPPER="${CLAUDE_PROJECT_DIR:-$(pwd)}/tools/aegis-claude-agents.sh"
+if [[ -x "$WRAPPER" ]]; then
+    # Get all live sessions, exclude self, raise red flags
+    SELF="${CLAUDE_SESSION_ID:-}"
+    OTHERS=$(bash "$WRAPPER" list --json 2>/dev/null \
+        | jq --arg s "$SELF" '[.[] | select(.sessionId != $s)]' 2>/dev/null || echo '[]')
+    OTHER_COUNT=$(echo "$OTHERS" | jq 'length' 2>/dev/null || echo 0)
+
+    if [[ "$OTHER_COUNT" -gt 0 ]]; then
+        # Race risk: another session at the SAME cwd
+        MY_CWD=$(pwd)
+        SAME_CWD=$(echo "$OTHERS" | jq --arg c "$MY_CWD" '[.[] | select(.cwd == $c)] | length' 2>/dev/null || echo 0)
+
+        # Idle session > 1h at any other registered project = handoff candidate
+        NOW_MS=$(node -e 'console.log(Date.now())')
+        IDLE_OLD=$(echo "$OTHERS" | jq --argjson now "$NOW_MS" \
+            '[.[] | select(.status == "idle" and ($now - (.startedAt // $now)) > 3600000)] | length' 2>/dev/null || echo 0)
+
+        if [[ "$SAME_CWD" -gt 0 ]] || [[ "$IDLE_OLD" -gt 0 ]]; then
+            echo ""
+            echo "⚠️  Cross-session awareness:"
+            if [[ "$SAME_CWD" -gt 0 ]] && [[ "$SAME_CWD" -ne "0" ]]; then
+                echo "  • ANOTHER CC session is running at the SAME project directory."
+                echo "    Brain writes can race — consider closing one or using a worktree."
+            fi
+            if [[ "$IDLE_OLD" -gt 0 ]] && [[ "$IDLE_OLD" -ne "0" ]]; then
+                echo "  • $IDLE_OLD idle CC session(s) > 1h old on other project(s)."
+                echo "    Probably forgot to /aegis-handoff. Run from that project to clean up."
+            fi
+            echo "  Run \`node tools/aegis-multi-tenant/mt.mjs sessions\` for the full map."
+            echo ""
+        fi
+    fi
+fi
+```
+
+Soft gate: this never blocks. It surfaces a class of "session debt" that
+previously was completely invisible.
+
 ### Step 3: Display Dashboard (brief, 5 seconds max)
 
 ```
@@ -140,50 +207,21 @@ fi
 
 ### Step 4: Activate Nick Fury (DO NOT ASK HUMAN)
 
-**This is the critical step.** Do NOT display "What would you like to do?" or
-present options. Instead, immediately execute the Nick Fury scan loop:
+**This is the critical step.** Do NOT display "What would you like to do?" or present options. Activate the autonomous loop now — Nick Fury runs, the human watches.
 
-**Spawn Nick Fury:**
+The loop substrate is **transparent**: the user never sees `/goal` text or subagent spawn syntax. Pick the available primitive automatically and announce only the Nick Fury banner:
+
 ```
-Agent tool call:
-  subagent_type: "nick-fury"
-  name: "nick-fury"
-  mode: "bypassPermissions"
-  run_in_background: true
-  prompt: |
-    You are 🧬 Nick Fury — the autonomous controller of AEGIS.
-    Read .claude/agents/nick-fury.md for your full protocol.
-
-    SESSION CONTEXT:
-    - Date: [current date]
-    - Autonomy: L3 (Autonomous)
-    - Profile: [tier]
-    - Context budget: [X]%
-    - Handoff data: [summary from Step 2, or "none"]
-    - Brain resonance: [key points from Step 2]
-
-    IMMEDIATE ACTIONS:
-    1. Run your first SCAN (git, tests, sprint, kanban, specs, deps, debt)
-    2. Apply Decision Matrix — pick highest-priority action
-    3. Announce your decision
-    4. DISPATCH sub-agents to execute (use Agent tool, run_in_background=true)
-    5. Enter HEARTBEAT LOOP:
-       - Monitor spawned agents via SendMessage
-       - Nudge agents idle > 120s
-       - Re-spawn agents that timeout > 300s
-       - After each task completes: verify gates, log results, pick next task
-       - Check context budget each cycle
-       - Continue until context >= 80% or all tasks done
-    6. When wrapping up: log final state to activity.log, report summary
-
-    RULES:
-    - NEVER ask "what would you like to do?" — analyze, decide, execute
-    - ALWAYS announce decisions with rationale before acting
-    - ALWAYS spawn sub-agents with run_in_background=true
-    - ALWAYS include SUCCESS CRITERIA in sub-agent prompts
-    - ALWAYS instruct sub-agents to SendMessage back when done
-    - Log every decision to .aegis/brain/logs/activity.log
+🧬 Nick Fury: ONLINE — scanning project now...
 ```
+
+Then begin the autonomous cycle.
+
+**Implementation details — internal to the framework, NOT shown to the user:**
+
+See [`.claude/references/command-audience.md`](../references/command-audience.md) for the user-vs-team command split principle and [`.claude/references/aegis-start-loop-substrate.md`](../references/aegis-start-loop-substrate.md) for substrate-selection logic + the exact `/goal` text used in CC 2.1.139+ and the subagent-spawn fallback for older CC versions.
+
+In short: the team uses whichever loop primitive is available (CC 2.1.139 `/goal` if present, else legacy subagent + SendMessage heartbeat). Both run Nick Fury's persona-defined Decision Cycle inside each turn. The user-facing experience is identical: type `/aegis-start`, watch Nick Fury work.
 
 #### 4b. Check Planning Artifacts — BLOCK 0 (MANDATORY)
 
@@ -228,6 +266,18 @@ If ANY BLOCK 0 check fails, Nick Fury MUST apply these hard stops in order:
 
 None of these are skippable. These are pipeline gates, not suggestions.
 Response if user pushes: "AEGIS pipeline requires BLOCK 0 docs first. Takes ~2 min. Starting now..."
+
+##### How to actually "Run /aegis-X NOW" — slash-command chaining protocol
+
+Slash commands are user-typed by definition; Claude cannot literally invoke `/aegis-sprint plan` mid-flow. When the matrix says "Run /aegis-X NOW", the executor MUST:
+
+1. **Read** the command's markdown definition file at `.claude/commands/aegis-<command>.md`
+2. **Locate** the relevant subcommand section (e.g. `### Subcommand: Sprint Planning`)
+3. **Execute the steps verbatim** — do NOT shortcut, do NOT reinvent
+4. **Persist all artifacts** the steps require (plan.md, kanban.md, metrics.json, activity log entries, ISO docs via Coulson)
+5. **Return to /aegis-start flow** only after the sub-command's "Display Summary" step has been reached
+
+**Anti-pattern to refuse** (found in v15-07 audit, 2026-05-14): "I'll create a kanban.md inline since the gate needs one" — that's a shortcut. The plan ceremony has 8+ ISO 29110 work products (Coulson generates them); skipping the ceremony leaves audit-trail holes. ALWAYS Read + execute the full subcommand.
 
 #### 4c. Analyze & Decide
 Apply the Decision Matrix (P0-P10):
@@ -303,12 +353,12 @@ After that single answer, she takes over completely.
 ### Human Interaction Model
 ```
 ┌──────────────────────────────────────────────────┐
-│  BEFORE (v6.0):                                  │
+│  BEFORE (pre-v9):                                │
 │  /aegis-start → Dashboard → "What to do?" → Wait │
 │                                                  │
-│  AFTER (v6.0 + Nick Fury):                    │
-│  /aegis-start → Dashboard → Scan → Decide → GO! │
-│  Human watches tmux, interrupts only if needed   │
+│  NOW (v9+ Nick Fury MBP):                        │
+│  /aegis-start → Scan → Decide → GO!              │
+│  Human watches, interrupts only if needed        │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -380,6 +430,36 @@ After loading the brain (Step 2), explicitly check for and load the latest hando
 - Log warning: "Handoff is [N] days old, may be outdated"
 - Still load it but tell Nick Fury to do a full scan anyway
 - Do not auto-delete old handoffs (git preserves history)
+
+### Step 2.6: Linear Health Check (NEW — Linear integration)
+
+If `.aegis/config/linear.json` exists, run the Linear health check.
+
+1. **Skip silently if config missing** — Linear is optional. Repos without `.aegis/config/linear.json` proceed normally.
+
+2. **Run health check:**
+   ```bash
+   bash tools/aegis-linear-setup.sh health
+   ```
+
+3. **Interpret exit code:**
+   - `0` GREEN — display nothing (silent success)
+   - `2` YELLOW — display a one-line banner, continue:
+     ```
+     ⚠️  Linear: degraded (e.g. project not yet auto-created) — will fix on /aegis-sprint plan
+     ```
+   - `1`/`3` RED — display banner + add to Nick Fury context:
+     ```
+     ❌ Linear: unhealthy — run /aegis-linear health for details
+     ```
+     Nick Fury still proceeds (Linear is non-blocking for AEGIS), but should NOT call /aegis-linear sync until fixed.
+
+4. **Log:**
+   ```
+   [YYYY-MM-DD HH:MM] LINEAR_HEALTH | status=GREEN|YELLOW|RED | project_id=<id-or-missing>
+   ```
+
+**Rationale**: Linear is a one-way mirror, not a dependency. A red Linear must never block AEGIS work — it just suppresses sync writes until repaired. See [`.claude/commands/aegis-linear.md`](aegis-linear.md) for full architecture.
 
 ---
 

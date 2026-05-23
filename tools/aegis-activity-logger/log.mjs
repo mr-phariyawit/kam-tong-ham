@@ -12,6 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { eventFromHook } from "../aegis-live-tail/format.mjs";
+import { safeRun } from "../_hook-utils/safe-run.mjs";
 
 const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const ACTIVITY_DIR = path.join(PROJECT_DIR, ".aegis/brain/activity");
@@ -88,4 +89,5 @@ async function main() {
   }
 }
 
-main().then(() => process.exit(0), () => process.exit(0));
+// v15-12: safeRun adds classified error logging + friendly stderr.
+safeRun(main, { hookName: "aegis-activity-logger/log", failOpen: true });

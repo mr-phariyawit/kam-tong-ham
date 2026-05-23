@@ -66,4 +66,50 @@ except Exception:
 fi
 
 # ── Run the downstream hook with original stdin ────────────────────────────
-echo "$STDIN_CACHE" | bash "$HOOK_CMD" "$@"
+# v15-12: capture stderr, log full content, emit a single classified
+# friendly line if the hook fails. PreToolUse hooks (guard-*, approval-*)
+# propagate their exit code so blocks still work; everything else exits 0.
+HOOK_STDERR=$(mktemp)
+# `set -e` is active, so a non-zero hook exit would abort the wrapper before
+# we get a chance to classify the error. The `|| HOOK_EXIT=$?` pattern
+# captures the exit code without triggering set-e's abort.
+HOOK_EXIT=0
+echo "$STDIN_CACHE" | bash "$HOOK_CMD" "$@" 2> "$HOOK_STDERR" || HOOK_EXIT=$?
+
+if [[ "$HOOK_EXIT" -ne 0 ]] && [[ -s "$HOOK_STDERR" ]]; then
+    # Append full stderr trace to per-project error log for forensics.
+    LOG_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}/.aegis/brain/logs"
+    mkdir -p "$LOG_DIR" 2>/dev/null
+    {
+        date -u +"[%FT%TZ] hook=${HOOK_ID} exit=${HOOK_EXIT}"
+        cat "$HOOK_STDERR"
+        echo "---"
+    } >> "$LOG_DIR/hook-errors.log" 2>/dev/null
+
+    # Emit one classified line to original stderr (so the user sees it).
+    STDERR_CONTENT=$(cat "$HOOK_STDERR")
+    if echo "$STDERR_CONTENT" | grep -qE "ERR_MODULE_NOT_FOUND|Cannot find module|Cannot find package"; then
+        echo "⚠ [${HOOK_ID}] missing Node module — run: bash tools/aegis-doctor.sh --fix" >&2
+    elif echo "$STDERR_CONTENT" | grep -q "command not found"; then
+        missing=$(echo "$STDERR_CONTENT" | grep -oE "command not found: [^ ]+" | head -1 | sed 's/.*: //')
+        echo "⚠ [${HOOK_ID}] missing command: ${missing:-unknown} — install it or set AEGIS_DISABLED_HOOKS=${HOOK_ID}" >&2
+    elif echo "$STDERR_CONTENT" | grep -qiE "permission denied"; then
+        echo "⚠ [${HOOK_ID}] permission denied — try: chmod +x <script>" >&2
+    elif echo "$STDERR_CONTENT" | grep -q "No such file or directory"; then
+        echo "⚠ [${HOOK_ID}] missing file — run: bash tools/aegis-doctor.sh" >&2
+    elif echo "$STDERR_CONTENT" | grep -q "python3"; then
+        echo "⚠ [${HOOK_ID}] python3 unavailable — install: brew install python3" >&2
+    else
+        first_line=$(echo "$STDERR_CONTENT" | head -1 | cut -c1-120)
+        echo "⚠ [${HOOK_ID}] failed: ${first_line} (full trace in .aegis/brain/logs/hook-errors.log)" >&2
+    fi
+fi
+
+rm -f "$HOOK_STDERR"
+
+# PreToolUse hooks (guard-*, approval-*) must propagate exit code so blocks work.
+# Stop / SessionStart / PostToolUse hooks fail-open (exit 0) to avoid disrupting flow.
+case "$HOOK_ID" in
+    guard-*|approval-*) exit "$HOOK_EXIT" ;;
+    *) exit 0 ;;
+esac

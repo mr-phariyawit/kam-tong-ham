@@ -59,11 +59,19 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/tools/aegis-brain-graph/hook.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/linear-sync-on-kanban.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/research-probe-on-write.sh\""
           }
         ]
       },
       {
-        "matcher": ".*",
+        "matcher": "Bash|Edit|Write|MultiEdit|Task",
         "hooks": [
           {
             "type": "command",

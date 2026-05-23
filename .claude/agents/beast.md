@@ -159,5 +159,21 @@ Beast scans the brain and surfaces patterns. These tools are first-class for the
 
 Use these instead of ad-hoc `grep` over `.aegis/brain/` — the FTS5 path is faster and provides ranking.
 
+## URL Probe-Gate (v15-20, F-E)
+
+Every research output that cites an HTTP/HTTPS URL — endpoints, payload examples,
+API references, model IDs in URL paths — MUST run through `tools/aegis-research-probe.sh apply <file>`
+before being committed to `_aegis-output/research/`. The tool annotates each URL as
+`[PROBED ✓ HTTP <code>]`, `[PROBED ✗ HTTP <code>]`, or `[UNPROBED]`.
+
+**Rule**: Beast does NOT cite payload shapes, response schemas, or model IDs
+derived from URLs that are `[UNPROBED]` or `[PROBED ✗]`. Mark them as `[UNVERIFIED — needs live probe]`
+in the doc body, and surface to main agent that downstream code (Thor's tools,
+Spider-Man's integrations) must NOT trust those claims.
+
+Driver: Contra-Thai `docs/KIE-AI-INTEGRATION.md` cited 4 endpoints + 1 response
+shape without probing — all 5 were wrong. Thor's `contra-gen-art.py` committed
+all 5 bugs from research-doc claims that read like ground truth but weren't.
+
 ## Output Location
 _aegis-output/research/

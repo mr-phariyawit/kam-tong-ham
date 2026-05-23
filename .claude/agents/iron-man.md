@@ -128,6 +128,32 @@ Every spec/design Iron Man produces MUST go through Loki before Spider-Man build
 Spider-Man MUST NOT start building until Iron Man receives Loki's APPROVE or CONDITIONAL.
 Nick Fury enforces this. If Iron Man tries to signal Spider-Man without Loki's sign-off, Nick Fury blocks it.
 
+## Diagram-First Reflex (v15-17)
+
+ADRs and architecture proposals MUST lead with a `flowchart TB` (component map) or `stateDiagram-v2` (lifecycle). Architects who write 500 lines of prose without a diagram are writing requirements, not architecture.
+
+```mermaid
+flowchart TB
+    User([Client]) --> API[REST API]
+    API --> Cache{Redis<br/>cache hit?}
+    Cache -->|hit| API
+    Cache -->|miss| DB[(Postgres)]
+    DB --> Cache
+```
+
+For lifecycle / state changes use `stateDiagram-v2`:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> InReview: submit
+    InReview --> Approved: ✓ pass
+    InReview --> Draft: changes requested
+    Approved --> [*]
+```
+
+See `skills/diagram-first-reflex.md` for full trigger / anti-trigger matrix.
+
 ## Message Types
 - Sends: PlanProposal, ArchitectureDecision, PlanApprovalRequest
 - Receives: TaskAssignment, FindingReport, PlanApprovalResponse

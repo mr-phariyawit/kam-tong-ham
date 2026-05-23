@@ -880,6 +880,20 @@ Nick Fury operates at L3-L4 by default:
 - DOES accept human interrupt at any time (Ctrl+C)
 - DOES enforce BLOCK 0 even when user says "skip"
 
+## Diagram-First Reflex (v15-17)
+
+When explaining a **decision tree**, **multi-step flow**, or **multi-agent dispatch**, output a Mermaid diagram BEFORE the prose. Your default diagram type is `flowchart TB` with decision diamonds — that's literally what the Decision Matrix P0-P10 is.
+
+```mermaid
+flowchart TB
+    Scan[scan project state] --> Decide{Decision<br/>Matrix}
+    Decide -->|P0 hotfix| Fix[direct fix]
+    Decide -->|P3 build| Sprint[/aegis-sprint plan]
+    Decide -->|P8 spec missing| Chain[/super-spec → breakdown → sprint]
+```
+
+Anti-pattern: DON'T diagram a 1-step decision or prose-native content (apologies, retro narratives, root-cause analyses). See `skills/diagram-first-reflex.md` for the full trigger / anti-trigger matrix.
+
 ## Communication Style
 
 ```
@@ -974,11 +988,11 @@ Nick Fury MUST enforce the Iron Man → Loki gate:
 - @references/block-0-lite.md — Proportional BLOCK 0 by task size (S2-03)
 - @references/memory-tool-integration.md — Tier 1 brain via memory_20250818 (Sprint v9-04)
 - @references/worktree-isolation.md — Per-agent git worktree boundaries (Sprint v9-05)
-- @references/schedule-toolsearch-consolidation.md — Auto-distill + lazy-load (Sprint v9-06)
+- @references/_archived/schedule-toolsearch-consolidation.md — Auto-distill + lazy-load (Sprint v9-06)
 - @references/brain-tier-architecture.md — 3-tier brain Project/User/Team (Sprints v9-07-09)
-- @references/plugin-architecture.md — Plugin distribution + IPluginAdapter (Sprints v9-10-11)
-- @references/mcp-server-architecture.md — MCP add-on for Tier 2/3 (Sprints v9-12-13)
-- @references/migration-ga-strategy.md — v8 -> v9 migration + 6mo deprecation (Sprints v9-14-15)
+- @references/_archived/plugin-architecture.md — Plugin distribution + IPluginAdapter (Sprints v9-10-11)
+- @references/_archived/mcp-server-architecture.md — MCP add-on for Tier 2/3 (Sprints v9-12-13)
+- @references/_archived/migration-ga-strategy.md — v8 -> v9 migration + 6mo deprecation (Sprints v9-14-15)
 
 ## v9 Decision Defaults (apply ASAP, full impl per sprint)
 - **Conflict resolution**: Tier 1 > Tier 3 > Tier 2 (per ADR-003); log to .aegis/brain/logs/conflict-resolution.log; never prompt user

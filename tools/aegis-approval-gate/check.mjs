@@ -67,14 +67,48 @@ async function main() {
   }
 
   if (verdict.decision === "block") {
-    process.stderr.write(
-      `\n⛔ aegis-approval-gate: BLOCKED\n` +
-      `   command:  ${command.slice(0, 120)}${command.length > 120 ? "…" : ""}\n` +
-      `   rule(s):  ${(verdict.matched_rules || []).join(", ")}\n` +
-      `   reason:   ${verdict.reason}\n\n` +
-      `${verdict.hint || ""}\n`
-    );
-    return 2; // PreToolUse blocking exit
+    // v15-15: default behavior is now MODERN-ONLY (CC 2.1.141+ schema:
+    // exit 0 + `hookSpecificOutput.permissionDecision: "deny"` on stdout).
+    // CC reads the JSON and renders a proper permission-denied dialog. NO
+    // stderr — emitting stderr while exiting 2 used to make CC label the
+    // event "Bash hook error" / "Write hook error" in red, framing
+    // legitimate blocks as if they were bugs.
+    //
+    // Set `AEGIS_APPROVAL_GATE_LEGACY=1` to opt back into the v15-09
+    // dual-path behavior (modern JSON + stderr + exit 2) for older CC
+    // versions that don't honour `hookSpecificOutput`. The legacy path
+    // also keeps the historical stderr text for shell users grepping it.
+    const matched = (verdict.matched_rules || []).join(", ") || "no-match";
+    const cmdShort = command.slice(0, 120) + (command.length > 120 ? "…" : "");
+    const hint = verdict.hint ? `\n\n${verdict.hint}` : "";
+    const dialogReason =
+      `⛔ aegis-approval-gate: BLOCKED\n` +
+      `   command:  ${cmdShort}\n` +
+      `   rule(s):  ${matched}\n` +
+      `   reason:   ${verdict.reason}${hint}`;
+
+    const payload = {
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: dialogReason,
+      },
+    };
+    try {
+      process.stdout.write(JSON.stringify(payload) + "\n");
+    } catch {
+      // best-effort; if stdout is closed, fall through to legacy below.
+    }
+
+    if (process.env.AEGIS_APPROVAL_GATE_LEGACY === "1") {
+      // Legacy path: also emit stderr + exit 2 for older CC versions.
+      // Modern CC will already have used the JSON; the stderr is
+      // duplicate context for users grepping shell output.
+      process.stderr.write("\n" + dialogReason + "\n");
+      return 2;
+    }
+    // Default modern path: exit 0, let CC use the JSON decision.
+    return 0;
   }
 
   return 0;

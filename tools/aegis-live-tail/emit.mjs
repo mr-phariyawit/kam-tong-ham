@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { eventFromHook, formatEvent } from "./format.mjs";
+import { safeRun } from "../_hook-utils/safe-run.mjs";
 
 const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const FIFO = path.join(PROJECT_DIR, ".aegis/brain/live/current.fifo");
@@ -74,7 +75,5 @@ async function main() {
 }
 
 // Always exit 0; PostToolUse hooks must not block tool calls.
-main().then(
-  () => process.exit(0),
-  () => process.exit(0),
-);
+// v15-12: safeRun wraps + classifies unexpected runtime errors.
+safeRun(main, { hookName: "aegis-live-tail/emit", failOpen: true });

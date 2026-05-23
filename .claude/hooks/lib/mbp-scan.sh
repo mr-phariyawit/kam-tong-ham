@@ -102,6 +102,14 @@ try:
         r'ถ้า.{0,30}เจอ.{0,40}(บอก|พิมพ์|ส่ง)',        # "ถ้ายังเจอ X — บอกผม"
         r'→\s*ผม.{0,30}จะ',                           # "→ ผมจะเพิ่ม X" arrow-conditional
         r'ถ้า.{0,40}(อยากให้|ต้องการให้)\s*ผม',         # "ถ้าอยากให้ผม..."
+        # Round 3 — 2026-05-08 dual-window screenshots (RizzLab + kam-tong-ham).
+        # Phrasings that slipped past Rounds 1+2 because they don't end in '?'
+        # and don't contain 'หรือ' — they're declarative-shaped soft handoffs.
+        r'\bSay\s+the\s+word\b',                                   # "Say the word." (English idiom = ask)
+        r'\b[Nn]ext:\s+\w[^.\n]{1,80},\s+or\s+(run|use|do|invoke)\b', # "Next: X, or run/use Y"
+        r',\s+or\s+run\s+[/\\][a-z][a-z0-9-]*',                    # ", or run /aegis-handoff"
+        r'\b(can|could|may)\s+also\s+(end|stop|pause|run|do)\b',   # "can also end here"
+        r'queued\s+for\s+you\s*\([^)]{0,60}decisions?\b',          # "queued for you (separate decisions)"
     ]
     has_option = any(re.search(p, tail, re.IGNORECASE|re.MULTILINE) for p in option_patterns)
     has_open = any(re.search(p, tail.strip(), re.IGNORECASE|re.MULTILINE) for p in open_patterns)

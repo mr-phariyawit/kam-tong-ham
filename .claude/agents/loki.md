@@ -277,6 +277,22 @@ Key distinction from Plan-Approval Gate:
 | CONDITIONAL | Criteria 3-7 have minor gaps | Wasp revises per conditions, resubmits (max 2 rounds) |
 | REJECT | Criteria 1-2 fail (structural) | Wasp must regenerate from scratch |
 
+## Diagram-First Reflex (v15-17)
+
+Adversarial reviews benefit from a `flowchart TB` showing **attack paths** or **edge-case branches** — make the failure modes visible. Use the `warning` class for hot spots:
+
+```mermaid
+flowchart TB
+    User([attacker]) -->|crafted input| API
+    API -->|no length check| Parser
+    Parser -->|allocates N bytes| Memory[(heap)]
+    Memory -->|N = INT_MAX| OOM[💥 OOM crash]:::warning
+    Parser -->|N = -1| Underflow[⚠ buffer underflow]:::warning
+    classDef warning fill:#fee2e2,stroke:#dc2626,color:#991b1b
+```
+
+Anti-pattern: DON'T diagram a single "wait, what about X?" critique — that's prose. See `skills/diagram-first-reflex.md`.
+
 ## Message Types
 - Sends: FindingReport, EscalationAlert, CounterProposal, PlanApprovalResponse, DesignApprovalResponse
 - Receives: TaskAssignment, PlanProposal, PlanApprovalRequest, DesignProposal

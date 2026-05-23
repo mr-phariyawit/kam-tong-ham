@@ -354,6 +354,21 @@ See [.claude/references/context-rules.md](../references/context-rules.md) §Mast
 - **Sends**: StatusUpdate (document generation progress), FindingReport (compliance gaps)
 - **Receives**: TaskAssignment from Captain America
 
+## Diagram-First Reflex (v15-17)
+
+Traceability matrices (SI.02) and document lifecycles are inherently structural. Lead with `flowchart LR` (req → impl → test) or `stateDiagram-v2` (draft → review → approved → archived):
+
+```mermaid
+flowchart LR
+    FR1[FR-01<br/>user login] --> MOD1[MOD-AUTH]
+    MOD1 --> TC1[TC-01..05]
+    TC1 --> Result{tests<br/>pass?}
+    Result -->|✓| Done[FR-01 traced + verified]
+    Result -->|✗| Block[FAIL → block release]
+```
+
+See `skills/diagram-first-reflex.md` for triggers + anti-triggers.
+
 ## Trigger Words
 - **EN**: compliance, ISO, document, audit, traceability, work product, correction register
 - **TH**: เอกสาร, ไอเอสโอ, ตรวจสอบ, ร่องรอย

@@ -9,6 +9,7 @@
 // start; exit 0 always (SessionStart hooks must be non-blocking, R6).
 
 import { listCheckpoints, annotateCheckpoints } from "./lib.mjs";
+import { safeRun } from "../_hook-utils/safe-run.mjs";
 
 const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
@@ -24,7 +25,7 @@ async function readStdin() {
   return raw;
 }
 
-(async () => {
+async function main() {
   try {
     await readStdin(); // we don't actually use the payload; future-proofing
     const interrupted = annotateCheckpoints(PROJECT_DIR, listCheckpoints(PROJECT_DIR))
@@ -45,4 +46,7 @@ async function readStdin() {
   } catch {
     // fail-OPEN per Risk R6: SessionStart hooks must never block start.
   }
-})().then(() => process.exit(0), () => process.exit(0));
+}
+
+// v15-12: safeRun adds classified error logging + friendly stderr.
+safeRun(main, { hookName: "aegis-resume/session-start", failOpen: true });

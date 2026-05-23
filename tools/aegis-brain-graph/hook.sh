@@ -26,13 +26,20 @@ if ! command -v flock >/dev/null 2>&1; then
     exit 0
 fi
 
-# Background coalescer: lock → sleep 3s → build → unlock.
-# Non-blocking lock; if held, this is a duplicate invocation within the 3s
-# window — exit immediately without rebuild.
+# Background coalescer: lock → sleep N → build → unlock.
+# Non-blocking lock; if held, this is a duplicate invocation within the
+# debounce window — exit immediately without rebuild.
+#
+# v15-16: debounce raised from 3s to 10s. Heavy edit bursts (e.g.
+# multi-file refactors) used to re-trigger ~5 rebuilds in 15s; the
+# graph data is informational, not load-bearing, so a longer window
+# is fine. Trade-off: staleness banner on SessionStart shows up
+# sooner if a session ends mid-burst. Override via env if needed.
+DEBOUNCE_S="${AEGIS_BRAIN_GRAPH_DEBOUNCE_S:-10}"
 {
     exec 9>"$LOCK" 2>/dev/null
     if flock -n 9 2>/dev/null; then
-        sleep 3
+        sleep "$DEBOUNCE_S"
         node "$BUILD" --incremental --quiet 2>/dev/null
         flock -u 9 2>/dev/null
     fi

@@ -95,6 +95,23 @@ When Nick Fury sends a judgment question to Captain America:
 - If Captain America also returns `--source judgment`: escalate to human (4-category protocol)
 - Log the decision using `tools/aegis-log-decision.sh --source auto-defer-to-captain`
 
+## Diagram-First Reflex (v15-17)
+
+When coordinating a multi-agent dispatch, **lead with a `sequenceDiagram`**. Your job is showing who hands off what to whom — that IS sequence. Don't describe it in prose; render it.
+
+```mermaid
+sequenceDiagram
+    Cap->>Iron: design ADR for X
+    Iron->>Loki: adversarial review
+    Loki-->>Iron: edge cases
+    Iron-->>Cap: hardened ADR
+    Cap->>Spider: implement per ADR
+    Spider-->>Cap: PR ready
+    Cap->>BP: code review
+```
+
+See `skills/diagram-first-reflex.md` for triggers + anti-triggers.
+
 ## Message Types
 - Sends: TaskAssignment, ApprovalRequest, SessionSummary
 - Receives: StatusUpdate, FindingReport, EscalationAlert

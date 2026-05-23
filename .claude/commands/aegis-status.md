@@ -141,6 +141,33 @@ Full queue: `.aegis/brain/human-queue.md`.
   ```
 - If activity.log doesn't exist or is empty: "No activity recorded yet."
 
+### Step 5.5: Cross-Project Session Map (NEW v15-22)
+
+Show what other CC sessions are open across registered projects. Lets the user
+see, from any project, where attention is owed.
+
+```bash
+if [[ -f "tools/aegis-multi-tenant/mt.mjs" ]]; then
+    node tools/aegis-multi-tenant/mt.mjs sessions 2>/dev/null
+fi
+```
+
+Output format (already implemented by `mt.mjs sessions`):
+
+```
+PROJECT            VERSION  EXISTS  STATUS   SESSION   AGE     PATH
+gengoogleform      15.0     yes     idle     2fe3cb0f  38h21m  /Users/.../GenGoogleForm
+(unregistered)     -        -       busy     d2abe945  38h17m  /Users/.../AEGIS-Team
+```
+
+- `STATUS = busy` → active conversation
+- `STATUS = idle` → live but not currently working
+- `STATUS = none` → registered but no CC session attached
+- `(unregistered)` rows surface CC sessions in unrelated directories
+
+Soft surface only — no warnings, no gates here (warnings live in `/aegis-start`
+Step 2.7). This is just the inventory.
+
 ### Step 6: Format Final Output
 - Combine all sections into a single cohesive dashboard.
 - Keep it compact but informative.

@@ -173,6 +173,33 @@ Sprint <N> Planning Complete
   Kanban:       .aegis/brain/sprints/sprint-<N>/kanban.md
 ```
 
+#### Step 9: Linear Sync (auto-skipped if Linear not configured)
+
+If `.aegis/config/linear.json` exists AND `project.throwaway` is `false`:
+
+```bash
+bash tools/aegis-linear-sync.sh open sprint-<N>
+```
+
+This:
+- Ensures Linear project exists (auto-creates on first run)
+- Creates a Project Milestone named `sprint-<N>`
+- Creates one Linear Issue per kanban story (in BACKLOG/TODO sections)
+- Maps state, agent, points, PR refs from kanban
+- Idempotent — re-running just syncs diffs
+
+**On failure**: log warning, do NOT block sprint plan. Kanban.md remains source of truth.
+
+Append to activity log:
+```
+[YYYY-MM-DD HH:MM] LINEAR_SYNC | sprint=<N> | created=<n> | updated=<n> | exit=<code>
+```
+
+Display:
+```
+  Linear:       <project_url>/milestones/<milestone_name>  (created <n> issues)
+```
+
 ---
 
 ### Subcommand: Daily Standup
@@ -358,6 +385,18 @@ No file is written for status — it is a read-only display. Do NOT write to met
 - Populate `carry_over` in `metrics.json`: count, total points, and list of task IDs.
 - Carry-over tasks must not be silently dropped.
 
+#### Step 3.5: Coverage Playtest Gate (NEW v15-20)
+
+- Run `bash tools/aegis-sprint-close-gate.sh check .` to surface playtest evidence
+  for GUI-runtime projects (coverage < 100%). The gate:
+  - Silent + exit 0 if coverage = 100% (text-runtime)
+  - Prints warning block listing missing playtest files for each DONE story
+  - Captures the report — embed it in close.md under "Verification Status"
+- Soft gate: sprint close proceeds regardless. The warning surfaces the
+  "produced vs verified" gap so retro can address it. Closes Contra-Thai F-B.
+- Per-story playtest format: `_aegis-output/playtests/S<NN>-<NN>.md` with
+  `verified_by:`, `date:`, `pass: true|false`, `notes:` keys.
+
 #### Step 4: Write Close Report and Finalize Metrics
 - Update `.aegis/brain/sprints/sprint-<N>/metrics.json`:
   - Set `actual_end` to today's date.
@@ -444,6 +483,26 @@ Sprint <N> Closed
 
   Ready for: /aegis-sprint plan (to start sprint <N+1>)
 ```
+
+#### Step 9.5: Linear Close Sync (auto-skipped if Linear not configured)
+
+If `.aegis/config/linear.json` exists AND `project.throwaway` is `false`:
+
+```bash
+bash tools/aegis-linear-sync.sh close sprint-<N>
+```
+
+This:
+- Sends final state diffs (any kanban moves since last sync)
+- Leaves the Project Milestone in Linear for historical record
+- Non-destructive: does not archive or delete issues
+
+Append to activity log:
+```
+[YYYY-MM-DD HH:MM] LINEAR_SYNC_CLOSE | sprint=<N> | final_state=GREEN|RED
+```
+
+On failure: warn, do NOT block sprint close. Kanban + git history are the immutable record.
 
 #### Step 10: Re-enter Nick Fury's Decision Loop (autonomous rollover)
 

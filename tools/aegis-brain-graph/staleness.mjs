@@ -22,6 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { execSync } from 'node:child_process';
+import { safeRun } from '../_hook-utils/safe-run.mjs';
 
 const STALE_HOURS_THRESHOLD = 1; // banner fires only when HEAD is ≥ 1h newer
 
@@ -118,4 +119,5 @@ function main() {
   process.exit(0);
 }
 
-main();
+// v15-12: safeRun adds classified error logging + friendly stderr.
+safeRun(main, { hookName: "aegis-brain-graph/staleness", failOpen: true });

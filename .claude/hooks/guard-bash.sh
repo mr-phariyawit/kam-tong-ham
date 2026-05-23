@@ -4,16 +4,45 @@
 # Enforces Golden Rules 1-3 at the machine level
 #
 # Input:  JSON on stdin  { "tool_name": "Bash", "tool_input": { "command": "..." } }
-# Output: JSON on stdout { "decision": "block", "reason": "..." }  (exit 2 to block)
+# Output (modern, CC 2.1.141+ — default):
+#   stdout: {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
+#   exit 0
+# Output (legacy, AEGIS_GUARD_LEGACY=1):
+#   stdout: {"decision":"block","reason":"..."} + stderr reason text
+#   exit 2
 
 set -euo pipefail
 
 INPUT=$(cat)
 CMD=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))" 2>/dev/null || echo "")
 
+# v15-15: emit CC 2.1.141 permission-decision schema by default (exit 0,
+# JSON-only, no stderr). The old `decision: block` + exit 2 + stderr
+# combination made CC label the block as "Bash hook error" in red, even
+# though the block was working as intended. Set AEGIS_GUARD_LEGACY=1 to
+# opt back into the old dual-path behavior for older CC versions.
 block() {
-    echo "{\"decision\":\"block\",\"reason\":\"$1\"}"
-    exit 2
+    local reason="$1"
+    # JSON-escape the reason string (escape backslashes + double quotes).
+    local escaped
+    escaped=$(printf '%s' "$reason" | python3 -c '
+import json, sys
+print(json.dumps(sys.stdin.read())[1:-1], end="")
+' 2>/dev/null || printf '%s' "$reason")
+
+    if [[ "${AEGIS_GUARD_LEGACY:-}" == "1" ]]; then
+        # Legacy dual-path: emit BOTH schemas + stderr + exit 2.
+        printf '{"decision":"block","reason":"%s","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' \
+            "$escaped" "$escaped"
+        printf '%s\n' "$reason" >&2
+        exit 2
+    fi
+
+    # Modern: JSON only, exit 0. CC 2.1.141+ uses the JSON to render the
+    # permission-denied dialog; no "Bash hook error" red label.
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' \
+        "$escaped"
+    exit 0
 }
 
 # Strip quoted strings, heredoc bodies, and commit-message args before matching.

@@ -10,6 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { safeRun } from "../_hook-utils/safe-run.mjs";
 
 const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const RUNS_DIR    = path.join(PROJECT_DIR, ".aegis/brain/runs");
@@ -75,4 +76,5 @@ async function main() {
   } catch {}
 }
 
-main().then(() => process.exit(0), () => process.exit(0));
+// v15-12: safeRun adds classified error logging + friendly stderr.
+safeRun(main, { hookName: "aegis-run-logger/archive", failOpen: true });

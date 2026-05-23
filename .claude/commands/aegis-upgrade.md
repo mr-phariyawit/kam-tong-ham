@@ -1,3 +1,11 @@
+---
+name: aegis-upgrade
+description: "Upgrade this AEGIS project to the latest framework — runs install.sh --upgrade with backup + hook normalization + migration log"
+triggers:
+  en: upgrade, upgrade aegis, update framework, sync framework
+  th: อัพเกรด, อัพเดทเฟรมเวิร์ค
+---
+
 # /aegis-upgrade
 
 ## Quick Reference

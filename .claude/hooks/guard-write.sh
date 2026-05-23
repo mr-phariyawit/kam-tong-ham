@@ -4,7 +4,11 @@
 # Prevents agents from "fixing" quality errors by weakening the rules instead of the code.
 #
 # Input:  JSON on stdin  { "tool_name": "Edit|Write|MultiEdit", "tool_input": { "file_path": "..." } }
-# Output: JSON on stdout { "decision": "block", "reason": "..." }  (exit 2 to block)
+# Output (modern, CC 2.1.141+ — default):
+#   stdout: {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
+#   exit 0
+# Output (legacy, AEGIS_GUARD_LEGACY=1):
+#   stdout: {"decision":"block","reason":"..."} + stderr reason + exit 2
 
 set -euo pipefail
 
@@ -23,9 +27,28 @@ esac
 
 BASENAME=$(basename "$FILE")
 
+# v15-15: emit CC 2.1.141 permission-decision schema by default. Avoids
+# the stderr+exit-2 combo that made CC label legitimate blocks as
+# "Write hook error" in red. Set AEGIS_GUARD_LEGACY=1 to opt back into
+# the v15-09 dual-path behavior for older CC versions.
 block() {
-    echo "{\"decision\":\"block\",\"reason\":\"$1\"}"
-    exit 2
+    local reason="$1"
+    local escaped
+    escaped=$(printf '%s' "$reason" | python3 -c '
+import json, sys
+print(json.dumps(sys.stdin.read())[1:-1], end="")
+' 2>/dev/null || printf '%s' "$reason")
+
+    if [[ "${AEGIS_GUARD_LEGACY:-}" == "1" ]]; then
+        printf '{"decision":"block","reason":"%s","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' \
+            "$escaped" "$escaped"
+        printf '%s\n' "$reason" >&2
+        exit 2
+    fi
+
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' \
+        "$escaped"
+    exit 0
 }
 
 # ── ADR-004 Phase 2: Maintainer-mode AUTHORIZATION ────────────────────────

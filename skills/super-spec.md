@@ -54,6 +54,29 @@ must validate and fill gaps. Every minute spent here saves hours of rework later
 - `ux` — Generate UX Blueprint (requires BRD)
 - `all` — Full pipeline: BRD → SRS → UX Blueprint (default)
 
+### Phase 0: Tool-Boundary Screen (NEW v15-19 — never skip)
+
+**Run BEFORE any human Q&A.** AEGIS contract is 100% autonomy with human role limited to (1) requirements and (2) credentials. If the project's stack creates ANY gap beyond those two, the user has the right to know on day 1 — not at sprint 3.
+
+```bash
+bash tools/aegis-coverage-screen.sh screen .
+```
+
+- The tool detects stack from file patterns (or `unknown` if empty)
+- Emits a warning block listing every gap (Thai + English)
+- Writes `.aegis/brain/state/coverage.json`
+- Process always exits 0 — soft gate, never blocks
+
+**Embed the warning block verbatim in the chat reply.** Then wait for user response:
+- `ack gaps` → flip `ack: true` in coverage.json, proceed to Phase 1
+- `swap stack to <X>` → recommend an alternative, re-screen, proceed to Phase 1 after re-screen
+- `skip aegis` → record the project as out-of-scope; stop
+- (no reply) → proceed to Phase 1 anyway (soft gate); coverage.json keeps `ack: false`; warning will re-surface at next `/aegis-start`
+
+For projects already past intake (no `coverage.json` exists yet but Phase 0 was skipped historically), `/aegis-start` will auto-run this screen retroactively on next session.
+
+Only after Phase 0 → continue to Phase 1.
+
 ### Phase 1: Human Interview (MANDATORY — never skip)
 
 **This phase is interactive. ASK the human. WAIT for answers. Do NOT guess.**
